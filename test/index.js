@@ -1,1 +1,1 @@
-require('./Router');
+require('./Router.spec');

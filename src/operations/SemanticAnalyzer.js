@@ -5,9 +5,10 @@ var SemanticAnalyzer = {
      * @returns {*}
      */
     generate: function(parser, router) {
-        return new Function('Router', 'router', 'return (function innerFunction(pathActions) { ' +
+        console.log(topLevelStack(parser.depth, buildVirtualCode(parser.parseTree, 0)));
+        return new Function('Router', 'Precedence', 'router', 'return (function innerFunction(pathActions) { ' +
             topLevelStack(parser.depth, buildVirtualCode(parser.parseTree, 0)) +
-        ' });')(Router, router);
+        ' });')(Router, Precedence, router);
     }
 };
 
@@ -43,15 +44,13 @@ function readyStack(node, depth) {
 function treeTraversal(node, depth) {
     var exitEarly = valueNode(node);
     if (exitEarly) { return '// EMPTY KEY SET\n'; }
-    var str = SyntaxGenerator.
+    return SyntaxGenerator.
         searchBody().
         replace('__SWITCH_KEYS__', switchKeys(node, depth)).
         replace('__INTEGERS_OR_RANGES__', integersOrRanges(node, depth)).
         replace('__INTEGERS__', integers(node, depth)).
         replace('__KEYS__', keys(node, depth)).
-        replace(/DEPTH/g, depth).
-        split('\n');
-    return str.slice(1, str.length - 1).join('\n');
+        replace(/_D/g, depth);
 }
 
 function switchKeys(node, depth) {
@@ -64,7 +63,7 @@ function switchKeys(node, depth) {
         keys(node).
         filter(function(x) { return !~x.indexOf('__'); });
 
-    var str = "switch (valueDEPTH) {\n";
+    var str = "switch (value_D) {\n";
     keys.forEach(function(k) {
         if (typeof k === 'string' && isNaN(+k)) {
             str += ['case ', '"', k, '"', ':\n'].join('');
@@ -126,4 +125,3 @@ function executeMatched(node) {
     }
     return '// EMPTY MATCHES\n';
 }
-

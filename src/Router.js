@@ -1,6 +1,11 @@
 var Router = function(routes) {
-    var router = {};
-    var routeMatcher = SemanticAnalyzer.generate(ParseTree.generateParseTree(routes, router));
+    var router = {
+        __virtualFns: null,
+        get: null,
+        set: null
+    };
+    
+    var routeMatcher = SemanticAnalyzer.generate(ParseTree.generateParseTree(routes, router), router);
     var fn = function(pathActions) {
         var matched = routeMatcher(pathActions);
         var sorted = matched.
@@ -29,20 +34,30 @@ var Router = function(routes) {
     };
     //TODO: 'get' should just be passed in instead of creating objects
     this.get = function(paths) {
-        return fn(paths.map(function(p) {
+        var results = fn(paths.map(function(p) {
             return {
                 path: p,
                 action: 'get'
             }
         }));
+        return Observable.
+            // TODO: For time sake, this is equivalent to mergeDelayError().materialize()
+            // TODO: This will need to be addressed for speed.
+            from(results).
+            flatMap(function(x) { return x.materialize(); });
     };
     this.set = function(paths) {
-        return fn(paths.map(function(p) {
+        var results = fn(paths.map(function(p) {
             return {
                 path: p,
                 action: 'set'
             }
         }));
+        return Observable.
+            // TODO: For time sake, this is equivalent to mergeDelayError().materialize()
+            // TODO: This will need to be addressed for speed.
+            from(results).
+            flatMap(function(x) { return x.materialize(); });
     };
 };
 

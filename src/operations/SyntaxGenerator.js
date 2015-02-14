@@ -71,7 +71,7 @@ var matchedGetMethodString = fnToString(function innerBlock() {
         copyRunner.precedence = virtualRunner.precedence.concat();
         dataResults.push({
             actionType: 'get',
-            action: model.__virtualFns[__GET__],
+            action: router.__virtualFns[__GET__],
             virtualRunner: copyRunner,
             valueRunner: valueRunner.concat()
         });
@@ -84,7 +84,7 @@ var matchedSetMethodString = fnToString(function innerBlock() {
         copyRunner.precedence = virtualRunner.precedence.concat();
         dataResults.push({
             actionType: 'set',
-            action: model.__virtualFns[__SET__],
+            action: router.__virtualFns[__SET__],
             virtualRunner: copyRunner,
             valueRunner: valueRunner.concat()
         });

@@ -8,13 +8,16 @@ var router = new R([
     {
         route: ['videos', 'summary'],
         get: function(path) {
-            return Observable.from({
-                videos: {
-                    summary: {
-                        $type: 'leaf', // TODO: Does paul know about this typing
-                        length: 45
+            return Observable.return({
+                jsong: {
+                    videos: {
+                        summary: {
+                            $type: 'leaf', // TODO: Does paul know about this typing
+                            length: 45
+                        }
                     }
-                }
+                },
+                paths: [['videos', 'summary']]
             });
         }
     }

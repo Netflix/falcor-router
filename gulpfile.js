@@ -12,7 +12,7 @@ gulp.task('default', ['build.node', 'hint']);
 gulp.task('build.node', function() {
     return buildPipe({
         surround: {
-            prefix: '',
+            prefix: 'var Rx = require("rx");\nvar Observable = Rx.Observable;',
             suffix: '\nmodule.exports = Router;'
         },
         dest: 'bin'
