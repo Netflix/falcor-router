@@ -138,7 +138,7 @@ var integersOrRangesString = fnToString(function innerBlock() {
             convertedRange_D = {from: p_D, to: p_D};
         }
         virtualRunner.push(Router.integersOrRanges);
-        virtualRunner.precedence.push(Router.Precedence.integersOrRanges);
+        virtualRunner.precedence.push(Precedence.integersOrRanges);
         valueRunner.push(value_D);
         __INNER_INTEGERS_OR_RANGES__
         valueRunner.splice(_D);
@@ -166,7 +166,7 @@ var integersString = fnToString(function innerBlock() {
             convertedArray_D = [p_D];
         }
         virtualRunner.push(Router.integers);
-        virtualRunner.precedence.push(Router.Precedence.integers);
+        virtualRunner.precedence.push(Precedence.integers);
         valueRunner.push(value_D);
         __INNER_INTEGERS__
         valueRunner.splice(_D);
@@ -187,7 +187,7 @@ var keysString = fnToString(function innerBlock() {
         convertedKeys_D = [p_D];
     }
     virtualRunner.push(Router.keys);
-    virtualRunner.precedence.push(Router.Precedence.keys);
+    virtualRunner.precedence.push(Precedence.keys);
     valueRunner.push(value_D);
     __INNER_KEYS__
     valueRunner.splice(_D);
@@ -235,7 +235,7 @@ var searchBody = fnToString(function innerBlock() {
         do {
             value_D = isArray_D ? p_D[p_D.position] : (isRange_D ? p_D.position + p_D.from : p_D);
             virtualRunner.push(value_D);
-            virtualRunner.precedence.push(Router.Precedence.specific);
+            virtualRunner.precedence.push(Precedence.specific);
             valueRunner.push(value_D);
             __SWITCH_KEYS__
             valueRunner.splice(_D);
@@ -248,9 +248,3 @@ var searchBody = fnToString(function innerBlock() {
     __INTEGERS__
     __KEYS__
 });
-    
-function fnToString(x) {
-    return x.toString();
-}
-
-module.exports = SyntaxGenerator;

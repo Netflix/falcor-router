@@ -17,7 +17,9 @@
     "gulp-mocha": "~2.0.0",
     "gulp-sweetjs": "~0.6.0",
     "gulp-license": "~1.0.0",
-    "chai": "~2.0.0"
+    "chai": "~2.0.0",
+    "through2": "~0.6.3",
+    "gulp-rename": "~1.2.0"
   },
   "scripts": {
     "test": "mocha test"

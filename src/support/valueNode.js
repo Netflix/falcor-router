@@ -6,5 +6,3 @@ function valueNode(node) {
             !~x.indexOf('__');
     });
 }
-
-module.exports = valueNode;

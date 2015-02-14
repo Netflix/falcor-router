@@ -1,5 +1,3 @@
-var SemanticAnalyzer = require('./operations/SemanticAnalyzer');
-var ParseTree = require('./operations/ParseTree');
 var Router = function(routes) {
     var router = {};
     var routeMatcher = SemanticAnalyzer.generate(ParseTree.generateParseTree(routes, router));
@@ -48,13 +46,8 @@ var Router = function(routes) {
     };
 };
 
-Router.Precedence = require('./Precedence');
-var Keys = require('./Keys');
-
 Router.integersOrRanges = Keys.integersOrRanges;
 Router.integers = Keys.integers;
 Router.keys = Keys.keys;
-
-module.exports = Router;
 
 

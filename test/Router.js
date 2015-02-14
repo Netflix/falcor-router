@@ -2,7 +2,7 @@ var Rx = require('rx');
 var Observable = Rx.Observable;
 var chai = require('chai');
 var expect = chai.expect;
-var R = require('../src/Router');
+var R = require('../bin/Router');
 
 var router = new R([
     {

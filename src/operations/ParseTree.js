@@ -1,4 +1,3 @@
-var Keys = require('../Keys');
 var ParseTree = {
     generateParseTree: function(virtualPaths, router) {
         router.__virtualFns = [];
@@ -10,12 +9,13 @@ var ParseTree = {
                 largestPath = virtualPath.route.length;
             }
         });
-        parseTree.depth = largestPath;
-        return parseTree;
+        
+        return {
+            depth: largestPath,
+            parseTree: parseTree
+        };
     }
 };
-
-module.exports = ParseTree;
 
 function buildParseTree(node, pathAndAction, depth, router) {
     var route = pathAndAction.route;
