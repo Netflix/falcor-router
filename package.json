@@ -1,0 +1,42 @@
+{
+  "name": "falcor-router",
+  "version": "0.0.1",
+  "description": "The router for Falcor.JSONGModel.setRouter(...)",
+  "main": "dist/Router.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "rx": "~2.3.25"
+  },
+  "devDependencies": {
+    "gulp": "~3.8.11",
+    "gulp-concat": "~2.4.3",
+    "gulp-istanbul": "~0.6.0",
+    "gulp-jshint": "~1.9.2",
+    "gulp-mocha": "~2.0.0",
+    "gulp-sweetjs": "~0.6.0",
+    "gulp-license": "~1.0.0",
+    "chai": "~2.0.0"
+  },
+  "scripts": {
+    "test": "mocha test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Netflix/falcor-router.git"
+  },
+  "keywords": [
+    "Falcor",
+    "Router"
+  ],
+  "author": [
+    "Jafar Husain <jhusain@gmail.com>",
+    "Michael Brady Paulson <michael.b.paulson@gmail.com>"
+  ],
+  "license": "ALV2",
+  "bugs": {
+    "url": "https://github.com/Netflix/falcor-router/issues"
+  },
+  "homepage": "https://github.com/Netflix/falcor-router"
+}
