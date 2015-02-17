@@ -1,5 +1,5 @@
 var Keys = {
-    integersOrRanges: '__integersOrRanges__',
+    ranges: '__ranges__',
     integers: '__integers__',
     keys: '__keys__'
 };

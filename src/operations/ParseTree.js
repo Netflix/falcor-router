@@ -38,8 +38,8 @@ function buildParseTree(node, pathAndAction, depth, router) {
             next = node[Keys.keys] || (node[Keys.keys] = {});
         } else if (value === Keys.integers) {
             next = node[Keys.integers] || (node[Keys.integers] = {});
-        } else if (value === Keys.integersOrRanges) {
-            next = node[Keys.integersOrRanges] || (node[Keys.integersOrRanges] = {});
+        } else if (value === Keys.ranges) {
+            next = node[Keys.ranges] || (node[Keys.ranges] = {});
         } else {
             if (typeof value === 'number') {
                 node.__hasInts = true;

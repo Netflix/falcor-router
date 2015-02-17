@@ -62,7 +62,7 @@ function isMatch(incoming, value, virtual) {
 
 function isStrictComparable(incomingAtom, virtualAtom) {
     return typeof incomingAtom !== 'object' && typeof virtualAtom !== 'object' &&
-        virtualAtom !== Router.integers && virtualAtom !== Router.integersOrRanges;
+        virtualAtom !== Router.integers && virtualAtom !== Router.ranges;
 }
 
 function arrayComparable(incomingAtom, virtualAtom) {
@@ -79,7 +79,7 @@ function arrayComparable(incomingAtom, virtualAtom) {
     }
 
     // match on integers or ranges.
-    else if (virtualAtom === Router.integersOrRanges || virtualAtom === Router.integers) {
+    else if (virtualAtom === Router.ranges || virtualAtom === Router.integers) {
         return incomingAtom.some(function(x) { return typeof x === 'number'; });
     }
 
@@ -115,7 +115,7 @@ function objectComparable(incomingAtom, virtualAtom) {
     }
 
     // match on integers or ranges.
-    else if (virtualAtom === Router.integersOrRanges || virtualAtom === Router.integers) {
+    else if (virtualAtom === Router.ranges || virtualAtom === Router.integers) {
         return true;
     }
 
@@ -187,7 +187,7 @@ function permuateAt(prefix, virtualAtom, incomingAtom, suffix) {
     }
 
     var virtualAtomIsIntegers = virtualAtom === Router.integers;
-    var virtualAtomIsIntsOrRanges = virtualAtom === Router.integersOrRanges;
+    var virtualAtomIsIntsOrRanges = virtualAtom === Router.ranges;
     var virtualAtomIsMatcher = virtualAtomIsIntegers || virtualAtomIsIntsOrRanges;
     var newPermutations = [];
     var newPrefixAtom = incomingAtom;
@@ -354,7 +354,7 @@ function matchVirtualPathFormat(incomingValues, virtualExpected, extentWithIncom
             } else if (!Array.isArray(incomingValues[i])) {
                 output[i] = convertRangeToArray(array);
             }
-        } else if (vK === Router.integersOrRanges) {
+        } else if (vK === Router.ranges) {
             if (typeof incomingValues[i] !== 'object') {
                 output[i] = [incomingValues[i]];
             } else if (Array.isArray(incomingValues[i])) {

@@ -106,7 +106,7 @@ function router_isJSONG(x) {
     return x.jsong && x.paths;
 }
 
-Router.integersOrRanges = Keys.integersOrRanges;
+Router.ranges = Keys.ranges;
 Router.integers = Keys.integers;
 Router.keys = Keys.keys;
 

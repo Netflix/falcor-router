@@ -7,10 +7,10 @@ var SyntaxGenerator = {
             'value', 'typeofP', 'convertedRange', 'convertedArray', 'convertedKeys'
         ].map(function(x) { return x + depth; }).join(',');
     },
-    integersOrRanges: function(depth, innerSrc) {
-        var src = integersOrRangesString.
+    ranges: function(depth, innerSrc) {
+        var src = rangesString.
             replace(/_D/g, depth).
-            replace('__INNER_INTEGERS_OR_RANGES__', innerSrc).
+            replace('__INNER_RANGES__', innerSrc).
             split('\n');
 
         return src.join('\n');
@@ -91,7 +91,7 @@ var matchedSetMethodString = fnToString(function innerBlock() {
     }
 });
 
-var integersOrRangesString = fnToString(function innerBlock() {
+var rangesString = fnToString(function innerBlock() {
     // TODO: isArray_D could be made faster.
     if (isRange_D || isArray_D && someNumericKeys_D) {
 
@@ -137,10 +137,10 @@ var integersOrRangesString = fnToString(function innerBlock() {
         } else {
             convertedRange_D = {from: p_D, to: p_D};
         }
-        virtualRunner.push(Router.integersOrRanges);
-        virtualRunner.precedence.push(Precedence.integersOrRanges);
+        virtualRunner.push(Router.ranges);
+        virtualRunner.precedence.push(Precedence.ranges);
         valueRunner.push(value_D);
-        __INNER_INTEGERS_OR_RANGES__
+        __INNER_RANGES__
         valueRunner.splice(_D);
         virtualRunner.splice(_D);
         virtualRunner.precedence.splice(_D);

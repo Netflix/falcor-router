@@ -46,7 +46,7 @@ function treeTraversal(node, depth) {
     return SyntaxGenerator.
         searchBody().
         replace('__SWITCH_KEYS__', switchKeys(node, depth)).
-        replace('__INTEGERS_OR_RANGES__', integersOrRanges(node, depth)).
+        replace('__INTEGERS_OR_RANGES__', ranges(node, depth)).
         replace('__INTEGERS__', integers(node, depth)).
         replace('__KEYS__', keys(node, depth)).
         replace(/_D/g, depth);
@@ -80,10 +80,10 @@ function switchKeys(node, depth) {
     return str;
 }
 
-function integersOrRanges(node, depth) {
+function ranges(node, depth) {
 
-    if (node[Keys.integersOrRanges]) {
-        return SyntaxGenerator.integersOrRanges(depth, executeMatched(node) + buildVirtualCode(node[Keys.integersOrRanges], depth + 1));
+    if (node[Keys.ranges]) {
+        return SyntaxGenerator.ranges(depth, executeMatched(node) + buildVirtualCode(node[Keys.ranges], depth + 1));
     }
 
     // nothing.  No code to generate at this level
