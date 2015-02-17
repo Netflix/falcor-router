@@ -5,10 +5,11 @@ var TestRunner = {
         var count = 0;
         return obs.
             do(function(x) {
+                var receivedPathTree = convertToTree({}, x.paths);
                 // Validates against all comparables
                 compares.forEach(function(c) {
                     jsongPartialCompare(c.jsong, x.jsong);
-                    jsongPathContains(x.paths, c.paths);
+                    jsongPathContains(receivedPathTree, c.paths);
                 });
                 count++;
             }, undefined, function() {
@@ -23,11 +24,63 @@ function jsongPartialCompare(shouldContain, container) {
     traverseAndConvert(container);
     contains(shouldContain, container, '');
 }
-function jsongPathContains(responseTree, expectedPaths) {
-    // TODO: path comparison
+function jsongPathContains(responseTree, expectedPaths, depth) {
+    expectedPaths.forEach(function(p) {
+        pathDescend(responseTree, p, 0, function(obj, key, depth) {
+            if (depth === p.length - 1) {
+                expect(obj[key]).to.equal(null);
+            } else {
+                expect(obj[key], 'Expected ' + key + ' to exist at depth ' + depth + ' on the jsongEnv.paths tree for path ' + JSON.stringify(p)).to.be.ok;
+            }
+        });
+    });
 }
-function convertToTree(paths, idx) {
-    // TODO: grow a tree
+
+function pathDescend(obj, path, depth, cb) {
+    if (depth === path.length) {
+        return;
+    }
+    var key = path[depth];
+    if (typeof key === 'object') {
+        var keySet = key;
+
+        // TODO: does not account for array of objects
+        if (Array.isArray(keySet)) {
+            keySet.forEach(function(key) {
+                cb(obj, key, depth);
+                if (obj[key]) {
+                    pathDescend(obj[key], path, depth + 1, cb);
+                }
+            });
+        } else {
+            var start = keySet.from || 0;
+            var stop = typeof keySet.to === 'number' ? keySet.to : keySet.length;
+            for (key = start; key <= stop; key++) {
+                cb(obj, key, depth);
+                if (obj[key]) {
+                    pathDescend(obj[key], path, depth + 1, cb);
+                }
+            }
+        }
+    } else {
+        cb(obj, key, depth);
+        if (obj[key]) {
+            pathDescend(obj[key], path, depth + 1, cb);
+        }
+    }
+}
+
+function convertToTree(obj, paths) {
+    paths.forEach(function(p) {
+        pathDescend(obj, p, 0, function(obj, key, depth) {
+            if (depth === p.length - 1) {
+                obj[key] = null;
+            } else if (!obj[key]) {
+                obj[key] = {};
+            }
+        });
+    });
+    return obj;
 }
 
 function traverseAndConvert(obj) {
@@ -77,7 +130,7 @@ function contains(has, toHave, position) {
     obj.forEach(function (k) {
         expect(toHave, "Object" + position + " to have key " + k).to.include.keys(k);
         if (typeof has[k] !== typeof toHave[k]) {
-            expect(has[k]).to.deep.equals(toHave[k]);
+            expect(has[k]).to.equals(toHave[k]);
         } else if (typeof has[k] !== 'object') {
             expect(has[k]).to.equals(toHave[k]);
         } else if (typeof has[k] === 'object' && Array.isArray(has[k])) {
