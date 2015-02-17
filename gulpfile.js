@@ -6,12 +6,22 @@ var license = require('gulp-license');
 var concat = require('gulp-concat');
 var bump = require('gulp-bump');
 var hint = require('gulp-jshint');
+var clean = require('gulp-clean');
 var surround = require('./gulp-surround');
 var _ = require('lodash');
 
 gulp.task('dev', ['build.dev', 'hint']);
 gulp.task('default', ['build.dev', 'hint']);
-gulp.task('dist', ['build.dist', 'hint']);
+gulp.task('dist', ['dist.node', 'hint']);
+
+gulp.task('clean', function() {
+    return gulp.src([
+            'bin/',
+            'tmp/'
+        ]).
+        pipe(clean());
+});
+
 gulp.task('bump', ['dist'], function() {
     return gulp.
         src('package.json').
@@ -19,19 +29,28 @@ gulp.task('bump', ['dist'], function() {
         pipe(gulp.dest('./'));
 });
 
-gulp.task('build.sweet', function() {
-    return buildTmpPipe({
+gulp.task('build.sweet', ['clean'], function() {
+    return compileSweet();
+});
+gulp.task('build.dev', ['build.sweet'], function() {
+    return compile({
+        name: 'Router', 
+        src: ['lib/falcor.js'],
         surround: {
             prefix: 'var Rx = require("rx");\nvar Observable = Rx.Observable;',
             suffix: '\nmodule.exports = Router;'
         }
     });
 });
-gulp.task('build.dev', ['build.sweet'], function() {
-    return compile({name: 'Router', src: ['lib/falcor.js']});
-});
 gulp.task('dist.node', ['build.sweet'], function() {
-    return compile({name: 'Router', dest: 'dist'});
+    return compile({
+        name: 'Router', 
+        dest: 'dist',
+        surround: {
+            prefix: 'var Rx = require("rx");\nvar Observable = Rx.Observable;',
+            suffix: '\nmodule.exports = Router;'
+        }
+    });
 });
 
 gulp.task('hint', function() {
@@ -40,17 +59,8 @@ gulp.task('hint', function() {
         pipe(hint());
 });
 
-gulp.task('dist', function() {
-    return gulp.src(['src/**/*.js']).
-        pipe(sweet({
-            modules: ['./macros/fnToString.sjs'],
-            readableNames: true
-        })).
-        pipe(concat({path: 'Router.js'})).
-        pipe(gulp.dest('dist'));
-});
-
-function buildTmpPipe(opts) {
+function compileSweet(opts) {
+    opts = opts || {};
     opts.src = [
         'src/support/*.js',
         'src/operations/*.js',
@@ -64,9 +74,6 @@ function buildTmpPipe(opts) {
         })).
         pipe(concat({path: 'Router.js'}));
     
-    if (opts.surround) {
-        catBuild = catBuild.pipe(surround(opts.surround));
-    }
     if (opts.name) {
         catBuild = catBuild.pipe(rename(opts.name));
     }
@@ -74,10 +81,14 @@ function buildTmpPipe(opts) {
 }
 
 function compile(opts) {
-    return gulp.
+    var out = gulp.
         src([
             'tmp/**/*.js'
         ].concat(opts.src || [])).
-        pipe(concat({path: opts.name + ".js"})).
-        pipe(gulp.dest(opts.dest || 'bin'));
+        pipe(concat({path: opts.name + ".js"}));
+    if (opts.surround) {
+        out = out.pipe(surround(opts.surround));
+    }
+    
+    return out.pipe(gulp.dest(opts.dest || 'bin'));
 }
