@@ -37,7 +37,11 @@ function executeByPrecedence(paths, matches) {
 
         // There will possibly have to be contexts
         matchedPaths.forEach(function(path) {
-            results.push(matched.action(matchVirtualPathFormat(path, matched.virtualRunner)));
+            // TODO: Error handling?
+            results[results.length] = {
+                obs: matched.action(matchVirtualPathFormat(path, matched.virtualRunner)),
+                path: path
+            };
         });
     }
 
@@ -340,30 +344,35 @@ function flatten(x) {
     });
 }
 
-function matchVirtualPathFormat(incomingValues, virtualExpected) {
-    virtualExpected.forEach(function(vK, i) {
+function matchVirtualPathFormat(incomingValues, virtualExpected, extentWithIncomingValues) {
+    var output = [];
+    var i = 0;
+    virtualExpected.forEach(function(vK) {
         if (vK === Router.integers) {
             if (typeof incomingValues[i] !== 'object') {
-                incomingValues[i] = [incomingValues[i]];
+                output[i] = [incomingValues[i]];
             } else if (!Array.isArray(incomingValues[i])) {
-                incomingValues[i] = convertRangeToArray(array);
+                output[i] = convertRangeToArray(array);
             }
         } else if (vK === Router.integersOrRanges) {
             if (typeof incomingValues[i] !== 'object') {
-                incomingValues[i] = [incomingValues[i]];
+                output[i] = [incomingValues[i]];
             } else if (Array.isArray(incomingValues[i])) {
-                incomingValues[i] = convertArrayToRange(incomingValues[i]);
+                output[i] = convertArrayToRange(incomingValues[i]);
             }
         } else if (vK === Router.keys) {
             if (typeof incomingValues[i] !== 'object') {
-                incomingValues[i] = [incomingValues[i]];
+                output[i] = [incomingValues[i]];
             } else if (!Array.isArray(incomingValues[i])) {
-                incomingValues[i] = convertRangeToArray(array);
+                output[i] = convertRangeToArray(array);
             }
+        } else {
+            output[i] = incomingValues[i];
         }
+        i++;
     });
 
-    return incomingValues;
+    return output;
 }
 
 function convertRangeToArray(range) {

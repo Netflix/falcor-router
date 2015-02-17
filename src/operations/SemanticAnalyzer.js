@@ -5,7 +5,6 @@ var SemanticAnalyzer = {
      * @returns {*}
      */
     generate: function(parser, router) {
-        console.log(topLevelStack(parser.depth, buildVirtualCode(parser.parseTree, 0)));
         return new Function('Router', 'Precedence', 'router', 'return (function innerFunction(pathActions) { ' +
             topLevelStack(parser.depth, buildVirtualCode(parser.parseTree, 0)) +
         ' });')(Router, Precedence, router);

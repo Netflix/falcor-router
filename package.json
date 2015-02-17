@@ -19,10 +19,12 @@
     "gulp-license": "~1.0.0",
     "chai": "~2.0.0",
     "through2": "~0.6.3",
-    "gulp-rename": "~1.2.0"
+    "gulp-rename": "~1.2.0",
+    "lodash": "~3.2.0",
+    "gulp-bump": "~0.1.13"
   },
   "scripts": {
-    "test": "mocha test"
+    "test": "mocha test/index.js"
   },
   "repository": {
     "type": "git",
@@ -34,7 +36,8 @@
   ],
   "author": [
     "Jafar Husain <jhusain@gmail.com>",
-    "Michael Brady Paulson <michael.b.paulson@gmail.com>"
+    "Michael Brady Paulson <michael.b.paulson@gmail.com>",
+    "Paul Taylor <ptaylor@netflix.com>"
   ],
   "license": "ALV2",
   "bugs": {

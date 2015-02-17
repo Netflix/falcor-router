@@ -30,7 +30,7 @@ var Router = function(routes) {
                 pathActions.map(function(x) {
                     return x.path;
                 }), sorted);
-        return executionResults.results;
+        return executionResults;
     };
     //TODO: 'get' should just be passed in instead of creating objects
     this.get = function(paths) {
@@ -40,11 +40,8 @@ var Router = function(routes) {
                 action: 'get'
             }
         }));
-        return Observable.
-            // TODO: For time sake, this is equivalent to mergeDelayError().materialize()
-            // TODO: This will need to be addressed for speed.
-            from(results).
-            flatMap(function(x) { return x.materialize(); });
+        // Assumes falcor
+        return accumulateValues(results);
     };
     this.set = function(paths) {
         var results = fn(paths.map(function(p) {
@@ -56,10 +53,58 @@ var Router = function(routes) {
         return Observable.
             // TODO: For time sake, this is equivalent to mergeDelayError().materialize()
             // TODO: This will need to be addressed for speed.
-            from(results).
+            resu(results).
             flatMap(function(x) { return x.materialize(); });
     };
 };
+
+function accumulateValues(precedenceMatches) {
+    var model = new falcor.JSONGModel();
+    return Observable.
+        // TODO: For time sake, this is equivalent to mergeDelayError().materialize()
+        // TODO: This will need to be addressed for speed.
+        from(precedenceMatches.results).
+        flatMap(function(x) {
+            debugger;
+            return x.obs.
+                materialize().
+                map(function(jsongEnvNote) {
+                    return {
+                        note: jsongEnvNote,
+                        path: x.path
+                    };
+                });
+        }).
+        reduce(function(acc, value) {
+            // TODO: should be easy to accept all formats
+            var note = value.note;
+            var seed = [acc.jsong];
+            var res = null;
+            if (note.kind === 'N') {
+                if (isJSONG(note.value)) {
+                    res = model._setJSONGsAsJSONG(model, [note.value], seed);
+                }
+                acc.paths[acc.paths.length] = value.path;
+            } else if (note.kind === 'E') {
+                if (isJSONG(note.value)) {
+                    res = model._setJSONGsAsJSONG(model, [note.value], seed);
+                } else {
+                    res = model._setPathsAsJSONG(model, [{path: value.path, value: note.value}], seed);
+                }
+                acc.paths[acc.paths.length] = value.path;
+            }
+            
+            return acc;
+        }, {
+            jsong: {},
+            paths: [],
+            errors: []
+        });
+}
+
+function isJSONG(x) {
+    return x.jsong && x.paths;
+}
 
 Router.integersOrRanges = Keys.integersOrRanges;
 Router.integers = Keys.integers;

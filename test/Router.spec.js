@@ -1,34 +1,18 @@
-var Rx = require('rx');
-var Observable = Rx.Observable;
-var chai = require('chai');
-var expect = chai.expect;
+var TestRunner = require('./TestRunner');
 var R = require('../bin/Router');
+var Routes = require('./data');
+var Expected = require('./data/expected');
+var noOp = function() {};
 
-var router = new R([
-    {
-        route: ['videos', 'summary'],
-        get: function(path) {
-            return Observable.return({
-                jsong: {
-                    videos: {
-                        summary: {
-                            $type: 'leaf', // TODO: Does paul know about this typing
-                            length: 45
-                        }
-                    }
-                },
-                paths: [['videos', 'summary']]
-            });
-        }
-    }
-]);
 
 describe('Router', function() {
     it('should execute a simple route matching.', function(done) {
-        router.
-            get([['videos', 'summary']]).
-            subscribe(function(x) {
-                debugger;
-            }, done, done);
+        var router = new R(Routes().Videos.Summary);
+        var obs = router.
+            get([['videos', 'summary']]);
+        
+        TestRunner.
+            run(obs, [Expected().Videos.Summary]).
+            subscribe(noOp, done, done);
     });
 });
