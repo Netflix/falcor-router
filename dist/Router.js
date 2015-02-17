@@ -1,109 +1,10 @@
-var Keys = {
-    integersOrRanges: '__integersOrRanges__',
-    integers: '__integers__',
-    keys: '__keys__'
-};
-var Precedence = {
-    specific: 4,
-    integersOrRanges: 3,
-    integers: 2,
-    keys: 1
-};
-var Router = function (routes) {
-    var router = {
-        __virtualFns: null,
-        get: null,
-        set: null
-    };
-    var routeMatcher = SemanticAnalyzer.generate(ParseTree.generateParseTree(routes, router), router);
-    var fn = function (pathActions) {
-        var matched = routeMatcher(pathActions);
-        var sorted = matched.map(function (a) {
-            // Casts the precedence array into a number
-            a.precedence = +a.virtualRunner.precedence.join('');
-            return a;
-        }).sort(function (a, b) {
-            if (// reverse precedence ordering.
-                a.precedence > b.precedence) {
-                return -1;
-            } else if (b.precedence > a.precedence) {
-                return 1;
-            }
-            // can't happen?
-            return 0;
-        });
-        var executionResults = PrecedenceProcessor.execute(pathActions.map(function (x) {
-            return x.path;
-        }), sorted);
-        return executionResults;
-    };
-    //TODO: 'get' should just be passed in instead of creating objects
-    this.get = function (paths) {
-        var results = fn(paths.map(function (p) {
-            return {
-                path: p,
-                action: 'get'
-            };
-        }));
-        // Assumes falcor
-        return accumulateValues(results);
-    };
-    this.set = function (paths) {
-        var results = fn(paths.map(function (p) {
-            return {
-                path: p,
-                action: 'set'
-            };
-        }));
-        return Observable.resu(results).flatMap(function (x) {
-            return x.materialize();
-        });
-    };
-};
-function accumulateValues(precedenceMatches) {
-    var model = new falcor.JSONGModel();
-    return Observable.from(precedenceMatches.results).flatMap(function (x) {
-        debugger;
-        return x.obs.materialize().map(function (jsongEnvNote) {
-            return {
-                note: jsongEnvNote,
-                path: x.path
-            };
-        });
-    }).reduce(function (acc, value) {
-        var // TODO: should be easy to accept all formats
-        note = value.note;
-        var seed = [acc.jsong];
-        var res = null;
-        if (note.kind === 'N') {
-            if (isJSONG(note.value)) {
-                res = model._setJSONGsAsJSONG(model, [note.value], seed);
-            }
-            acc.paths[acc.paths.length] = value.path;
-        } else if (note.kind === 'E') {
-            if (isJSONG(note.value)) {
-                res = model._setJSONGsAsJSONG(model, [note.value], seed);
-            } else {
-                res = model._setPathsAsJSONG(model, [{
-                        path: value.path,
-                        value: note.value
-                    }], seed);
-            }
-            acc.paths[acc.paths.length] = value.path;
-        }
-        return acc;
-    }, {
-        jsong: {},
-        paths: [],
-        errors: []
+var Rx = require("rx");
+var Observable = Rx.Observable;
+function valueNode(node) {
+    return !Object.keys(node).some(function (x) {
+        return x === '__integers' || x === '__integersOrRanges' || x === '__keys' || !~x.indexOf('__');
     });
 }
-function isJSONG(x) {
-    return x.jsong && x.paths;
-}
-Router.integersOrRanges = Keys.integersOrRanges;
-Router.integers = Keys.integers;
-Router.keys = Keys.keys;
 var ParseTree = {
     generateParseTree: function (virtualPaths, router) {
         router.__virtualFns = [];
@@ -690,8 +591,111 @@ var integersString = ' if (isRange_D||isArray_D&&someNumericKeys_D||typeofP_D===
 var keysString = ' if (isRange_D){convertedKeys_D=[]; for (i_D=p_D.from;i_D<p_D.to;i_D++){convertedKeys_D.push(i_D);}} else  if (isArray_D){convertedKeys_D=p_D.concat();} else {convertedKeys_D=[p_D];}virtualRunner.push(Router.keys);virtualRunner.precedence.push(Precedence.keys);valueRunner.push(value_D);__INNER_KEYS__valueRunner.splice(_D);virtualRunner.splice(_D);virtualRunner.precedence.splice(_D);';
 var resetStackString = 'p_D=path[_D];hasNumericKeys_D=HAS_INTS;start_D=START;stop_D=STOP;typeofP_D= typeof p_D;value_D=false; if (typeofP_D==="object"){p_D.position=0; if (p_D instanceof Array){isArray_D=true;someNumericKeys_D=p_D.some( function (el){ return  typeof el==="number";});numericKeys_D=someNumericKeys_D&&p_D.every( function (el){ return  typeof el==="number";});objectKeys_D=!numericKeys_D&&p_D.some( function (el){ return  typeof el==="object";});p_D.__length=p_D.length;} else {isRange_D=true;p_D.from=p_D.from||0; if (p_D.to===undefined){p_D.to=(p_D.length-1)||0;}p_D.__length=p_D.to-p_D.from;inRange_D=isRange_D&&hasNumericKeys_D&&p_D.from<=stop_D&&p_D.to>=start_D;}}';
 var searchBody = ' if (!isArray_D||!isRange_D||(numericKeys_D||inRange_D)&&hasNumericKeys_D||!hasNumericKeys_D){ do {value_D=isArray_D?p_D[p_D.position]:(isRange_D?p_D.position+p_D.from:p_D);virtualRunner.push(value_D);virtualRunner.precedence.push(Precedence.specific);valueRunner.push(value_D);__SWITCH_KEYS__valueRunner.splice(_D);virtualRunner.splice(_D);virtualRunner.precedence.splice(_D);} while ((isArray_D||isRange_D)&&++p_D.position<p_D.__length);}__INTEGERS_OR_RANGES____INTEGERS____KEYS__';
-function valueNode(node) {
-    return !Object.keys(node).some(function (x) {
-        return x === '__integers' || x === '__integersOrRanges' || x === '__keys' || !~x.indexOf('__');
+var Keys = {
+    integersOrRanges: '__integersOrRanges__',
+    integers: '__integers__',
+    keys: '__keys__'
+};
+var Precedence = {
+    specific: 4,
+    integersOrRanges: 3,
+    integers: 2,
+    keys: 1
+};
+var Router = function (routes) {
+    var router = {
+        __virtualFns: null,
+        get: null,
+        set: null
+    };
+    var routeMatcher = SemanticAnalyzer.generate(ParseTree.generateParseTree(routes, router), router);
+    var fn = function (pathActions) {
+        var matched = routeMatcher(pathActions);
+        var sorted = matched.map(function (a) {
+            // Casts the precedence array into a number
+            a.precedence = +a.virtualRunner.precedence.join('');
+            return a;
+        }).sort(function (a, b) {
+            if (// reverse precedence ordering.
+                a.precedence > b.precedence) {
+                return -1;
+            } else if (b.precedence > a.precedence) {
+                return 1;
+            }
+            // can't happen?
+            return 0;
+        });
+        var executionResults = PrecedenceProcessor.execute(pathActions.map(function (x) {
+            return x.path;
+        }), sorted);
+        return executionResults;
+    };
+    //TODO: 'get' should just be passed in instead of creating objects
+    this.get = function (paths) {
+        var results = fn(paths.map(function (p) {
+            return {
+                path: p,
+                action: 'get'
+            };
+        }));
+        // Assumes falcor
+        return accumulateValues(results);
+    };
+    this.set = function (paths) {
+        var results = fn(paths.map(function (p) {
+            return {
+                path: p,
+                action: 'set'
+            };
+        }));
+        return Observable.resu(results).flatMap(function (x) {
+            return x.materialize();
+        });
+    };
+};
+function accumulateValues(precedenceMatches) {
+    var model = new falcor.JSONGModel();
+    return Observable.from(precedenceMatches.results).flatMap(function (x) {
+        debugger;
+        return x.obs.materialize().map(function (jsongEnvNote) {
+            return {
+                note: jsongEnvNote,
+                path: x.path
+            };
+        });
+    }).reduce(function (acc, value) {
+        var // TODO: should be easy to accept all formats
+        note = value.note;
+        var seed = [acc.jsong];
+        var res = null;
+        if (note.kind === 'N') {
+            if (isJSONG(note.value)) {
+                res = model._setJSONGsAsJSONG(model, [note.value], seed);
+            }
+            acc.paths[acc.paths.length] = value.path;
+        } else if (note.kind === 'E') {
+            if (isJSONG(note.value)) {
+                res = model._setJSONGsAsJSONG(model, [note.value], seed);
+            } else {
+                res = model._setPathsAsJSONG(model, [{
+                        path: value.path,
+                        value: note.value
+                    }], seed);
+            }
+            acc.paths[acc.paths.length] = value.path;
+        }
+        return acc;
+    }, {
+        jsong: {},
+        paths: [],
+        errors: []
     });
 }
+function isJSONG(x) {
+    return x.jsong && x.paths;
+}
+Router.integersOrRanges = Keys.integersOrRanges;
+Router.integers = Keys.integers;
+Router.keys = Keys.keys;
+
+module.exports = Router;
