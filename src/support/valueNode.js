@@ -1,8 +1,8 @@
 function valueNode(node) {
     return !Object.keys(node).some(function(x) {
-        return x === '__integers' ||
-            x === '__integersOrRanges' ||
-            x === '__keys' ||
-            !~x.indexOf('__');
+        return x === Router.keys ||
+            x === Router.integers ||
+            x === Router.integersOrRanges ||
+            x.indexOf('__') !== 0;
     });
 }

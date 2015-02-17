@@ -81,15 +81,15 @@ function accumulateValues(precedenceMatches) {
             var seed = [acc.jsong];
             var res = null;
             if (note.kind === 'N') {
-                if (isJSONG(note.value)) {
+                if (router_isJSONG(note.value)) {
                     res = model._setJSONGsAsJSONG(model, [note.value], seed);
                 }
                 acc.paths[acc.paths.length] = value.path;
             } else if (note.kind === 'E') {
-                if (isJSONG(note.value)) {
+                if (note.value && router_isJSONG(note.value)) {
                     res = model._setJSONGsAsJSONG(model, [note.value], seed);
                 } else {
-                    res = model._setPathsAsJSONG(model, [{path: value.path, value: note.value}], seed);
+                    res = model._setPathsAsJSONG(model, [{path: value.path, value: note.exception.message}], seed);
                 }
                 acc.paths[acc.paths.length] = value.path;
             }
@@ -102,7 +102,7 @@ function accumulateValues(precedenceMatches) {
         });
 }
 
-function isJSONG(x) {
+function router_isJSONG(x) {
     return x.jsong && x.paths;
 }
 

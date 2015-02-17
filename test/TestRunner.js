@@ -7,7 +7,8 @@ var TestRunner = {
             do(function(x) {
                 // Validates against all comparables
                 compares.forEach(function(c) {
-                    partialCompare(c, x);
+                    jsongPartialCompare(c.jsong, x.jsong);
+                    jsongPathContains(x.paths, c.paths);
                 });
                 count++;
             }, undefined, function() {
@@ -17,10 +18,16 @@ var TestRunner = {
 };
 
 module.exports = TestRunner;
-function partialCompare(shouldContain, container) {
+function jsongPartialCompare(shouldContain, container) {
     traverseAndConvert(shouldContain);
     traverseAndConvert(container);
     contains(shouldContain, container, '');
+}
+function jsongPathContains(responseTree, expectedPaths) {
+    // TODO: path comparison
+}
+function convertToTree(paths, idx) {
+    // TODO: grow a tree
 }
 
 function traverseAndConvert(obj) {
@@ -51,7 +58,6 @@ function traverseAndConvert(obj) {
 function strip(obj, key) {
     var keys = Array.prototype.slice.call(arguments, 1);
     var args = [0].concat(keys);
-    debugger;
     if (obj != null && typeof obj === "object") {
         Object.keys(obj).forEach(function (k) {
             if (~keys.indexOf(k)) {
@@ -64,10 +70,15 @@ function strip(obj, key) {
 }
 
 function contains(has, toHave, position) {
+    if (typeof has !== 'object') {
+        debugger
+    }
     var obj = Object.keys(has);
     obj.forEach(function (k) {
         expect(toHave, "Object" + position + " to have key " + k).to.include.keys(k);
-        if (typeof has[k] !== 'object') {
+        if (typeof has[k] !== typeof toHave[k]) {
+            expect(has[k]).to.deep.equals(toHave[k]);
+        } else if (typeof has[k] !== 'object') {
             expect(has[k]).to.equals(toHave[k]);
         } else if (typeof has[k] === 'object' && Array.isArray(has[k])) {
             expect(has[k]).to.deep.equals(toHave[k]);
