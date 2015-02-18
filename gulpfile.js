@@ -32,15 +32,23 @@ gulp.task('bump', ['dist'], function() {
 gulp.task('build.sweet', ['clean'], function() {
     return compileSweet();
 });
-gulp.task('build.dev', ['build.sweet'], function() {
+gulp.task('build.dev', ['build.sweet', 'build.move-falcor'], function() {
     return compile({
         name: 'Router', 
-        src: ['lib/falcor.js'],
         surround: {
-            prefix: 'var Rx = require("rx");\nvar Observable = Rx.Observable;',
-            suffix: '\nmodule.exports = Router;'
+            prefix: 'var Rx = require("rx");\nvar Observable = Rx.Observable;\nvar falcor = require("./falcor");\n',
+            suffix: '\nmodule.exports = Router;\n'
         }
     });
+});
+gulp.task('build.move-falcor', ['clean'], function() {
+    return gulp.
+        src(['lib/falcor.js']).
+        pipe(surround({
+            prefix: '/* istanbul ignore next */\n(function() {var Rx = require("rx");\nvar Observable = Rx.Observable;\n',
+            suffix: '\nmodule.exports = falcor;})();\n'
+        })).
+        pipe(gulp.dest('bin'));
 });
 gulp.task('dist.node', ['build.sweet'], function() {
     return compile({

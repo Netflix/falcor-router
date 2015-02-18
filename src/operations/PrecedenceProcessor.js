@@ -366,10 +366,10 @@ function matchVirtualPathFormat(incomingValues, virtualExpected) {
                 } else {
                     // the range is just a range, which means this was the matching range,
                     // which needs to be stripped of navigation keys.
-                    if (typeof val.from === 'number') {
-                        output[i] = [{from: val.from, to: val.to}];
+                    if (typeof val.length === 'number') {
+                        output[i] = [{length: val.length, from: val.from || 0}];
                     } else {
-                        output[i] = [{length: val.length, to: val.to}];
+                        output[i] = [{from: val.from || 0, to: val.to}];
                     }
                 }
             }

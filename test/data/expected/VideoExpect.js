@@ -55,6 +55,21 @@ module.exports = function() {
                 },
                 paths: [['videos', 2, 'summary']]
             }
+        },
+        someKey: {
+            Summary: {
+                jsong: {
+                    videos: {
+                        someKey: {
+                            summary: {
+                                $type: 'leaf',
+                                title: 'Some Movie someKey'
+                            }
+                        }
+                    }
+                },
+                paths: [['videos', 'someKey', 'summary']]
+            }
         }
     }
 };

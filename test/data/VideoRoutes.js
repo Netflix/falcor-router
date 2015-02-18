@@ -23,6 +23,21 @@ module.exports = function() {
                 }
             }];
         },
+        Keys: {
+            Summary: function (fn) {
+                return [{
+                    route: ['videos', R.keys, 'summary'],
+                    get: function (path) {
+                        fn && fn(path);
+                        return Observable.
+                            from(path[1]).
+                            map(function(id) {
+                                return generateVideoJSONG(id);
+                            });
+                    }
+                }];
+            }
+        },
         Integers: {
             Summary: function (fn) {
                 return [{
@@ -32,18 +47,7 @@ module.exports = function() {
                         return Observable.
                             from(path[1]).
                             map(function(id) {
-                                var videos;
-                                var jsongEnv = {
-                                    jsong: {videos: (videos = {})},
-                                    paths: [['videos', id, 'summary']]
-                                };
-                                videos[id] = {};
-                                videos[id].summary = {
-                                    title: 'Some Movie ' + id,
-                                    $type: 'leaf'
-                                };
-                                
-                                return jsongEnv;
+                                return generateVideoJSONG(id);
                             });
                     }
                 }];
@@ -60,18 +64,7 @@ module.exports = function() {
                         return Observable.
                             from(R.rangeToArray(path[1])).
                             map(function(id) {
-                                var videos;
-                                var jsongEnv = {
-                                    jsong: {videos: (videos = {})},
-                                    paths: [['videos', id, 'summary']]
-                                };
-                                videos[id] = {};
-                                videos[id].summary = {
-                                    title: 'Some Movie ' + id,
-                                    $type: 'leaf'
-                                };
-
-                                return jsongEnv;
+                                return generateVideoJSONG(id);
                             });
                     }
                 }];
@@ -79,3 +72,18 @@ module.exports = function() {
         }
     };
 };
+
+function generateVideoJSONG(id) {
+    var videos;
+    var jsongEnv = {
+        jsong: {videos: (videos = {})},
+        paths: [['videos', id, 'summary']]
+    };
+    videos[id] = {};
+    videos[id].summary = {
+        title: 'Some Movie ' + id,
+        $type: 'leaf'
+    };
+
+    return jsongEnv;
+}

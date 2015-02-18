@@ -15,6 +15,19 @@ var TestRunner = {
             }, undefined, function() {
                 expect(count, 'The observable should of onNext one time').to.equal(1);
             });
+    },
+    
+    comparePath: function(expected, actual) {
+        expected.forEach(function(el, i) {
+            var aEl = actual[i];
+            if (typeof el === 'object') {
+                el.forEach(function(innerEl, innerI) {
+                    expect(aEl[innerI]).to.deep.equal(innerEl);
+                });
+            } else {
+                expect(aEl).to.equal(el);
+            }
+        });
     }
 };
 

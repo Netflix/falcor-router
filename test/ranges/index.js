@@ -10,10 +10,9 @@ describe('Ranges', function() {
     it('should match integers for videos with int keys passed in.', function(done) {
         var router = new R(
             Routes().Videos.Ranges.Summary(function(pathSet) {
-                expect(pathSet).to.deep.equals(['videos', [{from:1,to:1}], 'summary']);
+                TestRunner.comparePath(['videos', [{from:1, to:1}], 'summary'], pathSet);
             })
         );
-        debugger;
         var obs = router.
             get([['videos', 1, 'summary']]);
 
@@ -25,7 +24,7 @@ describe('Ranges', function() {
     it('should match ranges for videos with array of ints passed in.', function(done) {
         var router = new R(
             Routes().Videos.Ranges.Summary(function(pathSet) {
-                expect(pathSet).to.deep.equals(['videos', [{from: 1, to: 2}], 'summary']);
+                TestRunner.comparePath(['videos', [{from:1, to:2}], 'summary'], pathSet);
             })
         );
         var obs = router.
@@ -39,7 +38,7 @@ describe('Ranges', function() {
     it('should match ranges for videos with array of ints passed in that are not adjacent.', function(done) {
         var router = new R(
             Routes().Videos.Ranges.Summary(function(pathSet) {
-                expect(pathSet).to.deep.equals(['videos', [{from: 0, to: 0}, {from: 2, to: 2}], 'summary']);
+                TestRunner.comparePath(['videos', [{from:0, to:0}, {from:2, to:2}], 'summary'], pathSet);
             })
         );
         var obs = router.
@@ -53,7 +52,7 @@ describe('Ranges', function() {
     it('should match ranges with a range passed in.', function(done) {
         var router = new R(
             Routes().Videos.Ranges.Summary(function(pathSet) {
-                expect(pathSet).to.deep.equals(['videos', [{from: 0, to: 2}], 'summary']);
+                TestRunner.comparePath(['videos', [{from:0, to:2}], 'summary'], pathSet);
             })
         );
         var obs = router.
