@@ -2,7 +2,7 @@ var Rx = require("rx");
 var Observable = Rx.Observable;
 function valueNode(node) {
     return !Object.keys(node).some(function (x) {
-        return x === '__integers' || x === '__integersOrRanges' || x === '__keys' || !~x.indexOf('__');
+        return x === Router.keys || x === Router.integers || x === Router.ranges || x.indexOf('__') !== 0;
     });
 }
 var ParseTree = {
@@ -40,8 +40,8 @@ function buildParseTree(node, pathAndAction, depth, router) {
             next = node[Keys.keys] || (node[Keys.keys] = {});
         } else if (value === Keys.integers) {
             next = node[Keys.integers] || (node[Keys.integers] = {});
-        } else if (value === Keys.integersOrRanges) {
-            next = node[Keys.integersOrRanges] || (node[Keys.integersOrRanges] = {});
+        } else if (value === Keys.ranges) {
+            next = node[Keys.ranges] || (node[Keys.ranges] = {});
         } else {
             if (typeof value === 'number') {
                 node.__hasInts = true;
@@ -123,7 +123,7 @@ function isMatch(incoming, value, virtual) {
     return true;
 }
 function isStrictComparable(incomingAtom, virtualAtom) {
-    return typeof incomingAtom !== 'object' && typeof virtualAtom !== 'object' && virtualAtom !== Router.integers && virtualAtom !== Router.integersOrRanges;
+    return typeof incomingAtom !== 'object' && typeof virtualAtom !== 'object' && virtualAtom !== Router.integers && virtualAtom !== Router.ranges;
 }
 function arrayComparable(incomingAtom, virtualAtom) {
     if (// is an array of keys
@@ -137,7 +137,7 @@ function arrayComparable(incomingAtom, virtualAtom) {
             }
         }
     } else if (// match on integers or ranges.
-        virtualAtom === Router.integersOrRanges || virtualAtom === Router.integers) {
+        virtualAtom === Router.ranges || virtualAtom === Router.integers) {
         return incomingAtom.some(function (x) {
             return typeof x === 'number';
         });
@@ -166,7 +166,7 @@ function objectComparable(incomingAtom, virtualAtom) {
             }
         }
     } else if (// match on integers or ranges.
-        virtualAtom === Router.integersOrRanges || virtualAtom === Router.integers) {
+        virtualAtom === Router.ranges || virtualAtom === Router.integers) {
         return true;
     } else if (// matches everything
         virtualAtom === Router.keys) {
@@ -225,7 +225,7 @@ function permuateAt(prefix, virtualAtom, incomingAtom, suffix) {
         return null;
     }
     var virtualAtomIsIntegers = virtualAtom === Router.integers;
-    var virtualAtomIsIntsOrRanges = virtualAtom === Router.integersOrRanges;
+    var virtualAtomIsIntsOrRanges = virtualAtom === Router.ranges;
     var virtualAtomIsMatcher = virtualAtomIsIntegers || virtualAtomIsIntsOrRanges;
     var newPermutations = [];
     var newPrefixAtom = incomingAtom;
@@ -356,30 +356,49 @@ function flatten(x) {
         return atom;
     });
 }
-function matchVirtualPathFormat(incomingValues, virtualExpected, extentWithIncomingValues) {
+function matchVirtualPathFormat(incomingValues, virtualExpected) {
     var output = [];
     var i = 0;
     virtualExpected.forEach(function (vK) {
+        var val = incomingValues[i];
         if (vK === Router.integers) {
-            if (typeof incomingValues[i] !== 'object') {
-                output[i] = [incomingValues[i]];
-            } else if (!Array.isArray(incomingValues[i])) {
-                output[i] = convertRangeToArray(array);
+            if (typeof val !== 'object') {
+                output[i] = [val];
+            } else if (!Array.isArray(val)) {
+                output[i] = convertRangeToArray(val);
             }
-        } else if (vK === Router.integersOrRanges) {
-            if (typeof incomingValues[i] !== 'object') {
-                output[i] = [incomingValues[i]];
-            } else if (Array.isArray(incomingValues[i])) {
-                output[i] = convertArrayToRange(incomingValues[i]);
+        } else if (vK === Router.ranges) {
+            if (typeof val !== 'object') {
+                val = [val];
+            }
+            if (typeof val === 'object') {
+                if (Array.isArray(val)) {
+                    output[i] = convertArrayToRange(val);
+                } else {
+                    if (// the range is just a range, which means this was the matching range,
+                        // which needs to be stripped of navigation keys.
+                        typeof val.from === 'number') {
+                        output[i] = [{
+                                from: val.from,
+                                to: val.to
+                            }];
+                    } else {
+                        output[i] = [{
+                                length: val.length,
+                                to: val.to
+                            }];
+                    }
+                }
             }
         } else if (vK === Router.keys) {
-            if (typeof incomingValues[i] !== 'object') {
-                output[i] = [incomingValues[i]];
-            } else if (!Array.isArray(incomingValues[i])) {
-                output[i] = convertRangeToArray(array);
+            if (typeof val !== 'object') {
+                output[i] = [val];
+            } else if (!Array.isArray(val)) {
+                output[i] = convertRangeToArray(val);
             }
-        } else {
-            output[i] = incomingValues[i];
+        }
+        if (output[i] === undefined) {
+            output[i] = val;
         }
         i++;
     });
@@ -387,15 +406,15 @@ function matchVirtualPathFormat(incomingValues, virtualExpected, extentWithIncom
 }
 function convertRangeToArray(range) {
     var from = range.from || 0;
-    var to = typeof range.to === 'number' ? range.to : range.length || 1;
+    var to = typeof range.to === 'number' ? range.to : range.length;
     var convertedValue = [];
     for (var j = from; j <= to; j++) {
         convertedValue.push(j);
     }
     return convertedValue;
 }
-function convertArrayToRange(array$2) {
-    var convertedRange = array$2.sort().reduce(function (acc, v) {
+function convertArrayToRange(array) {
+    var convertedRange = array.sort().reduce(function (acc, v) {
         if (!acc.length) {
             acc.push({
                 from: v,
@@ -457,7 +476,7 @@ function treeTraversal(node, depth) {
     if (exitEarly) {
         return '// EMPTY KEY SET\n';
     }
-    return SyntaxGenerator.searchBody().replace('__SWITCH_KEYS__', switchKeys(node, depth)).replace('__INTEGERS_OR_RANGES__', integersOrRanges(node, depth)).replace('__INTEGERS__', integers(node, depth)).replace('__KEYS__', keys(node, depth)).replace(/_D/g, depth);
+    return SyntaxGenerator.searchBody().replace('__SWITCH_KEYS__', switchKeys(node, depth)).replace('__INTEGERS_OR_RANGES__', ranges(node, depth)).replace('__INTEGERS__', integers(node, depth)).replace('__KEYS__', keys(node, depth)).replace(/_D/g, depth);
 }
 function switchKeys(node, depth) {
     if (!(node.__hasKeys || node.__hasInts)) {
@@ -493,23 +512,23 @@ function switchKeys(node, depth) {
     str += '}\n';
     return str;
 }
-function integersOrRanges(node, depth) {
-    if (node.__integersOrRanges) {
-        return SyntaxGenerator.integersOrRanges(depth, executeMatched(node) + buildVirtualCode(node.__integersOrRanges, depth + 1));
+function ranges(node, depth) {
+    if (node[Keys.ranges]) {
+        return SyntaxGenerator.ranges(depth, executeMatched(node) + buildVirtualCode(node[Keys.ranges], depth + 1));
     }
     // nothing.  No code to generate at this level
     return '';
 }
 function integers(node, depth) {
-    if (node.__integers) {
-        return SyntaxGenerator.integers(depth, executeMatched(node) + buildVirtualCode(node.__integers, depth + 1));
+    if (node[Keys.integers]) {
+        return SyntaxGenerator.integers(depth, executeMatched(node) + buildVirtualCode(node[Keys.integers], depth + 1));
     }
     // nothing.  No code to generate at this level
     return '';
 }
 function keys(node, depth) {
-    if (node.__keys) {
-        return SyntaxGenerator.keysStringFn(depth, executeMatched(node) + buildVirtualCode(node.__keys, depth + 1));
+    if (node[Keys.keys]) {
+        return SyntaxGenerator.keysStringFn(depth, executeMatched(node) + buildVirtualCode(node[Keys.keys], depth + 1));
     }
     // nothing.  No code to generate at this level
     return '';
@@ -550,8 +569,8 @@ var SyntaxGenerator = {
             return x + depth;
         }).join(',');
     },
-    integersOrRanges: function (depth, innerSrc) {
-        var src = integersOrRangesString.replace(/_D/g, depth).replace('__INNER_INTEGERS_OR_RANGES__', innerSrc).split('\n');
+    ranges: function (depth, innerSrc) {
+        var src = rangesString.replace(/_D/g, depth).replace('__INNER_RANGES__', innerSrc).split('\n');
         return src.join('\n');
     },
     integers: function (depth, innerSrc) {
@@ -586,19 +605,19 @@ var SyntaxGenerator = {
 };
 var matchedGetMethodString = ' if (action==="get"){copyRunner=virtualRunner.concat();copyRunner.precedence=virtualRunner.precedence.concat();dataResults.push({actionType:"get",action:router.__virtualFns[__GET__],virtualRunner:copyRunner,valueRunner:valueRunner.concat()});}';
 var matchedSetMethodString = ' if (action==="set"){copyRunner=virtualRunner.concat();copyRunner.precedence=virtualRunner.precedence.concat();dataResults.push({actionType:"set",action:router.__virtualFns[__SET__],virtualRunner:copyRunner,valueRunner:valueRunner.concat()});}';
-var integersOrRangesString = ' if (isRange_D||isArray_D&&someNumericKeys_D){ if (isArray_D){convertedRange_D=(numericKeys_D?p_D.sort():p_D.filter( function (x){ return  typeof x==="number";}).sort()).reduce( function (acc,x){ if (!acc){ return [{from:x,to:x}];} var searching=true;acc.some( function (range){ if (range.to+1===x){range.to++;} return searching;}); if (searching){acc.push({from:x,to:x});} return acc;},null);} else  if (isRange_D){convertedRange_D={}; if (p_D.length){convertedRange_D.length=p_D.length;} if (p_D.from||p_D.from===0){convertedRange_D.from=p_D.from;} if (p_D.to||p_D.to===0){convertedRange_D.to=p_D.to;}} else {convertedRange_D={from:p_D,to:p_D};}virtualRunner.push(Router.integersOrRanges);virtualRunner.precedence.push(Precedence.integersOrRanges);valueRunner.push(value_D);__INNER_INTEGERS_OR_RANGES__valueRunner.splice(_D);virtualRunner.splice(_D);virtualRunner.precedence.splice(_D);}';
-var integersString = ' if (isRange_D||isArray_D&&someNumericKeys_D||typeofP_D==="number"){ if (isArray_D){ if (numericKeys_D){convertedArray_D=p_D.concat();} else {convertedArray_D=p_D.filter( function (x){ return  typeof x==="number";});}} else  if (isRange_D){convertedArray_D=[]; for (i_D=p_D.from;i_D<p_D.to;i_D++){convertedArray_D.push(i_D);}} else {convertedArray_D=[p_D];}virtualRunner.push(Router.integers);virtualRunner.precedence.push(Precedence.integers);valueRunner.push(value_D);__INNER_INTEGERS__valueRunner.splice(_D);virtualRunner.splice(_D);virtualRunner.precedence.splice(_D);}';
+var rangesString = ' if (isRange_D||isArray_D&&someNumericKeys_D||typeofP_D==="number"){ if (isArray_D){convertedRange_D=(numericKeys_D?p_D.sort():p_D.filter( function (x){ return  typeof x==="number";}).sort()).reduce( function (acc,x){ if (!acc){ return [{from:x,to:x}];} var searching=true;acc.some( function (range){ if (range.to+1===x){range.to++;} return searching;}); if (searching){acc.push({from:x,to:x});} return acc;},null);} else  if (isRange_D){convertedRange_D={}; if (p_D.length){convertedRange_D.length=p_D.length;} if (p_D.from||p_D.from===0){convertedRange_D.from=p_D.from;} if (p_D.to||p_D.to===0){convertedRange_D.to=p_D.to;}} else {convertedRange_D={from:p_D,to:p_D};}virtualRunner.push(Router.ranges);virtualRunner.precedence.push(Precedence.ranges);valueRunner.push(convertedRange_D);__INNER_RANGES__valueRunner.splice(_D);virtualRunner.splice(_D);virtualRunner.precedence.splice(_D);}';
+var integersString = ' if (isRange_D||isArray_D&&someNumericKeys_D||typeofP_D==="number"){ if (isArray_D){ if (numericKeys_D){convertedArray_D=p_D.concat();} else {convertedArray_D=p_D.filter( function (x){ return  typeof x==="number";});}} else  if (isRange_D){convertedArray_D=[]; for (i_D=p_D.from;i_D<p_D.to;i_D++){convertedArray_D.push(i_D);}} else {convertedArray_D=[p_D];}virtualRunner.push(Router.integers);virtualRunner.precedence.push(Precedence.integers);valueRunner.push(convertedArray_D);__INNER_INTEGERS__valueRunner.splice(_D);virtualRunner.splice(_D);virtualRunner.precedence.splice(_D);}';
 var keysString = ' if (isRange_D){convertedKeys_D=[]; for (i_D=p_D.from;i_D<p_D.to;i_D++){convertedKeys_D.push(i_D);}} else  if (isArray_D){convertedKeys_D=p_D.concat();} else {convertedKeys_D=[p_D];}virtualRunner.push(Router.keys);virtualRunner.precedence.push(Precedence.keys);valueRunner.push(value_D);__INNER_KEYS__valueRunner.splice(_D);virtualRunner.splice(_D);virtualRunner.precedence.splice(_D);';
 var resetStackString = 'p_D=path[_D];hasNumericKeys_D=HAS_INTS;start_D=START;stop_D=STOP;typeofP_D= typeof p_D;value_D=false; if (typeofP_D==="object"){p_D.position=0; if (p_D instanceof Array){isArray_D=true;someNumericKeys_D=p_D.some( function (el){ return  typeof el==="number";});numericKeys_D=someNumericKeys_D&&p_D.every( function (el){ return  typeof el==="number";});objectKeys_D=!numericKeys_D&&p_D.some( function (el){ return  typeof el==="object";});p_D.__length=p_D.length;} else {isRange_D=true;p_D.from=p_D.from||0; if (p_D.to===undefined){p_D.to=(p_D.length-1)||0;}p_D.__length=p_D.to-p_D.from;inRange_D=isRange_D&&hasNumericKeys_D&&p_D.from<=stop_D&&p_D.to>=start_D;}}';
 var searchBody = ' if (!isArray_D||!isRange_D||(numericKeys_D||inRange_D)&&hasNumericKeys_D||!hasNumericKeys_D){ do {value_D=isArray_D?p_D[p_D.position]:(isRange_D?p_D.position+p_D.from:p_D);virtualRunner.push(value_D);virtualRunner.precedence.push(Precedence.specific);valueRunner.push(value_D);__SWITCH_KEYS__valueRunner.splice(_D);virtualRunner.splice(_D);virtualRunner.precedence.splice(_D);} while ((isArray_D||isRange_D)&&++p_D.position<p_D.__length);}__INTEGERS_OR_RANGES____INTEGERS____KEYS__';
 var Keys = {
-    integersOrRanges: '__integersOrRanges__',
+    ranges: '__ranges__',
     integers: '__integers__',
     keys: '__keys__'
 };
 var Precedence = {
     specific: 4,
-    integersOrRanges: 3,
+    ranges: 3,
     integers: 2,
     keys: 1
 };
@@ -656,7 +675,6 @@ var Router = function (routes) {
 function accumulateValues(precedenceMatches) {
     var model = new falcor.JSONGModel();
     return Observable.from(precedenceMatches.results).flatMap(function (x) {
-        debugger;
         return x.obs.materialize().map(function (jsongEnvNote) {
             return {
                 note: jsongEnvNote,
@@ -669,17 +687,17 @@ function accumulateValues(precedenceMatches) {
         var seed = [acc.jsong];
         var res = null;
         if (note.kind === 'N') {
-            if (isJSONG(note.value)) {
+            if (router_isJSONG(note.value)) {
                 res = model._setJSONGsAsJSONG(model, [note.value], seed);
             }
             acc.paths[acc.paths.length] = value.path;
         } else if (note.kind === 'E') {
-            if (isJSONG(note.value)) {
+            if (note.value && router_isJSONG(note.value)) {
                 res = model._setJSONGsAsJSONG(model, [note.value], seed);
             } else {
                 res = model._setPathsAsJSONG(model, [{
                         path: value.path,
-                        value: note.value
+                        value: note.exception.message
                     }], seed);
             }
             acc.paths[acc.paths.length] = value.path;
@@ -691,10 +709,22 @@ function accumulateValues(precedenceMatches) {
         errors: []
     });
 }
-function isJSONG(x) {
+function router_isJSONG(x) {
     return x.jsong && x.paths;
 }
-Router.integersOrRanges = Keys.integersOrRanges;
+Router.rangeToArray = function (ranges) {
+    return Object.keys(ranges.reduce(function (acc, range) {
+        var from = range.from || 0;
+        var to = typeof range.to === 'number' ? range.to : range.length;
+        for (; from <= to; from++) {
+            acc[from] = true;
+        }
+        return acc;
+    }, {})).map(function (x) {
+        return +x;
+    });
+};
+Router.ranges = Keys.ranges;
 Router.integers = Keys.integers;
 Router.keys = Keys.keys;
 
