@@ -65,7 +65,6 @@ function accumulateValues(precedenceMatches) {
         // TODO: This will need to be addressed for speed.
         from(precedenceMatches.results).
         flatMap(function(x) {
-            debugger;
             return x.obs.
                 materialize().
                 map(function(jsongEnvNote) {
@@ -105,6 +104,20 @@ function accumulateValues(precedenceMatches) {
 function router_isJSONG(x) {
     return x.jsong && x.paths;
 }
+
+Router.rangeToArray = function(ranges) {
+    return Object.
+        keys(
+            ranges.reduce(function(acc, range) {
+                var from = range.from || 0;
+                var to = typeof range.to === 'number' ? range.to : range.length;
+                for (;from <= to; from++) {
+                    acc[from] = true;
+                }
+                return acc;
+            }, {})).
+        map(function(x) { return +x; });
+};
 
 Router.ranges = Keys.ranges;
 Router.integers = Keys.integers;

@@ -344,30 +344,44 @@ function flatten(x) {
     });
 }
 
-function matchVirtualPathFormat(incomingValues, virtualExpected, extentWithIncomingValues) {
+// TODO: Performance, should be done during the generated matches?
+function matchVirtualPathFormat(incomingValues, virtualExpected) {
     var output = [];
     var i = 0;
     virtualExpected.forEach(function(vK) {
+        var val = incomingValues[i];
         if (vK === Router.integers) {
-            if (typeof incomingValues[i] !== 'object') {
-                output[i] = [incomingValues[i]];
-            } else if (!Array.isArray(incomingValues[i])) {
-                output[i] = convertRangeToArray(array);
-            }
+            if (typeof val !== 'object') {
+                output[i] = [val];
+            } else if (!Array.isArray(val)) {
+                output[i] = convertRangeToArray(val);
+            } 
         } else if (vK === Router.ranges) {
-            if (typeof incomingValues[i] !== 'object') {
-                output[i] = [incomingValues[i]];
-            } else if (Array.isArray(incomingValues[i])) {
-                output[i] = convertArrayToRange(incomingValues[i]);
+            if (typeof val !== 'object') {
+                val = [val];
+            }
+            if (typeof val === 'object') {
+                if (Array.isArray(val)) {
+                    output[i] = convertArrayToRange(val);
+                } else {
+                    // the range is just a range, which means this was the matching range,
+                    // which needs to be stripped of navigation keys.
+                    if (typeof val.from === 'number') {
+                        output[i] = [{from: val.from, to: val.to}];
+                    } else {
+                        output[i] = [{length: val.length, to: val.to}];
+                    }
+                }
             }
         } else if (vK === Router.keys) {
-            if (typeof incomingValues[i] !== 'object') {
-                output[i] = [incomingValues[i]];
-            } else if (!Array.isArray(incomingValues[i])) {
-                output[i] = convertRangeToArray(array);
+            if (typeof val !== 'object') {
+                output[i] = [val];
+            } else if (!Array.isArray(val)) {
+                output[i] = convertRangeToArray(val);
             }
-        } else {
-            output[i] = incomingValues[i];
+        }
+        if (output[i] === undefined) {
+            output[i] = val;
         }
         i++;
     });
@@ -377,7 +391,7 @@ function matchVirtualPathFormat(incomingValues, virtualExpected, extentWithIncom
 
 function convertRangeToArray(range) {
     var from = range.from || 0;
-    var to = typeof range.to === 'number' ? range.to : range.length || 1;
+    var to = typeof range.to === 'number' ? range.to : range.length;
     var convertedValue = [];
     for (var j = from; j <= to; j++) {
         convertedValue.push(j);

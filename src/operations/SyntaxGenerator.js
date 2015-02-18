@@ -93,20 +93,14 @@ var matchedSetMethodString = fnToString(function innerBlock() {
 
 var rangesString = fnToString(function innerBlock() {
     // TODO: isArray_D could be made faster.
-    if (isRange_D || isArray_D && someNumericKeys_D) {
-
+    if (isRange_D || isArray_D && someNumericKeys_D || typeofP_D === 'number') {
         if (isArray_D) {
-            convertedRange_D = (
-                numericKeys_D ?
-                    p_D.sort() :
-                    p_D.filter(function (x) {
-                        return typeof x === 'number';
-                    }).sort()).
+            // TODO: This is wrong
+            convertedRange_D = 
+                (numericKeys_D ? p_D.sort() : p_D.filter(function (x) { return typeof x === 'number'; }).sort()).
                 reduce(function (acc, x) {
                     if (!acc) {
-                        return [
-                            {from: x, to: x}
-                        ];
+                        return [{from: x, to: x}];
                     }
 
                     var searching = true;
@@ -139,7 +133,7 @@ var rangesString = fnToString(function innerBlock() {
         }
         virtualRunner.push(Router.ranges);
         virtualRunner.precedence.push(Precedence.ranges);
-        valueRunner.push(value_D);
+        valueRunner.push(convertedRange_D);
         __INNER_RANGES__
         valueRunner.splice(_D);
         virtualRunner.splice(_D);
@@ -167,7 +161,7 @@ var integersString = fnToString(function innerBlock() {
         }
         virtualRunner.push(Router.integers);
         virtualRunner.precedence.push(Precedence.integers);
-        valueRunner.push(value_D);
+        valueRunner.push(convertedArray_D);
         __INNER_INTEGERS__
         valueRunner.splice(_D);
         virtualRunner.splice(_D);

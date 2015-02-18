@@ -1,0 +1,67 @@
+var TestRunner = require('./../TestRunner');
+var R = require('../../bin/Router');
+var Routes = require('./../data');
+var Expected = require('./../data/expected');
+var noOp = function() {};
+var chai = require('chai');
+var expect = chai.expect;
+
+describe('Ranges', function() {
+    it('should match integers for videos with int keys passed in.', function(done) {
+        var router = new R(
+            Routes().Videos.Ranges.Summary(function(pathSet) {
+                expect(pathSet).to.deep.equals(['videos', [{from:1,to:1}], 'summary']);
+            })
+        );
+        debugger;
+        var obs = router.
+            get([['videos', 1, 'summary']]);
+
+        TestRunner.
+            run(obs, [Expected().Videos[1].Summary]).
+            subscribe(noOp, done, done);
+    });
+
+    it('should match ranges for videos with array of ints passed in.', function(done) {
+        var router = new R(
+            Routes().Videos.Ranges.Summary(function(pathSet) {
+                expect(pathSet).to.deep.equals(['videos', [{from: 1, to: 2}], 'summary']);
+            })
+        );
+        var obs = router.
+            get([['videos', [1, 2], 'summary']]);
+
+        TestRunner.
+            run(obs, [Expected().Videos[1].Summary, Expected().Videos[2].Summary]).
+            subscribe(noOp, done, done);
+    });
+
+    it('should match ranges for videos with array of ints passed in that are not adjacent.', function(done) {
+        var router = new R(
+            Routes().Videos.Ranges.Summary(function(pathSet) {
+                expect(pathSet).to.deep.equals(['videos', [{from: 0, to: 0}, {from: 2, to: 2}], 'summary']);
+            })
+        );
+        var obs = router.
+            get([['videos', [0, 2], 'summary']]);
+
+        TestRunner.
+            run(obs, [Expected().Videos[0].Summary, Expected().Videos[2].Summary]).
+            subscribe(noOp, done, done);
+    });
+
+    it('should match ranges with a range passed in.', function(done) {
+        var router = new R(
+            Routes().Videos.Ranges.Summary(function(pathSet) {
+                expect(pathSet).to.deep.equals(['videos', [{from: 0, to: 2}], 'summary']);
+            })
+        );
+        var obs = router.
+            get([['videos', {from: 0, to: 2}, 'summary']]);
+
+        TestRunner.
+            run(obs, [Expected().Videos[0].Summary, Expected().Videos[1].Summary, Expected().Videos[2].Summary]).
+            subscribe(noOp, done, done);
+    });
+});
+

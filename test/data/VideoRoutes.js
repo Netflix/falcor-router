@@ -23,7 +23,6 @@ module.exports = function() {
                 }
             }];
         },
-
         Integers: {
             Summary: function (fn) {
                 return [{
@@ -44,6 +43,34 @@ module.exports = function() {
                                     $type: 'leaf'
                                 };
                                 
+                                return jsongEnv;
+                            });
+                    }
+                }];
+            }
+        },
+
+        Ranges: {
+            Summary: function (fn) {
+                return [{
+                    route: ['videos', R.ranges, 'summary'],
+                    get: function (path) {
+                        fn && fn(path);
+                        debugger;
+                        return Observable.
+                            from(R.rangeToArray(path[1])).
+                            map(function(id) {
+                                var videos;
+                                var jsongEnv = {
+                                    jsong: {videos: (videos = {})},
+                                    paths: [['videos', id, 'summary']]
+                                };
+                                videos[id] = {};
+                                videos[id].summary = {
+                                    title: 'Some Movie ' + id,
+                                    $type: 'leaf'
+                                };
+
                                 return jsongEnv;
                             });
                     }
