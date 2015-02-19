@@ -1,6 +1,6 @@
 var Rx = require('rx');
 var Observable = Rx.Observable;
-var R = require('../../bin/Router');
+var R = require('../../src/Router');
 
 module.exports = function() {
     return {

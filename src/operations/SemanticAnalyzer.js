@@ -1,3 +1,7 @@
+var valueNode = require('../support/valueNode');
+var SyntaxGenerator = require('./SyntaxGenerator');
+var Keys = require('../Keys');
+var Precedence = require('../Precedence');
 var SemanticAnalyzer = {
     /**
      * Returns a new function that is the generated virtual code.
@@ -5,11 +9,12 @@ var SemanticAnalyzer = {
      * @returns {*}
      */
     generate: function(parser, router) {
-        return new Function('Router', 'Precedence', 'router', 'return (function innerFunction(pathActions) { ' +
+        return new Function('Keys', 'Precedence', 'router', 'return (function innerFunction(pathActions) { ' +
             topLevelStack(parser.depth, buildVirtualCode(parser.parseTree, 0)) +
-        ' });')(Router, Precedence, router);
+        ' });')(Keys, Precedence, router);
     }
 };
+module.exports = SemanticAnalyzer;
 
 function buildVirtualCode(node, depth) {
     return [].

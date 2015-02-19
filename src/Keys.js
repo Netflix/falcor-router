@@ -4,3 +4,4 @@ var Keys = {
     keys: '__keys__'
 };
 
+module.exports = Keys;

@@ -1,5 +1,5 @@
 var TestRunner = require('./../TestRunner');
-var R = require('../../bin/Router');
+var R = require('../../src/Router');
 var Routes = require('./../data');
 var Expected = require('./../data/expected');
 var noOp = function() {};

@@ -1,3 +1,10 @@
+var falcor = require('falcor');
+var Observable = falcor.Observable;
+var Keys = require('./Keys');
+var SemanticAnalyzer = require('./operations/SemanticAnalyzer');
+var ParseTree = require('./operations/ParseTree');
+var PrecedenceProcessor = require('./operations/PrecedenceProcessor');
+
 var Router = function(routes) {
     var router = {
         __virtualFns: null,
@@ -59,7 +66,7 @@ var Router = function(routes) {
 };
 
 function accumulateValues(precedenceMatches) {
-    var model = new falcor.JSONGModel();
+    var model = new falcor.Model();
     return Observable.
         // TODO: For time sake, this is equivalent to mergeDelayError().materialize()
         // TODO: This will need to be addressed for speed.
@@ -78,17 +85,18 @@ function accumulateValues(precedenceMatches) {
             // TODO: should be easy to accept all formats
             var note = value.note;
             var seed = [acc.jsong];
-            var res = null;
             if (note.kind === 'N') {
                 if (router_isJSONG(note.value)) {
-                    res = model._setJSONGsAsJSONG(model, [note.value], seed);
+                    model._setJSONGsAsJSONG(model, [note.value], seed);
+                } else {
+                    model._setPathsAsJSONG(model, [].concat(note.value), seed);
                 }
                 acc.paths[acc.paths.length] = value.path;
             } else if (note.kind === 'E') {
                 if (note.value && router_isJSONG(note.value)) {
-                    res = model._setJSONGsAsJSONG(model, [note.value], seed);
+                    model._setJSONGsAsJSONG(model, [note.value], seed);
                 } else {
-                    res = model._setPathsAsJSONG(model, [{path: value.path, value: note.exception.message}], seed);
+                    model._setPathsAsJSONG(model, [{path: value.path, value: {$type: 'error', message: note.exception.message}}], seed);
                 }
                 acc.paths[acc.paths.length] = value.path;
             }
@@ -122,5 +130,6 @@ Router.rangeToArray = function(ranges) {
 Router.ranges = Keys.ranges;
 Router.integers = Keys.integers;
 Router.keys = Keys.keys;
+module.exports = Router;
 
 

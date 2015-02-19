@@ -1,6 +1,9 @@
+var Keys = require('../Keys');
+var Precedence = require('../Precedence');
 var PrecedenceProcessor = {
     execute: executeByPrecedence
 };
+module.exports = PrecedenceProcessor;
 
 function executeByPrecedence(paths, matches) {
 
@@ -37,11 +40,17 @@ function executeByPrecedence(paths, matches) {
 
         // There will possibly have to be contexts
         matchedPaths.forEach(function(path) {
-            // TODO: Error handling?
-            results[results.length] = {
-                obs: matched.action(matchVirtualPathFormat(path, matched.virtualRunner)),
-                path: path
-            };
+            try {
+                results[results.length] = {
+                    obs: matched.action(matchVirtualPathFormat(path, matched.virtualRunner)),
+                    path: path
+                };
+            } catch (e) {
+                results[results.length] = {
+                    obs: Observable.throw({message: e, $type: 'error'}),
+                    path: path
+                };
+            }
         });
     }
 
@@ -62,7 +71,7 @@ function isMatch(incoming, value, virtual) {
 
 function isStrictComparable(incomingAtom, virtualAtom) {
     return typeof incomingAtom !== 'object' && typeof virtualAtom !== 'object' &&
-        virtualAtom !== Router.integers && virtualAtom !== Router.ranges;
+        virtualAtom !== Keys.integers && virtualAtom !== Keys.ranges;
 }
 
 function arrayComparable(incomingAtom, virtualAtom) {
@@ -79,12 +88,12 @@ function arrayComparable(incomingAtom, virtualAtom) {
     }
 
     // match on integers or ranges.
-    else if (virtualAtom === Router.ranges || virtualAtom === Router.integers) {
+    else if (virtualAtom === Keys.ranges || virtualAtom === Keys.integers) {
         return incomingAtom.some(function(x) { return typeof x === 'number'; });
     }
 
     // matches everything
-    else if (virtualAtom === Router.keys) {
+    else if (virtualAtom === Keys.keys) {
         return true;
     }
 
@@ -115,12 +124,12 @@ function objectComparable(incomingAtom, virtualAtom) {
     }
 
     // match on integers or ranges.
-    else if (virtualAtom === Router.ranges || virtualAtom === Router.integers) {
+    else if (virtualAtom === Keys.ranges || virtualAtom === Keys.integers) {
         return true;
     }
 
     // matches everything
-    else if (virtualAtom === Router.keys) {
+    else if (virtualAtom === Keys.keys) {
         return true;
     }
 
@@ -135,7 +144,7 @@ function objectComparable(incomingAtom, virtualAtom) {
 
 function isMatchAtom(incomingAtom, valueAtom, virtualAtom) {
     // Shortcut for keys
-    if (virtualAtom === Router.keys) {
+    if (virtualAtom === Keys.keys) {
         return true;
     }
 
@@ -182,12 +191,12 @@ function generateFromMatched(incoming, virtual, matchedIdx) {
 
 function permuateAt(prefix, virtualAtom, incomingAtom, suffix) {
     // If its keys, we never permute.
-    if (virtualAtom === Router.keys) {
+    if (virtualAtom === Keys.keys) {
         return null;
     }
 
-    var virtualAtomIsIntegers = virtualAtom === Router.integers;
-    var virtualAtomIsIntsOrRanges = virtualAtom === Router.ranges;
+    var virtualAtomIsIntegers = virtualAtom === Keys.integers;
+    var virtualAtomIsIntsOrRanges = virtualAtom === Keys.ranges;
     var virtualAtomIsMatcher = virtualAtomIsIntegers || virtualAtomIsIntsOrRanges;
     var newPermutations = [];
     var newPrefixAtom = incomingAtom;
@@ -350,13 +359,13 @@ function matchVirtualPathFormat(incomingValues, virtualExpected) {
     var i = 0;
     virtualExpected.forEach(function(vK) {
         var val = incomingValues[i];
-        if (vK === Router.integers) {
+        if (vK === Keys.integers) {
             if (typeof val !== 'object') {
                 output[i] = [val];
             } else if (!Array.isArray(val)) {
                 output[i] = convertRangeToArray(val);
             } 
-        } else if (vK === Router.ranges) {
+        } else if (vK === Keys.ranges) {
             if (typeof val !== 'object') {
                 val = [val];
             }
@@ -373,7 +382,7 @@ function matchVirtualPathFormat(incomingValues, virtualExpected) {
                     }
                 }
             }
-        } else if (vK === Router.keys) {
+        } else if (vK === Keys.keys) {
             if (typeof val !== 'object') {
                 output[i] = [val];
             } else if (!Array.isArray(val)) {
