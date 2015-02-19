@@ -1,5 +1,6 @@
 var Keys = require('../Keys');
 var Precedence = require('../Precedence');
+var Observable = require('falcor').Observable;
 var PrecedenceProcessor = {
     execute: executeByPrecedence
 };
