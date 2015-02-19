@@ -1,12 +1,12 @@
 {
   "name": "falcor-router",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "The router to rule all routers.",
   "main": "src/Router.js",
   "directories": {
     "test": "test"
   },
-  "dependencies": { },
+  "dependencies": {},
   "devDependencies": {
     "gulp": "~3.8.11",
     "gulp-concat": "~2.4.3",
