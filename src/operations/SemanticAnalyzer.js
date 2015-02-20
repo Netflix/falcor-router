@@ -88,7 +88,7 @@ function switchKeys(node, depth) {
 function ranges(node, depth) {
 
     if (node[Keys.ranges]) {
-        return SyntaxGenerator.ranges(depth, executeMatched(node) + buildVirtualCode(node[Keys.ranges], depth + 1));
+        return SyntaxGenerator.ranges(depth, executeMatched(node[Keys.ranges]) + buildVirtualCode(node[Keys.ranges], depth + 1));
     }
 
     // nothing.  No code to generate at this level
@@ -97,7 +97,7 @@ function ranges(node, depth) {
 
 function integers(node, depth) {
     if (node[Keys.integers]) {
-        return SyntaxGenerator.integers(depth, executeMatched(node) + buildVirtualCode(node[Keys.integers], depth + 1));
+        return SyntaxGenerator.integers(depth, executeMatched(node[Keys.integers]) + buildVirtualCode(node[Keys.integers], depth + 1));
     }
 
     // nothing.  No code to generate at this level
@@ -106,7 +106,7 @@ function integers(node, depth) {
 
 function keys(node, depth) {
     if (node[Keys.keys]) {
-        return SyntaxGenerator.keysStringFn(depth, executeMatched(node) + buildVirtualCode(node[Keys.keys], depth + 1));
+        return SyntaxGenerator.keysStringFn(depth, executeMatched(node[Keys.keys]) + buildVirtualCode(node[Keys.keys], depth + 1));
     }
 
     // nothing.  No code to generate at this level
