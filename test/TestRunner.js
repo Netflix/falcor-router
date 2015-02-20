@@ -28,14 +28,16 @@ var TestRunner = {
                 expect(aEl).to.equal(el);
             }
         });
-    }
+    },
+    
+    partialCompare: jsongPartialCompare
 };
 
 module.exports = TestRunner;
-function jsongPartialCompare(shouldContain, container) {
-    traverseAndConvert(shouldContain);
-    traverseAndConvert(container);
-    contains(shouldContain, container, '');
+function jsongPartialCompare(expectedPartial, actual) {
+    traverseAndConvert(actual);
+    traverseAndConvert(expectedPartial);
+    contains(expectedPartial, actual, '');
 }
 function jsongPathContains(responseTree, expectedPaths, depth) {
     expectedPaths.forEach(function(p) {
@@ -135,21 +137,19 @@ function strip(obj, key) {
     }
 }
 
-function contains(has, toHave, position) {
-    if (typeof has !== 'object') {
+function contains(expectedPartial, actual, position) {
+    if (typeof actual !== 'object') {
         debugger
     }
-    var obj = Object.keys(has);
+    var obj = Object.keys(expectedPartial);
     obj.forEach(function (k) {
-        expect(toHave, "Object" + position + " to have key " + k).to.include.keys(k);
-        if (typeof has[k] !== typeof toHave[k]) {
-            expect(has[k]).to.equals(toHave[k]);
-        } else if (typeof has[k] !== 'object') {
-            expect(has[k]).to.equals(toHave[k]);
-        } else if (typeof has[k] === 'object' && Array.isArray(has[k])) {
-            expect(has[k]).to.deep.equals(toHave[k]);
+        expect(expectedPartial, "Object" + position + " to have key " + k).to.include.keys(k);
+        if (typeof expectedPartial[k] !== 'object' && typeof actual[k] !== 'object') {
+            expect(actual[k]).to.equals(expectedPartial[k]);
+        } else if (typeof actual[k] === 'object' && Array.isArray(actual[k])) {
+            expect(actual[k]).to.deep.equals(expectedPartial[k]);
         } else {
-            contains(has[k], toHave[k], position + '.' + k);
+            contains(expectedPartial[k], actual[k], position + '.' + k);
         }
     });
 }
