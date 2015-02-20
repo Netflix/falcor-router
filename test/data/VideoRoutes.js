@@ -69,6 +69,47 @@ module.exports = function() {
                     }
                 }];
             }
+        },
+        State: {
+            Keys: function (fn) {
+                return [{
+                    route: ['videos', 'state', R.keys],
+                    get: function (path) {
+                        fn && fn(path);
+                        return Observable.
+                            from(path[2]).
+                            map(function(key) {
+                                return generateVideoStateJSONG(key);
+                            });
+                    }
+                }];
+            },
+            Integers: function (fn) {
+                return [{
+                    route: ['videos', 'state', R.integers],
+                    get: function (path) {
+                        fn && fn(path);
+                        return Observable.
+                            from(path[2]).
+                            map(function(key) {
+                                return generateVideoStateJSONG(key);
+                            });
+                    }
+                }];
+            },
+            Ranges: function (fn) {
+                return [{
+                    route: ['videos', 'state', R.ranges],
+                    get: function (path) {
+                        fn && fn(path);
+                        return Observable.
+                            from(R.rangeToArray(path[2])).
+                            map(function(key) {
+                                return generateVideoStateJSONG(key);
+                            });
+                    }
+                }];
+            }
         }
     };
 };
@@ -82,6 +123,20 @@ function generateVideoJSONG(id) {
     videos[id] = {};
     videos[id].summary = {
         title: 'Some Movie ' + id,
+        $type: 'leaf'
+    };
+
+    return jsongEnv;
+}
+
+function generateVideoStateJSONG(id) {
+    var videos;
+    var jsongEnv = {
+        jsong: {videos: (videos = {state: {}})},
+        paths: [['videos', 'state', id]]
+    };
+    videos.state[id] = {
+        title: 'Some State ' + id,
         $type: 'leaf'
     };
 

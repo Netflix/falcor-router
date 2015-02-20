@@ -66,5 +66,18 @@ describe('Keys', function() {
             ]).
             subscribe(noOp, done, done);
     });
+    it('should match keys as last key.', function(done) {
+        var router = new R(
+            Routes().Videos.State.Keys(function(pathSet) {
+                TestRunner.comparePath(['videos', 'state', ['specificKey']], pathSet);
+            })
+        );
+        var obs = router.
+            get([['videos', 'state', 'specificKey']]);
+
+        TestRunner.
+            run(obs, [Expected().Videos.state.specificKey]).
+            subscribe(noOp, done, done);
+    });
 });
 

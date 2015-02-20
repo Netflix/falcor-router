@@ -70,6 +70,47 @@ module.exports = function() {
                 },
                 paths: [['videos', 'someKey', 'summary']]
             }
+        },
+        state: {
+            0: {
+                jsong: {
+                    videos: {
+                        state: {
+                            0: {
+                                $type: 'leaf',
+                                title: 'Some State 0'
+                            }
+                        }
+                    }
+                },
+                paths: [['videos', 'state', 0]]
+            },
+            1: {
+                jsong: {
+                    videos: {
+                        state: {
+                            1: {
+                                $type: 'leaf',
+                                title: 'Some State 1'
+                            }
+                        }
+                    }
+                },
+                paths: [['videos', 'state', 1]]
+            },
+            specificKey: {
+                jsong: {
+                    videos: {
+                        state: {
+                            specificKey: {
+                                $type: 'leaf',
+                                title: 'Some State specificKey'
+                            }
+                        }
+                    }
+                },
+                paths: [['videos', 'state', 'specificKey']]
+            },
         }
     }
 };

@@ -96,6 +96,9 @@ function accumulateValues(precedenceMatches) {
                 if (note.value && router_isJSONG(note.value)) {
                     model._setJSONGsAsJSONG(model, [note.value], seed);
                 } else {
+                    if (Router.__throwErrors) {
+                        throw note.exception;
+                    }
                     model._setPathsAsJSONG(model, [{path: value.path, value: {$type: 'error', message: note.exception.message}}], seed);
                 }
                 acc.paths[acc.paths.length] = value.path;

@@ -48,4 +48,18 @@ describe('Integers', function() {
             run(obs, [Expected().Videos[0].Summary, Expected().Videos[1].Summary]).
             subscribe(noOp, done, done);
     });
+
+    it('should match integers as last key.', function(done) {
+        var router = new R(
+            Routes().Videos.State.Integers(function(pathSet) {
+                TestRunner.comparePath(['videos', 'state', [0]], pathSet);
+            })
+        );
+        var obs = router.
+            get([['videos', 'state', 0]]);
+
+        TestRunner.
+            run(obs, [Expected().Videos.state[0]]).
+            subscribe(noOp, done, done);
+    });
 });
