@@ -24,7 +24,7 @@ function buildVirtualCode(node, depth) {
 }
 
 function topLevelStack(largestStack, innerCode) {
-    var str = "var i = -1, results = [], dataResults = [], path, action, virtualRunner = [], valueRunner = [], copyRunner";
+    var str = "var i = -1, pathLength, results = [], dataResults = [], path, action, virtualRunner = [], valueRunner = [], copyRunner";
     for (var i = 0; i < largestStack; i++) {
         str += ', ' + SyntaxGenerator.variableDeclarationAtDepth(i);
     }
@@ -33,6 +33,7 @@ function topLevelStack(largestStack, innerCode) {
     str += '\nwhile (++i < pathActions.length) {\n';
     str += 'path = pathActions[i].path;\n';
     str += 'action = pathActions[i].action;\n';
+    str += 'pathLength = path.length;\n';
     str += innerCode + '\n}\n';
     str += 'return dataResults;\n';
 

@@ -1,6 +1,6 @@
 module.exports = {
     matchedGetMethodString: fnToString(function innerBlock() {
-        if (action === 'get') {
+        if (action === 'get' || (action === 'set' && _D < pathLength - 1)) {
             copyRunner = virtualRunner.concat();
             copyRunner.precedence = virtualRunner.precedence.concat();
             dataResults.push({
@@ -12,7 +12,7 @@ module.exports = {
         }
     }),
     matchedSetMethodString: fnToString(function innerBlock() {
-        if (action === 'set') {
+        if (action === 'set' && _D === pathLength - 1) {
             copyRunner = virtualRunner.concat();
             copyRunner.precedence = virtualRunner.precedence.concat();
             dataResults.push({
