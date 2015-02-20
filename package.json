@@ -1,13 +1,13 @@
 {
   "name": "falcor-router",
-  "version": "0.1.0",
+  "version": "0.10.0",
   "description": "The router to rule all routers.",
   "main": "src/Router.js",
   "directories": {
     "test": "test"
   },
   "dependencies": {
-    "falcor": "git+ssh://git@github.com/Netflix/falcor.git#v0.0.1"
+    "falcor": "git+ssh://git@github.com/Netflix/falcor.git#v0.0.2"
   },
   "devDependencies": {
     "gulp": "~3.8.11",
@@ -30,7 +30,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/Netflix/falcor-router.git#v0.0.2"
+    "url": "git://github.com/Netflix/falcor-router.git"
   },
   "keywords": [
     "Falcor",
