@@ -6,7 +6,7 @@ var PrecedenceProcessor = {
 };
 module.exports = PrecedenceProcessor;
 
-function executeByPrecedence(paths, matches) {
+function executeByPrecedence(paths, matches, method, context) {
 
     // process until there are no more paths or no more matches.
     var matched;
@@ -42,8 +42,14 @@ function executeByPrecedence(paths, matches) {
         // There will possibly have to be contexts
         matchedPaths.forEach(function(path) {
             try {
+                var obs;
+                if (method === 'set' && path.length === matched.virtualRunner.length) {
+                    obs = matched.action.call(context, matchVirtualPathFormat(path, matched.virtualRunner));
+                } else {
+                    obs = matched.action(matchVirtualPathFormat(path, matched.virtualRunner))
+                }
                 results[results.length] = {
-                    obs: matched.action(matchVirtualPathFormat(path, matched.virtualRunner)),
+                    obs: obs,
                     path: path
                 };
             } catch (e) {

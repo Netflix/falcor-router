@@ -13,7 +13,8 @@ var Router = function(routes) {
     };
     
     var routeMatcher = SemanticAnalyzer.generate(ParseTree.generateParseTree(routes, router), router);
-    var fn = function(pathActions) {
+    var fn = function(pathActions, method, context) {
+        // only a set does jsong
         var matched = routeMatcher(pathActions);
         var sorted = matched.
             map(function(a) {
@@ -32,12 +33,11 @@ var Router = function(routes) {
                 return 0;
             });
 
-        var executionResults = PrecedenceProcessor.
+        return PrecedenceProcessor.
             execute(
                 pathActions.map(function(x) {
                     return x.path;
-                }), sorted);
-        return executionResults;
+                }), sorted, method, context);
     };
     //TODO: 'get' should just be passed in instead of creating objects
     this.get = function(paths) {
@@ -50,18 +50,18 @@ var Router = function(routes) {
         // Assumes falcor
         return accumulateValues(results);
     };
-    this.set = function(paths) {
-        var results = fn(paths.map(function(p) {
+    this.set = function(jsongEnv) {
+        var model = new falcor.Model({
+            cache: jsongEnv.jsong
+        });
+        var results = fn(jsongEnv.paths.map(function(p) {
             return {
                 path: p,
                 action: 'set'
             }
-        }));
-        return Observable.
-            // TODO: For time sake, this is equivalent to mergeDelayError().materialize()
-            // TODO: This will need to be addressed for speed.
-            resu(results).
-            flatMap(function(x) { return x.materialize(); });
+        }), 'set', model);
+        // Assumes falcor
+        return accumulateValues(results);
     };
 };
 

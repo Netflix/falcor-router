@@ -60,7 +60,7 @@ var SyntaxGenerator = {
      */
     setMethod: function(node) {
         return SyntaxOutput.matchedSetMethodString.
-            replace(/__GET__/g, node.__match.set).
+            replace(/__SET__/g, node.__match.set).
             split('\n').
             join('\n');
     }

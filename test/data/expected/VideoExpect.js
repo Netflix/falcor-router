@@ -110,7 +110,7 @@ module.exports = function() {
                     }
                 },
                 paths: [['videos', 'state', 'specificKey']]
-            },
+            }
         }
     }
 };
