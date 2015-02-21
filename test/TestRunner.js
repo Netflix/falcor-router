@@ -143,11 +143,12 @@ function contains(expectedPartial, actual, position) {
     }
     var obj = Object.keys(expectedPartial);
     obj.forEach(function (k) {
-        expect(expectedPartial, "Object" + position + " to have key " + k).to.include.keys(k);
+        var message = "Object" + position;
+        expect(expectedPartial, message + " to have key " + k).to.include.keys(k);
         if (typeof expectedPartial[k] !== 'object' && typeof actual[k] !== 'object') {
-            expect(actual[k]).to.equals(expectedPartial[k]);
+            expect(actual[k], message + '.' + k).to.equals(expectedPartial[k]);
         } else if (typeof actual[k] === 'object' && Array.isArray(actual[k])) {
-            expect(actual[k]).to.deep.equals(expectedPartial[k]);
+            expect(actual[k], message + '.' + k).to.deep.equals(expectedPartial[k]);
         } else {
             contains(expectedPartial[k], actual[k], position + '.' + k);
         }

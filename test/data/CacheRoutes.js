@@ -36,8 +36,7 @@ module.exports = function() {
             
             Message: [{
                 route: ['comments', R.keys],
-                set: function(pathSet) {
-                    var modelContext = this;
+                set: function(pathSet, modelContext) {
                     return Observable.
                         from(pathSet[1]).
                         map(function(id) {

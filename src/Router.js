@@ -13,7 +13,7 @@ var Router = function(routes) {
     };
     
     var routeMatcher = SemanticAnalyzer.generate(ParseTree.generateParseTree(routes, router), router);
-    var fn = function(pathActions, method, context) {
+    var fn = function(pathActions, method, context, modelValue) {
         // only a set does jsong
         var matched = routeMatcher(pathActions);
         var sorted = matched.
@@ -23,7 +23,9 @@ var Router = function(routes) {
                 return a;
             }).
             sort(function(a, b) {
-                // reverse precedence ordering.
+                // TODO: is this necessary?  We are still determining the precedence ordering.
+                // TODO: and possibly re-execution of a lower precedence path 
+                // TODO: if an Observable of Empty is returned from a higher precedence path.
                 if (a.precedence > b.precedence) {
                     return -1;
                 } else if (b.precedence > a.precedence) {
@@ -37,20 +39,21 @@ var Router = function(routes) {
             execute(
                 pathActions.map(function(x) {
                     return x.path;
-                }), sorted, method, context);
+                }), sorted, method, context, modelValue);
     };
     //TODO: 'get' should just be passed in instead of creating objects
-    this.get = function(paths) {
+    this.get = function(paths, modelContext) {
         var results = fn(paths.map(function(p) {
             return {
                 path: p,
                 action: 'get'
             }
-        }));
+        }), 'get', modelContext);
         // Assumes falcor
         return accumulateValues(results);
     };
-    this.set = function(jsongEnv) {
+    //TODO: 'set' should just be passed in instead of creating objects
+    this.set = function(jsongEnv, modelContext) {
         var model = new falcor.Model({
             cache: jsongEnv.jsong
         });
@@ -59,7 +62,7 @@ var Router = function(routes) {
                 path: p,
                 action: 'set'
             }
-        }), 'set', model);
+        }), 'set', modelContext, model);
         // Assumes falcor
         return accumulateValues(results);
     };
