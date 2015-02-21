@@ -3,4 +3,5 @@ describe('Router', function() {
     require('./integers');
     require('./ranges');
     require('./keys');
+    require('./set')
 });
