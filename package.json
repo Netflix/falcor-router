@@ -1,6 +1,6 @@
 {
   "name": "falcor-router",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "The router to rule all routers.",
   "main": "src/Router.js",
   "directories": {
