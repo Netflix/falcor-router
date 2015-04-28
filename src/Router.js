@@ -6,6 +6,7 @@ var Rx = require('rx');
 var Observable = Rx.Observable;
 var falcor = require('falcor');
 var normalizePathSets = require('./operations/ranges/normalizePathSets');
+var isJSONG = require('./support/isJSONG');
 
 var Router = function(routes) {
     this._routes = routes;
@@ -16,65 +17,46 @@ var Router = function(routes) {
 Router.prototype = {
     get: function(paths) {
         normalizePathSets(paths);
-        return accumulateValues(getProcessor(this._matcher(paths, 'get')));
+        return accumulateValues(getProcessor(this._matcher(paths, 'get')), paths);
     }
 };
 
-function accumulateValues(matchedResults) {
+function accumulateValues(matchedResults, requestedPaths) {
     var model = new falcor.Model();
     return Observable.
         from(matchedResults).
-        flatMap(function(x) {
-            var obs = x;
-            if (x.then) {
-                obs = Observable.fromPromise(x);
-            }
-
+        flatMap(function(obs) {
             return obs.
                 materialize().
-                map(function(jsongEnvNote) {
-                    return {
-                        note: jsongEnvNote,
-                        path: x.path
-                    };
+                filter(function(x) {
+                    return x.kind !== 'C';
                 });
         }).
-        reduce(function(acc, value) {
-            var note = value.note;
-            var out;
-            if (note.kind === 'N') {
-                if (isJSONG(note.value)) {
-                    out = model._setJSONGsAsJSONG(model, [note.value], [{}]);
+        reduce(function(seed, value) {
+            if (value.kind === 'N') {
+                if (isJSONG(value.value)) {
+                    out = model._setJSONGsAsJSONG(model, [value.value], seed);
                 } else {
-                    out = model._setPathsAsJSONG(model, [].concat(note.value));
+                    out = model._setPathSetsAsJSONG(model, [].concat(value.value), seed);
                 }
-                acc = acc.concat(out.requestedPaths);
-            } else if (note.kind === 'E') {
-                if (note.value && router_isJSONG(note.value)) {
-                    out = model._setJSONGsAsJSONG(model, [note.value], [{}]);
+            } else if (value.kind === 'E') {
+                if (value.value && isJSONG(value.value)) {
+                    out = model._setJSONGsAsJSONG(model, [value.value], seed);
                 } else {
-                    out = model._setPathsAsJSONG(model, [{
+                    out = model._setPathSetsAsJSONG(model, [{
                         path: value.path,
                         value: {
                             $type: 'error',
-                            message: note.exception.message
+                            message: value.exception.message
                         }
-                    }]);
+                    }], seed);
                 }
-                acc = acc.concat(out.requestedPaths);
             }
-
-            return acc;
-        }, []).
-        map(function(paths) {
-            var out = [{}];
-            var res = model._getPathSetsAsJSONG(model, paths, out);
-            return out[0];
+            return seed;
+        }, [{}]).
+        map(function(out) {
+            return {jsong: out[0].jsong};
         });
-}
-
-function isJSONG(x) {
-    return x.jsong && x.paths;
 }
 
 Router.ranges = Keys.ranges;

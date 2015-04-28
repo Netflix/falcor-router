@@ -31,7 +31,19 @@ var TestRunner = {
         });
     },
 
-    partialCompare: jsongPartialCompare
+    partialCompare: jsongPartialCompare,
+    rangeToArray: function rangeToArray(ranges) {
+        var out = [];
+        ranges.forEach(function(range) {
+            var from = range.from;
+            var to = range.to;
+            for (var i = 0; i <= to; ++i) {
+                out[out.length] = i;
+            }
+        });
+
+        return out;
+    }
 };
 
 module.exports = TestRunner;

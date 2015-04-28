@@ -16,10 +16,6 @@ function keyReduce(out, key, range) {
             range.from = key;
         }
 
-        else if (key > range.to || key < range.from) {
-            range = {from: key, to: key};
-        }
-
         else {
             range = null;
         }

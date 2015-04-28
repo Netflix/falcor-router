@@ -77,7 +77,6 @@ describe('Keys', function() {
     it('should match keys as last key.', function(done) {
         var router = new R(
             Routes().Videos.State.Keys(function(pathSet) {
-                debugger
                 TestRunner.comparePath(['videos', 'state', ['specificKey']], pathSet);
             })
         );

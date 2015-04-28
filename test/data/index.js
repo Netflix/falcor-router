@@ -1,8 +1,8 @@
 var VideoRoutes = require('./VideoRoutes');
-var CacheRoutes = require('./CacheRoutes');
+var GenrelistsRoutes = require('./GenrelistRoutes');
 module.exports = function() {
     return {
         Videos: VideoRoutes(),
-        Cache: CacheRoutes()
+        Genrelists: GenrelistsRoutes()
     };
 };
