@@ -6,15 +6,15 @@ module.exports = function() {
     return {
         Summary: function (fn) {
             return [{
-                route: ['videos', 'summary'],
+                route: 'videos.summary',
                 get: function(path) {
                     fn && fn(path);
                     return Observable.return({
                         jsong: {
                             videos: {
                                 summary: {
-                                    $type: 'leaf',
-                                    length: 45
+                                    $type: 'sentinel',
+                                    value: 75
                                 }
                             }
                         },
@@ -26,7 +26,7 @@ module.exports = function() {
         Keys: {
             Summary: function (fn) {
                 return [{
-                    route: ['videos', R.keys, 'summary'],
+                    route: 'videos[{keys}].summary',
                     get: function (path) {
                         fn && fn(path);
                         return Observable.
@@ -122,8 +122,10 @@ function generateVideoJSONG(id) {
     };
     videos[id] = {};
     videos[id].summary = {
-        title: 'Some Movie ' + id,
-        $type: 'leaf'
+        value: {
+            title: 'Some Movie ' + id
+        },
+        $type: 'sentinel'
     };
 
     return jsongEnv;
@@ -136,8 +138,10 @@ function generateVideoStateJSONG(id) {
         paths: [['videos', 'state', id]]
     };
     videos.state[id] = {
-        title: 'Some State ' + id,
-        $type: 'leaf'
+        value: {
+            title: 'Some State ' + id
+        },
+        $type: 'sentinel'
     };
 
     return jsongEnv;

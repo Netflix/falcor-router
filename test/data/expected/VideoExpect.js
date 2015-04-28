@@ -1,116 +1,56 @@
 module.exports = function() {
-    return {
+    var retVal = {
         Summary: {
             jsong: {
                 videos: {
-                    summary: {
-                        $type: 'leaf',
-                        length: 45
-                    }
+                    summary: 75
                 }
             },
             paths: [['videos', 'summary']]
         },
-        0: {
-            Summary: {
-                jsong: {
-                    videos: {
-                        0: {
-                            summary: {
-                                $type: 'leaf',
-                                title: 'Some Movie 0'
-                            }
-                        }
-                    }
-                },
-                paths: [['videos', 0, 'summary']]
-            }
-        },
-        1: {
-            Summary: {
-                jsong: {
-                    videos: {
-                        1: {
-                            summary: {
-                                $type: 'leaf',
-                                title: 'Some Movie 1'
-                            }
-                        }
-                    }
-                },
-                paths: [['videos', 1, 'summary']]
-            }
-        },
-        2: {
-            Summary: {
-                jsong: {
-                    videos: {
-                        2: {
-                            summary: {
-                                $type: 'leaf',
-                                title: 'Some Movie 2'
-                            }
-                        }
-                    }
-                },
-                paths: [['videos', 2, 'summary']]
-            }
-        },
-        someKey: {
-            Summary: {
-                jsong: {
-                    videos: {
-                        someKey: {
-                            summary: {
-                                $type: 'leaf',
-                                title: 'Some Movie someKey'
-                            }
-                        }
-                    }
-                },
-                paths: [['videos', 'someKey', 'summary']]
-            }
-        },
-        state: {
-            0: {
-                jsong: {
-                    videos: {
-                        state: {
-                            0: {
-                                $type: 'leaf',
-                                title: 'Some State 0'
-                            }
-                        }
-                    }
-                },
-                paths: [['videos', 'state', 0]]
-            },
-            1: {
-                jsong: {
-                    videos: {
-                        state: {
-                            1: {
-                                $type: 'leaf',
-                                title: 'Some State 1'
-                            }
-                        }
-                    }
-                },
-                paths: [['videos', 'state', 1]]
-            },
-            specificKey: {
-                jsong: {
-                    videos: {
-                        state: {
-                            specificKey: {
-                                $type: 'leaf',
-                                title: 'Some State specificKey'
-                            }
-                        }
-                    }
-                },
-                paths: [['videos', 'state', 'specificKey']]
+    };
+    [0, 1, 2, 'someKey'].forEach(function(key) {
+        retVal[key] = {
+            summary: generateSummary(key)
+        };
+    });
+    retVal.state = {};
+    [0, 1, 2, 'specificKey'].forEach(function(key) {
+        retVal.state[key] = generateState(key);
+    });
+    return retVal;
+};
+
+function generateSummary(id) {
+    var videos = {};
+    videos[id] = {
+        summary: {
+            $type: 'sentinel',
+            $size: 51,
+            value: {
+                title: 'Some Movie ' + id
             }
         }
-    }
-};
+    };
+
+    return {
+        jsong: {videos: videos},
+        paths: [['videos', id, 'summary']]
+    };
+}
+
+function generateState(id) {
+    var videos = {state: {}};
+    videos.state[id] = {
+        $type: 'sentinel',
+        $size: 51,
+        value: {
+            title: 'Some State ' + id
+        }
+    };
+
+    return {
+        jsong: {videos: videos},
+        paths: [['videos', 'state', id]]
+    };
+}

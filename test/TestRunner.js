@@ -7,6 +7,7 @@ var TestRunner = {
             do(function(x) {
                 var receivedPathTree = convertToTree({}, x.paths);
                 // Validates against all comparables
+                debugger
                 compares.forEach(function(c) {
                     jsongPartialCompare(c.jsong, x.jsong);
                     jsongPathContains(receivedPathTree, c.paths);
@@ -16,7 +17,7 @@ var TestRunner = {
                 expect(count, 'The observable should of onNext one time').to.equal(1);
             });
     },
-    
+
     comparePath: function(expected, actual) {
         expected.forEach(function(el, i) {
             var aEl = actual[i];
@@ -29,7 +30,7 @@ var TestRunner = {
             }
         });
     },
-    
+
     partialCompare: jsongPartialCompare
 };
 

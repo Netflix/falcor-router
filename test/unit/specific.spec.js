@@ -11,9 +11,13 @@ describe('Specific', function() {
         var router = new R(Routes().Videos.Summary());
         var obs = router.
             get([['videos', 'summary']]);
-
-        TestRunner.
-            run(obs, [Expected().Videos.Summary]).
-            subscribe(noOp, done, done);
+        var called = false;
+        obs.subscribe(function(res) {
+            expect(res).to.deep.equals(Expected().Videos.Summary);
+            called = true;
+        }, done, function() {
+            expect(called, 'expect onNext called 1 time.').to.equal(true);
+            done();
+        });
     });
 });

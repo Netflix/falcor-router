@@ -13,26 +13,34 @@ describe('Keys', function() {
                 TestRunner.comparePath(['videos', [1], 'summary'], pathSet);
             })
         );
+        var called = false;
         var obs = router.
-            get([['videos', 1, 'summary']]);
-
-        TestRunner.
-            run(obs, [Expected().Videos[1].Summary]).
-            subscribe(noOp, done, done);
+            get([['videos', 1, 'summary']]).
+            subscribe(function(res) {
+                expect(res).to.deep.equals(Expected().Videos[1].summary);
+                called = true;
+            }, done, function() {
+                expect(called, 'expect onNext called 1 time.').to.equal(true);
+                done();
+            });
     });
-    
-    it('should match keys.', function(done) {
+
+    it('should match specific key with keys.', function(done) {
         var router = new R(
             Routes().Videos.Keys.Summary(function(pathSet) {
                 TestRunner.comparePath(['videos', ['someKey'], 'summary'], pathSet);
             })
         );
+        var called = false;
         var obs = router.
-            get([['videos', 'someKey', 'summary']]);
-
-        TestRunner.
-            run(obs, [Expected().Videos.someKey.Summary]).
-            subscribe(noOp, done, done);
+            get([['videos', 'someKey', 'summary']]).
+            subscribe(function(res) {
+                expect(res).to.deep.equals(Expected().Videos.someKey.summary);
+                called = true;
+            }, done, function() {
+                expect(called, 'expect onNext called 1 time.').to.equal(true);
+                done();
+            });
     });
 
     it('should match array of keys.', function(done) {
@@ -45,7 +53,7 @@ describe('Keys', function() {
             get([['videos', [1, 'someKey'], 'summary']]);
 
         TestRunner.
-            run(obs, [Expected().Videos[1].Summary, Expected().Videos.someKey.Summary]).
+            run(obs, [Expected().Videos[1].summary, Expected().Videos.someKey.summary]).
             subscribe(noOp, done, done);
     });
 
@@ -60,15 +68,16 @@ describe('Keys', function() {
 
         TestRunner.
             run(obs, [
-                Expected().Videos[0].Summary,
-                Expected().Videos[1].Summary,
-                Expected().Videos[2].Summary
+                Expected().Videos[0].summary,
+                Expected().Videos[1].summary,
+                Expected().Videos[2].summary
             ]).
             subscribe(noOp, done, done);
     });
     it('should match keys as last key.', function(done) {
         var router = new R(
             Routes().Videos.State.Keys(function(pathSet) {
+                debugger
                 TestRunner.comparePath(['videos', 'state', ['specificKey']], pathSet);
             })
         );
@@ -80,4 +89,5 @@ describe('Keys', function() {
             subscribe(noOp, done, done);
     });
 });
+
 

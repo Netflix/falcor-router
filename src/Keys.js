@@ -1,7 +1,10 @@
+var prefix = require('./support/prefix');
 var Keys = {
-    ranges: '__ranges__',
-    integers: '__integers__',
-    keys: '__keys__'
+    ranges: prefix + 'ranges',
+    integers: prefix + 'integers',
+    keys: prefix + 'keys',
+    named: prefix + 'named',
+    name: prefix + 'name',
 };
 
 module.exports = Keys;
