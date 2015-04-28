@@ -10,14 +10,14 @@ describe('Ranges', function() {
     it('should match integers for videos with int keys passed in.', function(done) {
         var router = new R(
             Routes().Videos.Ranges.Summary(function(pathSet) {
-                TestRunner.comparePath(['videos', [{from:1, to:1}], 'summary'], pathSet);
+                TestRunner.comparePath(['videos', [{from: 1, to: 1}], 'summary'], pathSet);
             })
         );
         var obs = router.
             get([['videos', 1, 'summary']]);
 
         TestRunner.
-            run(obs, [Expected().Videos[1].Summary]).
+            run(obs, [Expected().Videos[1].summary]).
             subscribe(noOp, done, done);
     });
 
@@ -31,7 +31,7 @@ describe('Ranges', function() {
             get([['videos', [1, 2], 'summary']]);
 
         TestRunner.
-            run(obs, [Expected().Videos[1].Summary, Expected().Videos[2].Summary]).
+            run(obs, [Expected().Videos[1].summary, Expected().Videos[2].summary]).
             subscribe(noOp, done, done);
     });
 
@@ -45,7 +45,7 @@ describe('Ranges', function() {
             get([['videos', [0, 2], 'summary']]);
 
         TestRunner.
-            run(obs, [Expected().Videos[0].Summary, Expected().Videos[2].Summary]).
+            run(obs, [Expected().Videos[0].summary, Expected().Videos[2].summary]).
             subscribe(noOp, done, done);
     });
 
@@ -59,7 +59,7 @@ describe('Ranges', function() {
             get([['videos', {from: 0, to: 2}, 'summary']]);
 
         TestRunner.
-            run(obs, [Expected().Videos[0].Summary, Expected().Videos[1].Summary, Expected().Videos[2].Summary]).
+            run(obs, [Expected().Videos[0].summary, Expected().Videos[1].summary, Expected().Videos[2].summary]).
             subscribe(noOp, done, done);
     });
 

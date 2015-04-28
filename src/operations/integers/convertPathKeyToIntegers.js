@@ -1,13 +1,12 @@
 var convertPathKeyTo = require('./../convertPathKeyTo');
 var isArray = Array.isArray;
+var rangeToArray = require('./../ranges/rangeToArray');
 
 function onRange(out, range) {
-    var i = key.from;
-    var to = key.to;
-    var outIdx = out.length;
-    for (; i < to; ++i, ++outIdx) {
-        out[outIdx] = i;
-    }
+    var len = out.length - 1;
+    rangeToArray(range).forEach(function(el) {
+        out[++len] = el;
+    });
 }
 
 function onKey(out, key) {

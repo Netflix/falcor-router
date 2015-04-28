@@ -1,6 +1,7 @@
 var Rx = require('rx');
 var Observable = Rx.Observable;
 var R = require('../../src/Router');
+var TestRunner = require('./../TestRunner');
 
 module.exports = function() {
     return {
@@ -62,7 +63,7 @@ module.exports = function() {
                         fn && fn(path);
                         debugger;
                         return Observable.
-                            from(R.rangeToArray(path[1])).
+                            from(TestRunner.rangeToArray(path[1])).
                             map(function(id) {
                                 return generateVideoJSONG(id);
                             });
@@ -103,7 +104,7 @@ module.exports = function() {
                     get: function (path) {
                         fn && fn(path);
                         return Observable.
-                            from(R.rangeToArray(path[2])).
+                            from(TestRunner.rangeToArray(path[2])).
                             map(function(key) {
                                 return generateVideoStateJSONG(key);
                             });

@@ -17,7 +17,7 @@ describe('Integers', function() {
             get([['videos', 1, 'summary']]);
 
         TestRunner.
-            run(obs, [Expected().Videos[1].Summary]).
+            run(obs, [Expected().Videos[1].summary]).
             subscribe(noOp, done, done);
     });
 
@@ -31,7 +31,7 @@ describe('Integers', function() {
             get([['videos', [1, 2], 'summary']]);
 
         TestRunner.
-            run(obs, [Expected().Videos[1].Summary, Expected().Videos[2].Summary]).
+            run(obs, [Expected().Videos[1].summary, Expected().Videos[2].summary]).
             subscribe(noOp, done, done);
     });
 
@@ -45,7 +45,7 @@ describe('Integers', function() {
             get([['videos', {to: 1}, 'summary']]);
 
         TestRunner.
-            run(obs, [Expected().Videos[0].Summary, Expected().Videos[1].Summary]).
+            run(obs, [Expected().Videos[0].summary, Expected().Videos[1].summary]).
             subscribe(noOp, done, done);
     });
 
