@@ -6,7 +6,7 @@ var Expected = require('./../data/expected');
 var noOp = function() {};
 var chai = require('chai');
 var expect = chai.expect;
-describe.only('Get', function() {
+describe('Get', function() {
     it('should take in a falcor model and get a value out.', function(done) {
         var router = new R(Routes().Videos.Summary());
         var model = new falcor.Model({
@@ -35,7 +35,10 @@ describe.only('Get', function() {
     });
 
     it('should perform reference following.', function(done) {
-        var router = new R(Routes().Videos.Summary());
+        var router = new R(
+            Routes().Videos.Integers.Summary().concat(
+            Routes().Genrelists.Integers()
+        ));
         var model = new falcor.Model({
             source: router
         });
@@ -50,8 +53,12 @@ describe.only('Get', function() {
                 called = true;
                 expect(x).to.deep.equals({
                     json: {
-                        videos: {
-                            summary: 75
+                        genreLists: {
+                            0: {
+                                summary: {
+                                    title: 'Some Movie 0'
+                                }
+                            }
                         }
                     }
                 });

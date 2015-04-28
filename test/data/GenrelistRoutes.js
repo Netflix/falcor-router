@@ -9,16 +9,16 @@ module.exports = function() {
     return {
         Integers: function() {
             return [{
-                route: 'genreLists[{range:indices}]',
+                route: 'genreLists[{ranges:indices}]',
                 get: function(path) {
                     return Observable.defer(function() {
                         var genreLists = {};
                         TestRunner.rangeToArray(path.indices).
                             forEach(function(x) {
-                                genreLists[x] = $ref(['videos', x, 'summary']);
+                                genreLists[x] = $ref(['videos', x]);
                             });
 
-                        return Observer.return({
+                        return Observable.return({
                             jsong: {
                                 genreLists: genreLists
                             }

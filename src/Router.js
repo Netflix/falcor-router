@@ -37,13 +37,13 @@ function accumulateValues(matchedResults, requestedPaths) {
                 if (isJSONG(value.value)) {
                     out = model._setJSONGsAsJSONG(model, [value.value], seed);
                 } else {
-                    out = model._setPathsAsJSONG(model, [].concat(value.value), seed);
+                    out = model._setPathSetsAsJSONG(model, [].concat(value.value), seed);
                 }
             } else if (value.kind === 'E') {
-                if (value.value && router_isJSONG(value.value)) {
+                if (value.value && isJSONG(value.value)) {
                     out = model._setJSONGsAsJSONG(model, [value.value], seed);
                 } else {
-                    out = model._setPathsAsJSONG(model, [{
+                    out = model._setPathSetsAsJSONG(model, [{
                         path: value.path,
                         value: {
                             $type: 'error',
@@ -55,7 +55,6 @@ function accumulateValues(matchedResults, requestedPaths) {
             return seed;
         }, [{}]).
         map(function(out) {
-            debugger
             return {jsong: out[0].jsong};
         });
 }
