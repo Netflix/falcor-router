@@ -5,8 +5,7 @@ module.exports = function() {
                 videos: {
                     summary: 75
                 }
-            },
-            paths: [['videos', 'summary']]
+            }
         },
     };
     [0, 1, 2, 'someKey'].forEach(function(key) {
@@ -34,8 +33,7 @@ function generateSummary(id) {
     };
 
     return {
-        jsong: {videos: videos},
-        paths: [['videos', id, 'summary']]
+        jsong: {videos: videos}
     };
 }
 
@@ -50,7 +48,6 @@ function generateState(id) {
     };
 
     return {
-        jsong: {videos: videos},
-        paths: [['videos', 'state', id]]
+        jsong: {videos: videos}
     };
 }

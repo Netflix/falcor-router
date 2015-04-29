@@ -5,12 +5,10 @@ var TestRunner = {
         var count = 0;
         return obs.
             do(function(x) {
-                var receivedPathTree = convertToTree({}, x.paths);
                 // Validates against all comparables
                 debugger
                 compares.forEach(function(c) {
                     jsongPartialCompare(c.jsong, x.jsong);
-                    jsongPathContains(receivedPathTree, c.paths);
                 });
                 count++;
             }, undefined, function() {

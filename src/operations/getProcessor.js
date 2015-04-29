@@ -25,7 +25,13 @@ module.exports = function getProcessor(matchedResults) {
 
             return out.
                 map(function(incomingJSONGOrPathValues) {
+                    // If its jsong we may need to optionally attach the
+                    // paths if the paths do not exist
                     if (isJSONG(incomingJSONGOrPathValues)) {
+                        if (incomingJSONGOrPathValues.paths) {
+                            return incomingJSONGOrPathValues;
+                        }
+
                         var jsong = incomingJSONGOrPathValues.jsong;
                         return {
                             jsong: jsong,

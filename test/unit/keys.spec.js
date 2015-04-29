@@ -49,6 +49,7 @@ describe('Keys', function() {
                 TestRunner.comparePath(['videos', [1, 'someKey'], 'summary'], pathSet);
             })
         );
+        debugger
         var obs = router.
             get([['videos', [1, 'someKey'], 'summary']]);
 
