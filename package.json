@@ -7,8 +7,8 @@
     "test": "test"
   },
   "dependencies": {
-    "falcor": "git+ssh://git@github.com/Netflix/falcor.git#v0.0.13",
-    "falcor-path-syntax": "git+ssh://git@github.com/Netflix/falcor-path-syntax.git#v0.1.7"
+    "falcor": "git+ssh://git@github.com/Netflix/falcor.git",
+    "falcor-path-syntax": "git+ssh://git@github.com/Netflix/falcor-path-syntax.git"
   },
   "devDependencies": {
     "gulp": "~3.8.11",
