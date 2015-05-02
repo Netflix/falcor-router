@@ -1,8 +1,23 @@
 {
   "name": "falcor-router",
   "version": "0.1.3",
-  "description": "The router to rule all routers.",
+  "description": "A router DataSource constructor for falcor that allows you to model all your cloud data sources as a single JSON resource.",
   "main": "src/Router.js",
+  "homepage": "https://github.com/Netflix/falcor-router",
+  "author": {
+    "name": "Netflix",
+    "url": "https://github.com/Netflix/falcor-router/authors.txt"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Netflix/falcor-router.git"
+  },
+  "licenses": [
+    {
+      "type": "Apache License, Version 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  ],
   "directories": {
     "test": "test"
   },
