@@ -1,5 +1,6 @@
 var isJSONG = require('./../support/isJSONG');
 module.exports = function getProcessor(matchedResults) {
+    var self = this;
     return matchedResults.
         map(function(x) {
             return x.
@@ -17,7 +18,7 @@ module.exports = function getProcessor(matchedResults) {
         map(function(sortedMatches) {
             // TODO: precedence could happend here.
             var match = sortedMatches[0];
-            var out = match.action(match.path);
+            var out = match.action.call(self, match.path);
 
             if (out.then) {
                 out = Observable.fromPromise(out);
