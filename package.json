@@ -7,23 +7,23 @@
     "test": "test"
   },
   "dependencies": {
-    "falcor": "git+ssh://git@github.com/Netflix/falcor.git#v0.0.13",
+    "falcor": "git+ssh://git@github.com/Netflix/falcor.git#v0.0.17",
     "falcor-path-syntax": "git+ssh://git@github.com/Netflix/falcor-path-syntax.git#v0.1.7"
   },
   "devDependencies": {
+    "chai": "^2.3.0",
     "gulp": "~3.8.11",
+    "gulp-bump": "~0.1.13",
+    "gulp-clean": "~0.3.1",
     "gulp-concat": "~2.4.3",
     "gulp-istanbul": "~0.6.0",
     "gulp-jshint": "~1.9.2",
-    "gulp-mocha": "~2.0.0",
     "gulp-license": "~1.0.0",
-    "chai": "~2.0.0",
-    "through2": "~0.6.3",
+    "gulp-mocha": "~2.0.0",
     "gulp-rename": "~1.2.0",
     "lodash": "~3.2.0",
-    "gulp-bump": "~0.1.13",
-    "gulp-clean": "~0.3.1",
-    "rx": "~2.3.25"
+    "rx": "~2.3.25",
+    "through2": "~0.6.3"
   },
   "scripts": {
     "test": "mocha test/index.js"
