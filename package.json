@@ -28,8 +28,8 @@
     "gulp-bump": "~0.1.13",
     "gulp-clean": "~0.3.1",
     "gulp-concat": "~2.4.3",
+    "gulp-eslint": "^0.12.0",
     "gulp-istanbul": "^0.9.0",
-    "gulp-jshint": "~1.9.2",
     "gulp-license": "~1.0.0",
     "gulp-mocha": "^2.0.1",
     "gulp-rename": "~1.2.0",
@@ -38,7 +38,8 @@
     "through2": "~0.6.3"
   },
   "scripts": {
-    "test": "./node_modules/gulp/bin/gulp.js test-coverage"
+    "test": "./node_modules/gulp/bin/gulp.js test-coverage",
+    "dist": "./node_modules/gulp/bin/gulp.js dist"
   },
   "repository": {
     "type": "git",

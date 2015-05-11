@@ -4,23 +4,31 @@ var rename = require('gulp-rename');
 var license = require('gulp-license');
 var concat = require('gulp-concat');
 var bump = require('gulp-bump');
-var hint = require('gulp-jshint');
 var clean = require('gulp-clean');
+var eslint = require('gulp-eslint');
 var gulp = require('gulp');
 var istanbul = require('gulp-istanbul');
 var mocha = require('gulp-mocha');
+
+var srcDir = 'lib';
+
+gulp.task('lint', function() {
+    return gulp.src(srcDir + '/**/*.js').
+        pipe(eslint({
+            globals: {
+                'require': false,
+                'module': false
+            }
+        })).
+        pipe(eslint.format()).
+        pipe(eslint.failAfterError());
+});
 
 gulp.task('bump', function() {
     return gulp.
         src('package.json').
         pipe(bump({type: 'patch'})).
         pipe(gulp.dest('./'));
-});
-
-gulp.task('hint', function() {
-    return gulp.
-        src(['src/**/*.js']).
-        pipe(hint());
 });
 
 gulp.task('test-coverage', function (cb) {
@@ -41,3 +49,4 @@ gulp.task('test', function (cb) {
     .on('end', cb);
 });
 
+gulp.task('dist', ['lint', 'test-coverage']);
