@@ -1,14 +1,25 @@
 {
   "name": "falcor-router",
   "version": "0.1.3",
-  "description": "The router to rule all routers.",
+  "description": "A router DataSource constructor for falcor that allows you to model all your cloud data sources as a single JSON resource.",
   "main": "src/Router.js",
+  "homepage": "https://github.com/Netflix/falcor-router",
+  "author": {
+    "name": "Netflix",
+    "url": "https://github.com/Netflix/falcor-router/authors.txt"
+  },
+  "licenses": [
+    {
+      "type": "Apache License, Version 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  ],
   "directories": {
     "test": "test"
   },
   "dependencies": {
-    "falcor": "git+ssh://git@github.com/Netflix/falcor.git#v0.0.17",
-    "falcor-path-syntax": "git+ssh://git@github.com/Netflix/falcor-path-syntax.git#v0.1.7"
+    "falcor": "git+ssh://git@github.com/Netflix/falcor.git",
+    "falcor-path-syntax": "git+ssh://git@github.com/Netflix/falcor-path-syntax.git"
   },
   "devDependencies": {
     "chai": "^2.3.0",
@@ -37,14 +48,8 @@
     "Falcor",
     "Router"
   ],
-  "author": [
-    "Jafar Husain <jhusain@gmail.com>",
-    "Michael Brady Paulson <michael.b.paulson@gmail.com>",
-    "Paul Taylor <ptaylor@netflix.com>"
-  ],
   "license": "ALV2",
   "bugs": {
     "url": "https://github.com/Netflix/falcor-router/issues"
-  },
-  "homepage": "https://github.com/Netflix/falcor-router"
+  }
 }

@@ -17,7 +17,7 @@ var Router = function(routes) {
 Router.prototype = {
     get: function(paths) {
         normalizePathSets(paths);
-        return accumulateValues(getProcessor(this._matcher(paths, 'get')), paths);
+        return accumulateValues(getProcessor.call(this, this._matcher(paths, 'get')), paths);
     }
 };
 
