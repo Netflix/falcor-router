@@ -3,7 +3,11 @@ module.exports = function() {
         Summary: {
             jsong: {
                 videos: {
-                    summary: 75
+                    summary: {
+                        $type: 'sentinel',
+                        $size: 51,
+                        value: 75
+                    }
                 }
             }
         },
