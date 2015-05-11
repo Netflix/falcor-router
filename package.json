@@ -8,10 +8,6 @@
     "name": "Netflix",
     "url": "https://github.com/Netflix/falcor-router/authors.txt"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Netflix/falcor-router.git"
-  },
   "licenses": [
     {
       "type": "Apache License, Version 2.0",
@@ -26,22 +22,23 @@
     "falcor-path-syntax": "git+ssh://git@github.com/Netflix/falcor-path-syntax.git"
   },
   "devDependencies": {
+    "chai": "^2.3.0",
+    "coveralls": "^2.11.2",
     "gulp": "~3.8.11",
-    "gulp-concat": "~2.4.3",
-    "gulp-istanbul": "~0.6.0",
-    "gulp-jshint": "~1.9.2",
-    "gulp-mocha": "~2.0.0",
-    "gulp-license": "~1.0.0",
-    "chai": "~2.0.0",
-    "through2": "~0.6.3",
-    "gulp-rename": "~1.2.0",
-    "lodash": "~3.2.0",
     "gulp-bump": "~0.1.13",
     "gulp-clean": "~0.3.1",
-    "rx": "~2.3.25"
+    "gulp-concat": "~2.4.3",
+    "gulp-istanbul": "^0.9.0",
+    "gulp-jshint": "~1.9.2",
+    "gulp-license": "~1.0.0",
+    "gulp-mocha": "^2.0.1",
+    "gulp-rename": "~1.2.0",
+    "lodash": "^3.8.0",
+    "rx": "~2.3.25",
+    "through2": "~0.6.3"
   },
   "scripts": {
-    "test": "mocha test/index.js"
+    "test": "./node_modules/gulp/bin/gulp.js test-coverage"
   },
   "repository": {
     "type": "git",
@@ -51,14 +48,8 @@
     "Falcor",
     "Router"
   ],
-  "author": [
-    "Jafar Husain <jhusain@gmail.com>",
-    "Michael Brady Paulson <michael.b.paulson@gmail.com>",
-    "Paul Taylor <ptaylor@netflix.com>"
-  ],
   "license": "ALV2",
   "bugs": {
     "url": "https://github.com/Netflix/falcor-router/issues"
-  },
-  "homepage": "https://github.com/Netflix/falcor-router"
+  }
 }
