@@ -1,11 +1,11 @@
+var $atom = require('./../../../src/merge/util/types').$atom;
 module.exports = function() {
     var retVal = {
         Summary: {
             jsong: {
                 videos: {
                     summary: {
-                        $type: 'sentinel',
-                        $size: 51,
+                        $type: $atom,
                         value: 75
                     }
                 }
@@ -28,8 +28,7 @@ function generateSummary(id) {
     var videos = {};
     videos[id] = {
         summary: {
-            $type: 'sentinel',
-            $size: 51,
+            $type: $atom,
             value: {
                 title: 'Some Movie ' + id
             }
@@ -44,8 +43,7 @@ function generateSummary(id) {
 function generateState(id) {
     var videos = {state: {}};
     videos.state[id] = {
-        $type: 'sentinel',
-        $size: 51,
+        $type: $atom,
         value: {
             title: 'Some State ' + id
         }

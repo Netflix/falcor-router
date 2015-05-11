@@ -8,9 +8,9 @@ var clone = require('./util/clone');
 /**
  * merges jsong into a seed
  */
-module.exports = function jsongMerge(cache, jsong) {
-    var paths = jsong.paths;
-    var j = jsong.jsong;
+module.exports = function jsongMerge(cache, jsongEnv) {
+    var paths = jsongEnv.paths;
+    var j = jsongEnv.jsong;
     paths.forEach(function(p) {
         merge(cache, cache, j, j, p, 0);
     });
@@ -33,7 +33,7 @@ function merge(cache, cacheRoot, message, messageRoot, path, depth, fromParent, 
     if (outerKey && typeof outerKey === 'object') {
         memo = {
             isArray: isArray(outerKey),
-            arrIndex: 0
+            arrOffset: 0
         };
         key = permuteKey(outerKey, memo);
     } else {
@@ -64,7 +64,7 @@ function merge(cache, cacheRoot, message, messageRoot, path, depth, fromParent, 
 
             // There is only a need to consider message references since the
             // merge is only for the path that is provided.
-            if (messageRes.$type === $ref) {
+            if (messageRes.$type === $ref && depth < path.length - 1) {
                 nextDepth = 0;
                 nextPath = catAndSlice(messageRes.value, path, depth + 1);
                 cache[key] = clone(messageRes);
@@ -103,7 +103,7 @@ function merge(cache, cacheRoot, message, messageRoot, path, depth, fromParent, 
         if (memo) {
             key = permuteKey(outerKey, memo);
         }
-    } while (memo && memo.done);
+    } while (memo && !memo.done);
 }
 
 function catAndSlice(a, b, slice) {

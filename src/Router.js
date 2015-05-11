@@ -4,9 +4,10 @@ var matcher = require('./operations/matcher');
 var getProcessor = require('./operations/getProcessor');
 var Rx = require('rx');
 var Observable = Rx.Observable;
-var falcor = require('falcor');
 var normalizePathSets = require('./operations/ranges/normalizePathSets');
 var isJSONG = require('./support/isJSONG');
+var jsongMerge = require('./merge/jsongMerge');
+var pathValueMerge = require('./merge/pathValueMerge');
 
 var Router = function(routes) {
     this._routes = routes;
@@ -22,7 +23,8 @@ Router.prototype = {
 };
 
 function accumulateValues(matchedResults, requestedPaths) {
-    var model = new falcor.Model();
+    var out = {};
+
     return Observable.
         from(matchedResults).
         flatMap(function(obs) {
@@ -32,30 +34,29 @@ function accumulateValues(matchedResults, requestedPaths) {
                     return x.kind !== 'C';
                 });
         }).
-        reduce(function(seed, value) {
+        reduce(function(acc, value) {
             if (value.kind === 'N') {
                 if (isJSONG(value.value)) {
-                    out = model._setJSONGsAsJSONG(model, [value.value], seed);
+                    jsongMerge(out, value.value);
                 } else {
-                    out = model._setPathSetsAsJSONG(model, [].concat(value.value), seed);
+                    pathValueMerge(out, value.value);
                 }
             } else if (value.kind === 'E') {
                 if (value.value && isJSONG(value.value)) {
-                    out = model._setJSONGsAsJSONG(model, [value.value], seed);
+                    jsongMerge(out, value.value);
                 } else {
-                    out = model._setPathSetsAsJSONG(model, [{
+                    pathValueMerge(out, {
                         path: value.path,
                         value: {
                             $type: 'error',
                             message: value.exception.message
                         }
-                    }], seed);
+                    });
                 }
             }
-            return seed;
-        }, [{}]).
-        map(function(out) {
-            return {jsong: out[0].jsong};
+        }, {}).
+        map(function() {
+            return {jsong: out};
         });
 }
 
