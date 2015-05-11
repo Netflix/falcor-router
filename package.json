@@ -21,7 +21,7 @@
     "gulp-license": "~1.0.0",
     "gulp-mocha": "~2.0.0",
     "gulp-rename": "~1.2.0",
-    "lodash": "~3.2.0",
+    "lodash": "^3.8.0",
     "rx": "~2.3.25",
     "through2": "~0.6.3"
   },

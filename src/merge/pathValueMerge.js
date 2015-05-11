@@ -3,7 +3,7 @@ var clone = require('./util/clone');
 /**
  * merges pathValue into a cache
  */
-module.exports = function pathValueMerge(pathValue, cache) {
+module.exports = function pathValueMerge(cache, pathValue) {
     var path = pathValue.path;
     var curr = cache;
     var next, key, cloned;
@@ -14,6 +14,8 @@ module.exports = function pathValueMerge(pathValue, cache) {
         if (!next) {
             next = curr[key] = {};
         }
+
+        curr = next;
     }
 
     key = path[i];

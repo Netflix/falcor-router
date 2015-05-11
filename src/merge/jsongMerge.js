@@ -67,7 +67,7 @@ function merge(cache, cacheRoot, message, messageRoot, path, depth, fromParent, 
             if (messageRes.$type === $ref) {
                 nextDepth = 0;
                 nextPath = catAndSlice(messageRes.value, path, depth + 1);
-                cache[key] = copy(messageRes);
+                cache[key] = clone(messageRes);
 
                 // Reset position in message and cache.
                 messageRes = messageRoot;
@@ -113,7 +113,7 @@ function catAndSlice(a, b, slice) {
     }
 
     for (j = slice || 0, len = b.length; j < len; ++j, ++i) {
-        next[i] = b[i];
+        next[i] = b[j];
     }
 
     return next;
