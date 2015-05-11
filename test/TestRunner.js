@@ -6,7 +6,6 @@ var TestRunner = {
         return obs.
             do(function(x) {
                 // Validates against all comparables
-                debugger
                 compares.forEach(function(c) {
                     jsongPartialCompare(c.jsong, x.jsong);
                 });
@@ -150,7 +149,6 @@ function strip(obj, key) {
 
 function contains(expectedPartial, actual, position) {
     if (typeof actual !== 'object') {
-        debugger
     }
     var obj = Object.keys(expectedPartial);
     obj.forEach(function (k) {

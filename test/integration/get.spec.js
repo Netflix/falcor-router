@@ -47,10 +47,12 @@ describe('Get', function() {
         Rx.Observable.
             of(model.get('genreLists[0].summary')).
             flatMap(function(obs) {
+                debugger
                 return obs;
             }).
             doAction(function(x) {
                 called = true;
+                debugger
                 expect(x).to.deep.equals({
                     json: {
                         genreLists: {
@@ -63,6 +65,7 @@ describe('Get', function() {
                     }
                 });
             }, noOp, function() {
+                debugger
                 expect(called).to.be.ok;
             }).
             subscribe(noOp, done, done);

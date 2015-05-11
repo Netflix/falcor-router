@@ -2,6 +2,8 @@ var Rx = require('rx');
 var Observable = Rx.Observable;
 var R = require('../../src/Router');
 var TestRunner = require('./../TestRunner');
+var Model = require('falcor').Model;
+var $atom = Model.atom;
 
 module.exports = function() {
     return {
@@ -13,10 +15,7 @@ module.exports = function() {
                     return Observable.return({
                         jsong: {
                             videos: {
-                                summary: {
-                                    $type: 'sentinel',
-                                    value: 75
-                                }
+                                summary: $atom(75)
                             }
                         },
                         paths: [['videos', 'summary']]
@@ -61,7 +60,6 @@ module.exports = function() {
                     route: ['videos', R.ranges, 'summary'],
                     get: function (path) {
                         fn && fn(path);
-                        debugger;
                         return Observable.
                             from(TestRunner.rangeToArray(path[1])).
                             map(function(id) {
@@ -121,13 +119,7 @@ function generateVideoJSONG(id) {
         jsong: {videos: (videos = {})},
         paths: [['videos', id, 'summary']]
     };
-    videos[id] = {};
-    videos[id].summary = {
-        value: {
-            title: 'Some Movie ' + id
-        },
-        $type: 'sentinel'
-    };
+    videos[id] = {summary: $atom({title: 'Some Movie ' + id})};
 
     return jsongEnv;
 }
@@ -138,12 +130,7 @@ function generateVideoStateJSONG(id) {
         jsong: {videos: (videos = {state: {}})},
         paths: [['videos', 'state', id]]
     };
-    videos.state[id] = {
-        value: {
-            title: 'Some State ' + id
-        },
-        $type: 'sentinel'
-    };
+    videos.state[id] = $atom({title: 'Some State ' + id});
 
     return jsongEnv;
 }
