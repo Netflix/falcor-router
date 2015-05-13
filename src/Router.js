@@ -7,9 +7,10 @@ var normalizePathSets = require('./operations/ranges/normalizePathSets');
 var isJSONG = require('./support/isJSONG');
 var pathValueMerge = require('./merge/pathValueMerge');
 var recurseMatchAndExecute = require('./operations/run/recurseMatchAndExecute');
+var materializeMissing = require('./support/materializeMissing');
 var runGetAction = require('./operations/run/runGetAction');
-var $atom = require('./merge/util/types').$atom;
-var materialize = {$type: $atom};
+var runSetAction = require('./operations/run/runSetAction');
+var falcor = require('falcor');
 
 var Router = function(routes) {
     this._routes = routes;
@@ -20,64 +21,21 @@ var Router = function(routes) {
 
 Router.prototype = {
     get: function(paths) {
-        var self = this;
+        var get = this._get;
+        var normalized = normalizePathSets(paths);
+        return recurseMatchAndExecute(get, runGetAction, normalized).
+            doAction(materializeMissing).
+            map(function(x) { return x.jsong; });
+    },
 
-        return recurseMatchAndExecute(self._get,
-                                      runGetAction, normalizePathSets(paths)).
-
-            map(function(results) {
-                results.missing.forEach(function(missing) {
-                    debugger
-                    pathValueMerge(
-                        results.jsong,
-                        {path: missing, value: materialize});
-                });
-
-                // TODO: should handle the missing paths here.
-                return {
-                    jsong: results.jsong
-                };
-            });
+    set: function(jsong) {
+        var set = this._set;
+        var modelContext = new falcor.Model({cache: jsong});
+        return recurseMatchAndExecute(set, runSetAction(modelContext), jsong).
+            doAction(materializeMissing).
+            map(function(x) { return x.jsong; });
     }
 };
-
-function accumulateValues(matchedResults, requestedPaths) {
-    var out = {};
-
-    return Observable.
-        from(matchedResults).
-        flatMap(function(obs) {
-            return obs.
-                materialize().
-                filter(function(x) {
-                    return x.kind !== 'C';
-                });
-        }).
-        reduce(function(acc, value) {
-            if (value.kind === 'N') {
-                if (isJSONG(value.value)) {
-                    jsongMerge(out, value.value);
-                } else {
-                    pathValueMerge(out, value.value);
-                }
-            } else if (value.kind === 'E') {
-                if (value.value && isJSONG(value.value)) {
-                    jsongMerge(out, value.value);
-                } else {
-                    pathValueMerge(out, {
-                        path: value.path,
-                        value: {
-                            $type: 'error',
-                            message: value.exception.message
-                        }
-                    });
-                }
-            }
-        }, {}).
-        map(function() {
-            return {jsong: out};
-        });
-}
 
 Router.ranges = Keys.ranges;
 Router.integers = Keys.integers;

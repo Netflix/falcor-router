@@ -5,6 +5,7 @@ var pathValueMerge = require('./../../merge/pathValueMerge');
 var isJSONG = require('./../../support/isJSONG');
 var pluckHighestPrecedence = require('./pluckHighestPrecedence');
 var precedenceAndReduce = require('./precedenceAndReduce');
+var falcor = require('falcor');
 
 /**
  * The recurse and match function will async recurse as long as
@@ -14,13 +15,18 @@ var precedenceAndReduce = require('./precedenceAndReduce');
  * paths to be matched then the recurser will keep running.
  */
 module.exports = function recurseMatchAndExecute(match, actionRunner, paths) {
-    return _recurseMatchAndExecute(match, actionRunner, paths, 0);
+    var modelContext = null;
+    if (isJSONG(paths)) {
+        modelContext = new falcor.Model({cache: paths.jsong});
+        paths = jsong.paths;
+    }
+    return _recurseMatchAndExecute(match, actionRunner, paths, 0, modelContext);
 };
 
 /**
  * performs the actual recursing
  */
-function _recurseMatchAndExecute(match, actionRunner, paths, loopCount) {
+function _recurseMatchAndExecute(match, actionRunner, paths, loopCount, modelContext) {
 
 
     return Observable.
@@ -32,7 +38,6 @@ function _recurseMatchAndExecute(match, actionRunner, paths, loopCount) {
             }
 
             var matchedResults = match(nextPaths);
-            debugger
             return precedenceAndReduce(matchedResults.matched, actionRunner).
 
                 // Generate from the combined results the next requestable paths
