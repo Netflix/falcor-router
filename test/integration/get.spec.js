@@ -47,7 +47,6 @@ describe('Get', function() {
         Rx.Observable.
             of(model.get('genreLists[0].summary')).
             flatMap(function(obs) {
-                debugger
                 return obs;
             }).
             doAction(function(x) {

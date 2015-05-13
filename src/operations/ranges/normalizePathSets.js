@@ -17,4 +17,5 @@ module.exports = function normalizePathSets(path) {
             path[i] = normalize(path[i]);
         }
     });
+    return path;
 };

@@ -11,18 +11,27 @@ var clone = require('./util/clone');
 module.exports = function jsongMerge(cache, jsongEnv) {
     var paths = jsongEnv.paths;
     var j = jsongEnv.jsong;
+    var insertedReferences = [];
     paths.forEach(function(p) {
-        merge(cache, cache, j, j, p, 0);
+        merge(cache, cache, j, j, p, 0, insertedReferences);
     });
-    return cache;
+    return insertedReferences;
 };
 
-function merge(cache, cacheRoot, message, messageRoot, path, depth, fromParent, fromKey) {
+function merge(cache, cacheRoot, message, messageRoot, path, depth, insertedReferences, fromParent, fromKey) {
     var typeOfMessage = typeof message;
 
     // The message at this point should always be defined.
     if (message.$type || typeOfMessage !== 'object') {
         fromParent[fromKey] = clone(message);
+
+        // NOTE: If we have found a reference at our cloning position
+        // and we have resolved our path then add the reference to
+        // the unfulfilledRefernces.
+        if (message.$type === $ref) {
+            insertedReferences[insertedReferences.length] = message.value;
+        }
+
         return;
     }
 
@@ -77,7 +86,7 @@ function merge(cache, cacheRoot, message, messageRoot, path, depth, fromParent, 
             // move forward down the path progression.
             merge(cacheRes, cacheRoot,
                   messageRes, messageRoot,
-                  nextPath, nextDepth, cache, key);
+                  nextPath, nextDepth, insertedReferences, cache, key);
         }
 
         // The second the incoming jsong must be fully qualified,
@@ -88,7 +97,7 @@ function merge(cache, cacheRoot, message, messageRoot, path, depth, fromParent, 
             if (depth < path.length - 1) {
                 merge(cacheRes, cacheRoot,
                       {}, messageRoot,
-                      nextPath, nextDepth, cache, key);
+                      nextPath, nextDepth, insertedReferences, cache, key);
             }
 
             // materialize the node
