@@ -7,10 +7,11 @@ var $ref = falcor.Model.ref;
 
 module.exports = function() {
     return {
-        Integers: function() {
+        Integers: function(fn) {
             return [{
                 route: 'genreLists[{ranges:indices}]',
                 get: function(path) {
+                    if (fn) { fn(path); }
                     return Observable.defer(function() {
                         var genreLists = {};
                         TestRunner.rangeToArray(path.indices).

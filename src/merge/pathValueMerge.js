@@ -12,6 +12,7 @@ module.exports = function pathValueMerge(cache, pathValue) {
     var curr = cache;
     var next, key, cloned, outerKey, memo;
     var refs = [];
+    debugger
 
     for (var i = 0, len = path.length - 1; i < len; ++i) {
         outerKey = path[i];
@@ -77,7 +78,7 @@ module.exports = function pathValueMerge(cache, pathValue) {
         curr[key] = cloned;
 
         if (cloned.$type === $ref) {
-            refs[refs.length] = clone.value;
+            refs[refs.length] = cloned.value;
         }
 
         if (memo && !memo.done) {
