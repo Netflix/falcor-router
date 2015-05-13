@@ -12,30 +12,38 @@ var runGetAction = require('./operations/run/runGetAction');
 var runSetAction = require('./operations/run/runSetAction');
 var falcor = require('falcor');
 
-var Router = function(routes) {
+var Router = function(routes, options) {
+    options = options || {};
+
     this._routes = routes;
     this._rst = parseTree(routes);
     this._get = matcher(this._rst, 'get');
     this._set = matcher(this._rst, 'set');
+    this._debug = options.debug;
 };
 
 Router.prototype = {
     get: function(paths) {
-        var get = this._get;
-        var normalized = normalizePathSets(paths);
-        return recurseMatchAndExecute(get, runGetAction, normalized).
-            doAction(materializeMissing).
-            map(function(x) { return x.jsong; });
+        return run(this._get, runGetAction, normalizePathSets(paths));
     },
 
     set: function(jsong) {
-        var set = this._set;
-        var modelContext = new falcor.Model({cache: jsong});
-        return recurseMatchAndExecute(set, runSetAction(modelContext), jsong).
-            doAction(materializeMissing).
-            map(function(x) { return x.jsong; });
+        var modelContext = new falcor.Model({cache: jsong.jsong});
+        return run(this._set, runSetAction(modelContext), jsong.paths);
     }
 };
+
+function run(method, actionRunner, paths) {
+    return recurseMatchAndExecute(method, actionRunner, paths).
+        doAction(materializeMissing).
+        map(mapResults);
+}
+
+function mapResults(results) {
+    return {
+        jsong: results.jsong
+    };
+}
 
 Router.ranges = Keys.ranges;
 Router.integers = Keys.integers;

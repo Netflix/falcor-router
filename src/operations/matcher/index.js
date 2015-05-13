@@ -1,7 +1,7 @@
 var Keys = require('./../../Keys');
 var Precedence = require('./../../Precedence');
 var permuteKey = require('./../../support/permuteKey');
-var copy = require('./../../support/copy');
+var cloneArray = require('./../../support/cloneArray');
 var specificMatcher = require('./specific');
 var pluckIntegers = require('./pluckIntergers');
 var intTypes = [{
@@ -71,7 +71,7 @@ function match(
     // Get: simple method matching
     // Set: The set method is unique.  If the path is not complete
     // then we match a 'get' method, else we match a 'set' method.
-    var atEndOfPath = path.length === depth + 1;
+    var atEndOfPath = path.length === depth;
     var isSet = method === set;
     var methodToUse = method;
     if (isSet && !atEndOfPath) {
@@ -80,11 +80,12 @@ function match(
     if (curr.__match && curr.__match[methodToUse]) {
         matchedFunctions[matchedFunctions.length] = {
             action: curr.__match[methodToUse],
-            path: copy(requested),
-            virtual: copy(virtual),
+            path: cloneArray(requested),
+            fullPath: path.slice(0, depth),
+            virtual: cloneArray(virtual),
             precedence: +(precedence.join('')),
             suffix: path.slice(depth),
-            isSet: isSet
+            isSet: atEndOfPath && isSet
         };
     }
 
@@ -92,7 +93,7 @@ function match(
     var isKeySet = typeof keySet === 'object';
     var i, len, key, next;
     if (isKeySet) {
-        precedence = copy(precedence);
+        precedence = cloneArray(precedence);
     }
 
     // -------------------------------------------

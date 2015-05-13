@@ -15,19 +15,13 @@ var falcor = require('falcor');
  * paths to be matched then the recurser will keep running.
  */
 module.exports = function recurseMatchAndExecute(match, actionRunner, paths) {
-    var modelContext = null;
-    if (isJSONG(paths)) {
-        modelContext = new falcor.Model({cache: paths.jsong});
-        paths = jsong.paths;
-    }
-    return _recurseMatchAndExecute(match, actionRunner, paths, 0, modelContext);
+    return _recurseMatchAndExecute(match, actionRunner, paths, 0);
 };
 
 /**
  * performs the actual recursing
  */
-function _recurseMatchAndExecute(match, actionRunner, paths, loopCount, modelContext) {
-
+function _recurseMatchAndExecute(match, actionRunner, paths, loopCount) {
 
     return Observable.
         of({nextPaths: paths, jsong: {}, missing: []}).

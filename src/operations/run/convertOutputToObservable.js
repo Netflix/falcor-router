@@ -1,13 +1,14 @@
-var Observable = require('rx');
+var Observable = require('rx').Observable;
 var isArray = Array.isArray;
-module.exports = function convertOutputToObservable(obs) {
+module.exports = function convertOutputToObservable(valueOrObservable) {
+
     // place holder
-    if (out.subscribe) { }
+    if (valueOrObservable.subscribe) { }
 
     // promise
-    else if (out.then) {
-        out = Observable.
-            fromPromise(out).
+    else if (valueOrObservable.then) {
+        valueOrObservable = Observable.
+            fromPromise(valueOrObservable).
             flatMap(function(promiseResult) {
                 if (isArray(promiseResult)) {
                     return Observable.from(promiseResult);
@@ -17,14 +18,14 @@ module.exports = function convertOutputToObservable(obs) {
     }
 
     // from array of pathValues.
-    else if (isArray(out)) {
-        out = Observable.from(out);
+    else if (isArray(valueOrObservable)) {
+        valueOrObservable = Observable.from(valueOrObservable);
     }
 
     // this will be jsong or pathValue at this point.
     else {
-        out = Observable.of(out);
+        valueOrObservable = Observable.of(valueOrObservable);
     }
 
-    return out;
+    return valueOrObservable;
 };
