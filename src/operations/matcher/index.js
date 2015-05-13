@@ -16,6 +16,8 @@ var keyTypes = [{
         precedence: Precedence.keys
     }];
 var allTypes = intTypes.concat(keyTypes);
+var get = 'get';
+var set = 'set';
 
 /**
  * Creates a custom matching function for the match tree.
@@ -66,13 +68,23 @@ function match(
 
     // At this point in the traversal we have hit a matching function.
     // Its time to terminate.
-    if (curr.__match && curr.__match[method]) {
+    // Get: simple method matching
+    // Set: The set method is unique.  If the path is not complete
+    // then we match a 'get' method, else we match a 'set' method.
+    var atEndOfPath = path.length === depth + 1;
+    var isSet = method === set;
+    var methodToUse = method;
+    if (isSet && !atEndOfPath) {
+        methodToUse = get;
+    }
+    if (curr.__match && curr.__match[methodToUse]) {
         matchedFunctions[matchedFunctions.length] = {
-            action: curr.__match[method],
+            action: curr.__match[methodToUse],
             path: copy(requested),
             virtual: copy(virtual),
             precedence: +(precedence.join('')),
-            suffix: path.slice(depth)
+            suffix: path.slice(depth),
+            isSet: isSet
         };
     }
 
