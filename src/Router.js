@@ -1,24 +1,43 @@
 var Keys = require('./Keys');
 var parseTree = require('./parse-tree');
 var matcher = require('./operations/matcher');
-var getProcessor = require('./operations/getProcessor');
 var Rx = require('rx');
 var Observable = Rx.Observable;
 var normalizePathSets = require('./operations/ranges/normalizePathSets');
 var isJSONG = require('./support/isJSONG');
-var jsongMerge = require('./merge/jsongMerge');
 var pathValueMerge = require('./merge/pathValueMerge');
+var recurseMatchAndExecute = require('./operations/run/recurseMatchAndExecute');
+var runGetAction = require('./operations/run/runGetAction');
+var $atom = require('./merge/util/types').$atom;
+var materialize = {$type: $atom};
 
 var Router = function(routes) {
     this._routes = routes;
     this._rst = parseTree(routes);
-    this._matcher = matcher(this._rst);
+    this._get = matcher(this._rst, 'get');
+    this._set = matcher(this._rst, 'set');
 };
 
 Router.prototype = {
     get: function(paths) {
-        normalizePathSets(paths);
-        return accumulateValues(getProcessor.call(this, this._matcher(paths, 'get')), paths);
+        var self = this;
+
+        return recurseMatchAndExecute(self._get,
+                                      runGetAction, normalizePathSets(paths)).
+
+            map(function(results) {
+                results.missing.forEach(function(missing) {
+                    debugger
+                    pathValueMerge(
+                        results.jsong,
+                        {path: missing, value: materialize});
+                });
+
+                // TODO: should handle the missing paths here.
+                return {
+                    jsong: results.jsong
+                };
+            });
     }
 };
 

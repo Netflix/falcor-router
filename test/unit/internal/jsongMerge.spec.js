@@ -15,6 +15,7 @@ var _ = require('lodash');
  */
 describe('JSONG - Merge', function() {
     it('should write a simple path to the cache.', function() {
+
         var jsong = {
             jsong: {
                 there: {
@@ -25,28 +26,6 @@ describe('JSONG - Merge', function() {
         };
 
         mergeTest(jsong);
-    });
-    it('should write a simple path to the cache with pathValue.', function() {
-        var expected = {
-            there: {
-                was: $atom('a value'),
-                is: $atom('a value')
-            }
-        };
-
-        var cache = {
-            there: {
-                was: $atom('a value')
-            }
-        };
-
-        var pV = {
-            path: ['there', 'is'],
-            value: $atom('a value')
-        };
-
-        pathValueMerge(cache, pV);
-        expect(cache).to.deep.equals(expected);
     });
     it('should write a path with a reference to a value.', function() {
         var jsong = {

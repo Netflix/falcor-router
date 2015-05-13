@@ -21,31 +21,36 @@ var allTypes = intTypes.concat(keyTypes);
  * Creates a custom matching function for the match tree.
  * @param Object rst The routed syntax tree
  */
-module.exports = function matcher(rst) {
+module.exports = function matcher(rst, method) {
 
     // This is where the matching is done.  Will recursively
     // match the paths until it has found all the matchable
     // functions.
-    return function innerMatcher(paths, method) {
+    return function innerMatcher(paths) {
         var matchedFunctions = [];
         var missingPaths = [];
         paths.forEach(function(p) {
             var matched = [];
-            match(rst, p, method, matched);
+            var missing = [];
+            match(rst, p, method, matched, missing);
 
             if (matched.length) {
                 matchedFunctions[matchedFunctions.length] = matched;
-            } else {
-                missingPaths[missingPaths.length] = p;
+            }
+            if (missing.length) {
+                missingPaths = missingPaths.concat(missing);
             }
         });
-        return matchedFunctions;
+        return {
+            matched: matchedFunctions,
+            missingPaths: missingPaths
+        };
     };
 };
 
 function match(
         curr, path, method, matchedFunctions,
-        depth, requested, virtual, precedence) {
+        missingPaths, depth, requested, virtual, precedence) {
 
     // We are not at a node anymore.
     if (!curr) {
@@ -66,7 +71,8 @@ function match(
             action: curr.__match[method],
             path: copy(requested),
             virtual: copy(virtual),
-            precedence: +(precedence.join(''))
+            precedence: +(precedence.join('')),
+            suffix: path.slice(depth)
         };
     }
 
@@ -91,7 +97,7 @@ function match(
         match(
             curr[specificKeys[i]],
             path, method, matchedFunctions,
-            depth + 1,
+            missingPaths, depth + 1,
             requested, virtual, precedence);
 
         // Removes the virtual, requested, and precedence info
@@ -141,7 +147,7 @@ function match(
             match(
                 next,
                 path, method, matchedFunctions,
-                depth + 1,
+                missingPaths, depth + 1,
                 requested, virtual, precedence);
 
             // removes the added keys
