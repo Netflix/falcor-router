@@ -5,4 +5,5 @@ describe('Unit', function() {
     require('./ranges.spec');
     require('./integers.spec');
     require('./set.spec');
+    require('./call.spec');
 });

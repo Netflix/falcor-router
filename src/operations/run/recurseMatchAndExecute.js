@@ -6,6 +6,7 @@ var isJSONG = require('./../../support/isJSONG');
 var pluckHighestPrecedence = require('./pluckHighestPrecedence');
 var precedenceAndReduce = require('./precedenceAndReduce');
 var falcor = require('falcor');
+var collapse = require('./../collapse');
 
 /**
  * The recurse and match function will async recurse as long as
@@ -22,9 +23,22 @@ module.exports = function recurseMatchAndExecute(match, actionRunner, paths) {
  * performs the actual recursing
  */
 function _recurseMatchAndExecute(match, actionRunner, paths, loopCount) {
+    var theSeed = {};
 
     return Observable.
-        of({nextPaths: paths, jsong: {}, missing: []}).
+
+        // Each pathSet (some form of collapsed path) need to be sent independently.
+        // for each collapsed pathSet will, if producing refs, be the highest likelihood
+        // of collapsibility.
+        from(paths).
+        map(function(p) {
+            return {
+                nextPaths: p,
+                jsong: theSeed,
+                missing: [],
+                invalidated: []
+            };
+        }).
         expand(function(outerResults) {
             var nextPaths = outerResults.nextPaths;
             if (!nextPaths.length) {
@@ -36,7 +50,7 @@ function _recurseMatchAndExecute(match, actionRunner, paths, loopCount) {
 
                 // Generate from the combined results the next requestable paths
                 // and insert errors / values into the cache.
-                map(function(results) {
+                flatMap(function(results) {
                     var values = results.values;
                     var suffix = results.match.suffix;
                     var hasSuffix = suffix.length;
@@ -48,7 +62,12 @@ function _recurseMatchAndExecute(match, actionRunner, paths, loopCount) {
                         var refs = [];
                         if (isJSONG(jsongOrPV)) {
                             refs = jsongMerge(jsongSeed, jsongOrPV);
-                        } else {
+                        }
+                        else if (jsongOrPV.value === undefined) {
+                            var invalidated = results.invalidated;
+                            invalidated[invalidated.length] = jsongOrPV;
+                        }
+                        else {
                             refs = pathValueMerge(jsongSeed, jsongOrPV);
                         }
 
@@ -57,6 +76,8 @@ function _recurseMatchAndExecute(match, actionRunner, paths, loopCount) {
                             refs.forEach(function(refs) {
                                 nextPaths[++len] = refs.concat(suffix);
                             });
+
+                            // TODO: collapse the next paths here.
                         }
 
                         else if (hasSuffix) {
@@ -64,12 +85,30 @@ function _recurseMatchAndExecute(match, actionRunner, paths, loopCount) {
                         }
                     });
 
-                    results.nextPaths = nextPaths;
-                    results.jsong = outerResults.jsong;
-                    results.missing = matchedResults.
-                        missingPaths.
-                        concat(outerResults.missing);
-                    return results;
+
+                    // Each nextPaths should be executed on its own.
+                    // The reasoning is that is it cannot collapse now
+                    // it probably wont collapse in the future
+                    return Observable.
+                        from(nextPaths).
+                        map(function(p) {
+                            var next = {
+                                nextPaths: p,
+                                jsong: jsongSeed,
+                                missing: matchedResults.
+                                    missingPaths.
+                                    concat(outerResults.missing)
+                            };
+                            return next;
+                        }).
+                        defaultIfEmpty({
+                            nextPaths: [],
+                            jsong: theSeed,
+                            missing: matchedResults.
+                                missingPaths.
+                                concat(outerResults.missing)
+                        });
+
                 }).
                 defaultIfEmpty({
                     nextPaths: [],

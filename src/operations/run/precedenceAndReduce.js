@@ -6,21 +6,19 @@ var Observable = require('rx').Observable;
 module.exports = function precedenceAndReduce(matches, actionRunner) {
 
     // Precendence matching
-    matches = matches.map(function(x) {
-        return x.
-            sort(function(a, b) {
-                if (a.precedence > b.precedence) {
-                    return 1;
-                } else if (a.precedence < b.precedence) {
-                    return -1;
-                }
+    matches = matches.
+        sort(function(a, b) {
+            if (a.precedence > b.precedence) {
+                return 1;
+            } else if (a.precedence < b.precedence) {
+                return -1;
+            }
 
-                return 0;
-            });
-    });
+            return 0;
+        });
 
     return Observable.
-        from(matches).
+        of(matches).
         map(actionRunner).
 
         // NOTE:  We need reduce per observable.
