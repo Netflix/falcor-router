@@ -1,7 +1,7 @@
-var isJSONG = require('./../../support/isJSONG');
+var isJSONG = require('./../../../support/isJSONG');
 var isArray = Array.isArray;
-var convertOutputToObservable = require('./convertOutputToObservable');
-var convertNoteToJsongOrPV = require('./convertNoteToJsongOrPV');
+var outputToObservable = require('../conversion/outputToObservable');
+var noteToJsongOrPV = require('../conversion/noteToJsongOrPV');
 
 module.exports = function outerRunSetAction(modelContext) {
     return function innerRunSetAction(matches) {
@@ -25,11 +25,11 @@ function runSetAction(modelContext, matches) {
                 toArray().
                 flatMap(function(pathValues) {
                     var matchedResults = match.action.call(self, pathValues);
-                    return convertOutputToObservable(matchedResults);
+                    return outputToObservable(matchedResults);
                 });
     } else {
         out = match.action.call(self, match.path);
-        out = convertOutputToObservable(out);
+        out = outputToObservable(out);
     }
 
     return out.
@@ -37,5 +37,5 @@ function runSetAction(modelContext, matches) {
         filter(function(note) {
             return note.kind !== 'C';
         }).
-        map(convertNoteToJsongOrPV(match));
+        map(noteToJsongOrPV(match));
 }

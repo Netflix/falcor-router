@@ -1,3 +1,5 @@
+var charPattern = /\D/i;
+
 module.exports = function collapse(pathMap) {
     return rangeCollapse(buildQueries(pathMap));
 };

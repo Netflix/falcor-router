@@ -22,6 +22,7 @@ function buildParseTree(node, pathAndAction, depth, virtualRunner) {
     var route = pathAndAction.route;
     var get = pathAndAction.get;
     var set = pathAndAction.set;
+    var call = pathAndAction.call;
     var el = route[depth];
 
     el = !isNaN(+el) && +el || el;
@@ -75,6 +76,9 @@ function buildParseTree(node, pathAndAction, depth, virtualRunner) {
             }
             if (set) {
                 next.__match.set = actionWrapper(virtualRunner, set);
+            }
+            if (call) {
+                next.__match.call = actionWrapper(virtualRunner, call);
             }
         } else {
             buildParseTree(next, pathAndAction, depth + 1, virtualRunner);

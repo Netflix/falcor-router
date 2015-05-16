@@ -1,7 +1,7 @@
 var convertPathToVirtual = require('./convertPathToVirtual');
 var isPathValue = require('./../support/isPathValue');
 var slice = function(args, i) {
-    var len = args.len;
+    var len = args.length;
     var out = [];
     var j = 0;
     while (i < len) {
@@ -9,12 +9,13 @@ var slice = function(args, i) {
         ++i;
         ++j;
     }
-}
+    return out;
+};
 function createNamedVariables(virtualPath, action) {
     return function(matchedPath) {
         var convertedArguments;
         var len = -1;
-        var restOrArgs = arguments
+        var restOfArgs = slice(arguments, 1);
 
         // Could be an array of pathValues for a set operation.
         if (isPathValue(matchedPath[0])) {
@@ -28,9 +29,10 @@ function createNamedVariables(virtualPath, action) {
 
         // else just convert and assign
         else {
-            convertedArguments = convertPathToVirtual(matchedPath, virtualPath);
+            convertedArguments =
+                convertPathToVirtual(matchedPath, virtualPath);
         }
-        return action.call(this, convertedArguments);
+        return action.apply(null, [convertedArguments].concat(restOfArgs));
     };
 }
 module.exports = createNamedVariables;

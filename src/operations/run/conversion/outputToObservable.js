@@ -1,6 +1,6 @@
 var Observable = require('rx').Observable;
 var isArray = Array.isArray;
-module.exports = function convertOutputToObservable(valueOrObservable) {
+module.exports = function outputToObservable(valueOrObservable) {
 
     // place holder
     if (valueOrObservable.subscribe) { }

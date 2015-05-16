@@ -1,5 +1,5 @@
-var isJSONG = require('./../../support/isJSONG');
-module.exports = function converter(match) {
+var isJSONG = require('./../../../support/isJSONG');
+module.exports = function noteToJsongOrPV(match) {
     return function(note) {
         return convertNoteToJsongOrPV(match, note);
     };
@@ -20,14 +20,17 @@ function convertNoteToJsongOrPV(match, note) {
     else {
         var exception = 'Unknown Error';
         if (note.exception) {
-            exception = note.exception.message;
+            exception = note.exception;
+        }
+        if (exception.throwToNext) {
+            throw exception;
         }
         incomingJSONGOrPathValues = {
             path: match.path,
             value: {
                 $type: 'error',
                 value: {
-                    message: exception,
+                    message: exception.message,
                     exception: true
                 }
             }

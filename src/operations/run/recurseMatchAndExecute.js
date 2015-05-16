@@ -6,7 +6,8 @@ var isJSONG = require('./../../support/isJSONG');
 var pluckHighestPrecedence = require('./pluckHighestPrecedence');
 var precedenceAndReduce = require('./precedenceAndReduce');
 var falcor = require('falcor');
-var collapse = require('./../collapse');
+var toPaths = require('./../collapse/toPaths');
+var toTree = require('./../collapse/toTree');
 
 /**
  * The recurse and match function will async recurse as long as
@@ -23,7 +24,9 @@ module.exports = function recurseMatchAndExecute(match, actionRunner, paths) {
  * performs the actual recursing
  */
 function _recurseMatchAndExecute(match, actionRunner, paths, loopCount) {
-    var theSeed = {};
+    var jsongSeed = {};
+    var missing = [];
+    var invalidated = [];
 
     return Observable.
 
@@ -31,20 +34,13 @@ function _recurseMatchAndExecute(match, actionRunner, paths, loopCount) {
         // for each collapsed pathSet will, if producing refs, be the highest likelihood
         // of collapsibility.
         from(paths).
-        map(function(p) {
-            return {
-                nextPaths: p,
-                jsong: theSeed,
-                missing: [],
-                invalidated: []
-            };
-        }).
-        expand(function(outerResults) {
-            var nextPaths = outerResults.nextPaths;
+        expand(function(nextPaths) {
             if (!nextPaths.length) {
                 return Observable.empty();
             }
 
+            // TODO: Don't forget to check the cache to remove any paths
+            // that have already been evaluated.
             var matchedResults = match(nextPaths);
             return precedenceAndReduce(matchedResults.matched, actionRunner).
 
@@ -56,19 +52,17 @@ function _recurseMatchAndExecute(match, actionRunner, paths, loopCount) {
                     var hasSuffix = suffix.length;
                     var nextPaths = [];
                     var insertedReferences = [];
-                    var jsongSeed = outerResults.jsong;
 
                     values.forEach(function(jsongOrPV) {
                         var refs = [];
                         if (isJSONG(jsongOrPV)) {
                             refs = jsongMerge(jsongSeed, jsongOrPV);
-                        }
-                        else if (jsongOrPV.value === undefined) {
-                            var invalidated = results.invalidated;
-                            invalidated[invalidated.length] = jsongOrPV;
-                        }
-                        else {
-                            refs = pathValueMerge(jsongSeed, jsongOrPV);
+                        } else {
+                            if (jsongOrPV.value === undefined) {
+                                invalidated[invalidated.length] = jsongOrPV;
+                            } else {
+                                refs = pathValueMerge(jsongSeed, jsongOrPV);
+                            }
                         }
 
                         if (hasSuffix && refs.length) {
@@ -77,45 +71,29 @@ function _recurseMatchAndExecute(match, actionRunner, paths, loopCount) {
                                 nextPaths[++len] = refs.concat(suffix);
                             });
 
-                            // TODO: collapse the next paths here.
-                        }
-
-                        else if (hasSuffix) {
-                            // TODO: do we materialize?
+                            // Explodes and collapse the tree to remove
+                            // redundants and get optimized next set of
+                            // paths to evaluate.
+                            nextPaths = toPaths(toTree(nextPaths));
                         }
                     });
 
-
-                    // Each nextPaths should be executed on its own.
-                    // The reasoning is that is it cannot collapse now
-                    // it probably wont collapse in the future
+                    missing = missing.concat(matchedResults.missingPaths);
                     return Observable.
                         from(nextPaths).
-                        map(function(p) {
-                            var next = {
-                                nextPaths: p,
-                                jsong: jsongSeed,
-                                missing: matchedResults.
-                                    missingPaths.
-                                    concat(outerResults.missing)
-                            };
-                            return next;
-                        }).
-                        defaultIfEmpty({
-                            nextPaths: [],
-                            jsong: theSeed,
-                            missing: matchedResults.
-                                missingPaths.
-                                concat(outerResults.missing)
-                        });
-
+                        defaultIfEmpty([]);
                 }).
-                defaultIfEmpty({
-                    nextPaths: [],
-                    missing: matchedResults.missing
-                });
+                defaultIfEmpty([]);
 
         }).
-        filter(function(x) { return x.nextPaths.length === 0; });
+        filter(function(x) { return x.length === 0; }).
+        reduce(function(acc, x) {return acc;}, null).
+        map(function() {
+            return {
+                missing: missing,
+                invalidated: invalidated,
+                jsong: jsongSeed
+            };
+        });
 }
 
