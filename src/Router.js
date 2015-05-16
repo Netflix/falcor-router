@@ -8,10 +8,11 @@ var isJSONG = require('./support/isJSONG');
 var pathValueMerge = require('./merge/pathValueMerge');
 var recurseMatchAndExecute = require('./operations/run/recurseMatchAndExecute');
 var materializeMissing = require('./support/materializeMissing');
-var runGetAction = require('./operations/run/runGetAction');
-var runSetAction = require('./operations/run/runSetAction');
+var runGetAction = require('./operations/run/get/runGetAction');
+var runSetAction = require('./operations/run/set/runSetAction');
+var runCallAction = require('./operations/run/call/runCallAction');
 var falcor = require('falcor');
-
+Rx.config.longStackSupport = true;
 var Router = function(routes, options) {
     options = options || {};
 
@@ -19,6 +20,7 @@ var Router = function(routes, options) {
     this._rst = parseTree(routes);
     this._get = matcher(this._rst, 'get');
     this._set = matcher(this._rst, 'set');
+    this._call = matcher(this._rst, 'call');
     this._debug = options.debug;
 };
 
@@ -30,6 +32,11 @@ Router.prototype = {
     set: function(jsong) {
         var modelContext = new falcor.Model({cache: jsong.jsong});
         return run(this._set, runSetAction(modelContext), jsong.paths);
+    },
+
+    call: function(callPath, args, suffixes, paths) {
+        var action = runCallAction(this, args, suffixes, paths);
+        return run(this._call, action, [callPath]);
     }
 };
 

@@ -18,34 +18,28 @@ var keyTypes = [{
 var allTypes = intTypes.concat(keyTypes);
 var get = 'get';
 var set = 'set';
+var call = 'call';
 
 /**
  * Creates a custom matching function for the match tree.
  * @param Object rst The routed syntax tree
+ * @param String method the method to call at the end of the path.
  */
 module.exports = function matcher(rst, method) {
 
-    // This is where the matching is done.  Will recursively
-    // match the paths until it has found all the matchable
-    // functions.
+    /**
+     * This is where the matching is done.  Will recursively
+     * match the paths until it has found all the matchable
+     * functions.
+     * @param [] paths
+     */
     return function innerMatcher(paths) {
-        var matchedFunctions = [];
-        var missingPaths = [];
-        paths.forEach(function(p) {
-            var matched = [];
-            var missing = [];
-            match(rst, p, method, matched, missing);
-
-            if (matched.length) {
-                matchedFunctions[matchedFunctions.length] = matched;
-            }
-            if (missing.length) {
-                missingPaths = missingPaths.concat(missing);
-            }
-        });
+        var matched = [];
+        var missing = [];
+        match(rst, paths, method, matched, missing);
         return {
-            matched: matchedFunctions,
-            missingPaths: missingPaths
+            matched: matched,
+            missingPaths: missing
         };
     };
 };
@@ -73,8 +67,9 @@ function match(
     // then we match a 'get' method, else we match a 'set' method.
     var atEndOfPath = path.length === depth;
     var isSet = method === set;
+    var isCall = method === call;
     var methodToUse = method;
-    if (isSet && !atEndOfPath) {
+    if ((isCall || isSet) && !atEndOfPath) {
         methodToUse = get;
     }
     if (curr.__match && curr.__match[methodToUse]) {
@@ -85,7 +80,8 @@ function match(
             virtual: cloneArray(virtual),
             precedence: +(precedence.join('')),
             suffix: path.slice(depth),
-            isSet: atEndOfPath && isSet
+            isSet: atEndOfPath && isSet,
+            isCall: atEndOfPath && isCall
         };
     }
 

@@ -6,6 +6,8 @@ var isJSONG = require('./../../support/isJSONG');
 var pluckHighestPrecedence = require('./pluckHighestPrecedence');
 var precedenceAndReduce = require('./precedenceAndReduce');
 var falcor = require('falcor');
+var toPaths = require('./../collapse/toPaths');
+var toTree = require('./../collapse/toTree');
 
 /**
  * The recurse and match function will async recurse as long as
@@ -22,34 +24,45 @@ module.exports = function recurseMatchAndExecute(match, actionRunner, paths) {
  * performs the actual recursing
  */
 function _recurseMatchAndExecute(match, actionRunner, paths, loopCount) {
+    var jsongSeed = {};
+    var missing = [];
+    var invalidated = [];
 
     return Observable.
-        of({nextPaths: paths, jsong: {}, missing: []}).
-        expand(function(outerResults) {
-            var nextPaths = outerResults.nextPaths;
+
+        // Each pathSet (some form of collapsed path) need to be sent independently.
+        // for each collapsed pathSet will, if producing refs, be the highest likelihood
+        // of collapsibility.
+        from(paths).
+        expand(function(nextPaths) {
             if (!nextPaths.length) {
                 return Observable.empty();
             }
 
+            // TODO: Don't forget to check the cache to remove any paths
+            // that have already been evaluated.
             var matchedResults = match(nextPaths);
             return precedenceAndReduce(matchedResults.matched, actionRunner).
 
                 // Generate from the combined results the next requestable paths
                 // and insert errors / values into the cache.
-                map(function(results) {
+                flatMap(function(results) {
                     var values = results.values;
                     var suffix = results.match.suffix;
                     var hasSuffix = suffix.length;
                     var nextPaths = [];
                     var insertedReferences = [];
-                    var jsongSeed = outerResults.jsong;
 
                     values.forEach(function(jsongOrPV) {
                         var refs = [];
                         if (isJSONG(jsongOrPV)) {
                             refs = jsongMerge(jsongSeed, jsongOrPV);
                         } else {
-                            refs = pathValueMerge(jsongSeed, jsongOrPV);
+                            if (jsongOrPV.value === undefined) {
+                                invalidated[invalidated.length] = jsongOrPV;
+                            } else {
+                                refs = pathValueMerge(jsongSeed, jsongOrPV);
+                            }
                         }
 
                         if (hasSuffix && refs.length) {
@@ -57,26 +70,30 @@ function _recurseMatchAndExecute(match, actionRunner, paths, loopCount) {
                             refs.forEach(function(refs) {
                                 nextPaths[++len] = refs.concat(suffix);
                             });
-                        }
 
-                        else if (hasSuffix) {
-                            // TODO: do we materialize?
+                            // Explodes and collapse the tree to remove
+                            // redundants and get optimized next set of
+                            // paths to evaluate.
+                            nextPaths = toPaths(toTree(nextPaths));
                         }
                     });
 
-                    results.nextPaths = nextPaths;
-                    results.jsong = outerResults.jsong;
-                    results.missing = matchedResults.
-                        missingPaths.
-                        concat(outerResults.missing);
-                    return results;
+                    missing = missing.concat(matchedResults.missingPaths);
+                    return Observable.
+                        from(nextPaths).
+                        defaultIfEmpty([]);
                 }).
-                defaultIfEmpty({
-                    nextPaths: [],
-                    missing: matchedResults.missing
-                });
+                defaultIfEmpty([]);
 
         }).
-        filter(function(x) { return x.nextPaths.length === 0; });
+        filter(function(x) { return x.length === 0; }).
+        reduce(function(acc, x) {return acc;}, null).
+        map(function() {
+            return {
+                missing: missing,
+                invalidated: invalidated,
+                jsong: jsongSeed
+            };
+        });
 }
 
