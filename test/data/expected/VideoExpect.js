@@ -1,4 +1,4 @@
-var $atom = require('./../../../src/merge/util/types').$atom;
+var $atom = require('./../../../src/support/types').$atom;
 module.exports = function() {
     var retVal = {
         Summary: {

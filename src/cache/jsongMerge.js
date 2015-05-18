@@ -1,9 +1,9 @@
 var permuteKey = require('./../support/permuteKey');
 var isArray = Array.isArray;
-var types = require('./util/types');
+var types = require('./../support/types');
 var $ref = types.$ref;
 var $atom = types.$atom;
-var clone = require('./util/clone');
+var clone = require('./../support/clone');
 
 /**
  * merges jsong into a seed

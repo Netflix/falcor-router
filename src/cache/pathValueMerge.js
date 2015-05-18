@@ -1,5 +1,5 @@
-var clone = require('./util/clone');
-var types = require('./util/types');
+var clone = require('./../support/clone');
+var types = require('./../support/types');
 var $ref = types.$ref;
 var permuteKey = require('./../support/permuteKey');
 var isArray = Array.isArray;

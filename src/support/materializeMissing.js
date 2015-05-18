@@ -1,4 +1,4 @@
-var $atom = require('./../merge/util/types').$atom;
+var $atom = require('./../support/types').$atom;
 var materialize = {$type: $atom};
 
 module.exports = function materializeMissing(results) {

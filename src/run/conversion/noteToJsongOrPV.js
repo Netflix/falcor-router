@@ -1,4 +1,4 @@
-var isJSONG = require('./../../../support/isJSONG');
+var isJSONG = require('./../../support/isJSONG');
 module.exports = function noteToJsongOrPV(match) {
     return function(note) {
         return convertNoteToJsongOrPV(match, note);

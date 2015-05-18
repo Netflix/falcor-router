@@ -1,4 +1,4 @@
-var pathValueMerge = require('./../../../src/merge/pathValueMerge');
+var pathValueMerge = require('./../../../src/cache/pathValueMerge');
 var Model = require('falcor').Model;
 var $ref = Model.ref;
 var $atom = Model.atom;

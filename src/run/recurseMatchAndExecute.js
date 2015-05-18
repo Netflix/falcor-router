@@ -1,13 +1,13 @@
 var Rx = require('rx');
 var Observable = Rx.Observable;
-var jsongMerge = require('./../../merge/jsongMerge');
-var pathValueMerge = require('./../../merge/pathValueMerge');
-var isJSONG = require('./../../support/isJSONG');
+var jsongMerge = require('./../cache/jsongMerge');
+var pathValueMerge = require('./../cache/pathValueMerge');
+var isJSONG = require('./../support/isJSONG');
 var pluckHighestPrecedence = require('./pluckHighestPrecedence');
 var precedenceAndReduce = require('./precedenceAndReduce');
 var falcor = require('falcor');
-var toPaths = require('./../collapse/toPaths');
-var toTree = require('./../collapse/toTree');
+var toPaths = require('./../operations/collapse/toPaths');
+var toTree = require('./../operations/collapse/toTree');
 
 /**
  * The recurse and match function will async recurse as long as

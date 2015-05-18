@@ -1,11 +1,11 @@
-var isJSONG = require('./../../../support/isJSONG');
+var isJSONG = require('./../../support/isJSONG');
 var isArray = Array.isArray;
 var outputToObservable = require('./../conversion/outputToObservable');
 var noteToJsongOrPV = require('./../conversion/noteToJsongOrPV');
 var runPaths = require('./runPaths');
 var runSuffix = require('./runSuffix');
 var Observable = require('rx').Observable;
-var errors = require('./../../../exceptions');
+var errors = require('./../../exceptions');
 
 module.exports =  outerRunCallAction;
 

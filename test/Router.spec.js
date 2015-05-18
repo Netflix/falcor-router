@@ -1,5 +1,5 @@
 var R = require('../src/Router');
-var $atom = require('./../src/merge/util/types').$atom;
+var $atom = require('./../src/support/types').$atom;
 var chai = require('chai');
 var expect = chai.expect;
 describe('Router', function() {
