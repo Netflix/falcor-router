@@ -32,7 +32,7 @@ function createNamedVariables(virtualPath, action) {
             convertedArguments =
                 convertPathToVirtual(matchedPath, virtualPath);
         }
-        return action.apply(null, [convertedArguments].concat(restOfArgs));
+        return action.apply(this, [convertedArguments].concat(restOfArgs));
     };
 }
 module.exports = createNamedVariables;

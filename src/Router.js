@@ -26,12 +26,12 @@ var Router = function(routes, options) {
 
 Router.prototype = {
     get: function(paths) {
-        return run(this._get, runGetAction, normalizePathSets(paths));
+        return run(this._get, runGetAction.bind(this), normalizePathSets(paths));
     },
 
     set: function(jsong) {
         var modelContext = new falcor.Model({cache: jsong.jsong});
-        return run(this._set, runSetAction(modelContext), jsong.paths);
+        return run(this._set, runSetAction.call(this,modelContext), jsong.paths);
     },
 
     call: function(callPath, args, suffixes, paths) {
