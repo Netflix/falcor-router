@@ -54,7 +54,6 @@ function runCallAction(matches, routerInstance, args, suffixes, paths) {
                         paths[++len] = r.path;
                     }
                 });
-                debugger;
 
                 return Observable.from(res);
             });
