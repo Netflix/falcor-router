@@ -65,6 +65,7 @@ describe('Specific', function() {
         this.timeout(10000);
         var calls;
         var serviceCalls = 0;
+        var testedTwo = false;
         function called(res) {
             if (!calls) {
                 calls = [];
@@ -79,6 +80,7 @@ describe('Specific', function() {
                 expect(serviceCalls).to.equal(2);
                 expect(calls.length).to.equal(2);
                 calls.length = 0;
+                testedTwo = true;
             });
         }
         var routes = [{
@@ -141,6 +143,7 @@ describe('Specific', function() {
                 count++;
             }, noOp, function() {
                 expect(count, 'expect onNext called 1 time.').to.equal(1);
+                expect(testedTwo, 'process.nextTick').to.equal(true);
             }).
             subscribe(noOp, done, done);
     });
