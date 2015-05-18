@@ -4,6 +4,7 @@ var types = require('./../support/types');
 var $ref = types.$ref;
 var $atom = types.$atom;
 var clone = require('./../support/clone');
+var catAndSlice = require('./../support/catAndSlice');
 
 /**
  * merges jsong into a seed
@@ -70,6 +71,9 @@ function merge(cache, cacheRoot, message, messageRoot, path, depth, insertedRefe
 
         if (messageRes) {
 
+            // TODO: Potential performance gain since we know that
+            // references are always pathSets of 1, they can be evaluated
+            // iteratively.
 
             // There is only a need to consider message references since the
             // merge is only for the path that is provided.
@@ -113,17 +117,4 @@ function merge(cache, cacheRoot, message, messageRoot, path, depth, insertedRefe
             key = permuteKey(outerKey, memo);
         }
     } while (memo && !memo.done);
-}
-
-function catAndSlice(a, b, slice) {
-    var next = [], i, j, len;
-    for (i = 0, len = a.length; i < len; ++i) {
-        next[i] = a[i];
-    }
-
-    for (j = slice || 0, len = b.length; j < len; ++j, ++i) {
-        next[i] = b[j];
-    }
-
-    return next;
 }

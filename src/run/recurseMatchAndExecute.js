@@ -5,9 +5,9 @@ var pathValueMerge = require('./../cache/pathValueMerge');
 var isJSONG = require('./../support/isJSONG');
 var pluckHighestPrecedence = require('./pluckHighestPrecedence');
 var precedenceAndReduce = require('./precedenceAndReduce');
-var falcor = require('falcor');
 var toPaths = require('./../operations/collapse/toPaths');
 var toTree = require('./../operations/collapse/toTree');
+var optimizePathSets = require('./../cache/optimizePathSets');
 
 /**
  * The recurse and match function will async recurse as long as
@@ -76,12 +76,14 @@ function _recurseMatchAndExecute(match, actionRunner, paths, loopCount) {
                     // Explodes and collapse the tree to remove
                     // redundants and get optimized next set of
                     // paths to evaluate.
-                    nextPaths = toPaths(toTree(nextPaths));
+                    nextPaths = optimizePathSets(jsongSeed, nextPaths);
+                    if (nextPaths.length) {
+                        nextPaths = toPaths(toTree(nextPaths));
+                    }
 
                     missing = missing.concat(matchedResults.missingPaths);
                     return Observable.
-                        from(nextPaths).
-                        defaultIfEmpty([]);
+                        from(nextPaths);
                 }).
                 defaultIfEmpty([]);
 
