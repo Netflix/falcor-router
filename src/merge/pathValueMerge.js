@@ -12,7 +12,6 @@ module.exports = function pathValueMerge(cache, pathValue) {
     var curr = cache;
     var next, key, cloned, outerKey, memo;
     var refs = [];
-    debugger
 
     for (var i = 0, len = path.length - 1; i < len; ++i) {
         outerKey = path[i];
@@ -86,7 +85,7 @@ module.exports = function pathValueMerge(cache, pathValue) {
         }
     } while (memo && !memo.done);
 
-    return cache;
+    return refs;
 };
 
 
