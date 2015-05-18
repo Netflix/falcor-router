@@ -37,7 +37,6 @@ describe('Specific', function() {
         var called = false;
         obs.
             doAction(function(res) {
-                debugger
                 expect(res).to.deep.equals({
                     jsong: {
                         genreLists: {
