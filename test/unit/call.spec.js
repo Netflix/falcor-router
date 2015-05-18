@@ -36,6 +36,25 @@ describe('Call', function() {
     xit('should use the path suffixes to execute on top of the call changes.', function(done) {
     });
 
+    it('should completely onError when an error is thrown from call.', function(done) {
+        getRouter(true, true).
+            call(['videos', 1234, 'rating'], [5]).
+            doAction(function() {
+                throw 'Should not be called.  onNext';
+            }, function(x) {
+                expect(x.message).to.equal('Oops?');
+            }, function() {
+                throw 'Should not be called.  onCompleted';
+            }).
+            subscribe(noOp, function(e) {
+                if (e.message === 'Oops?') {
+                    done();
+                    return;
+                }
+                done(e);
+            });
+    });
+
     it('should cause the router to on error only.', function(done) {
         getRouter(true).
             call(['videos', 1234, 'rating'], [5]).
@@ -56,10 +75,13 @@ describe('Call', function() {
     });
 
 
-    function getRouter(noPaths) {
+    function getRouter(noPaths, throwError) {
         return new R([{
             route: 'videos[{integers:id}].rating',
             call: function(callPath, args) {
+                if (throwError) {
+                    throw new Error('Oops?');
+                }
                 return {
                     jsong: {
                         videos: {
