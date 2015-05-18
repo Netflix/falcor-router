@@ -88,7 +88,7 @@ describe('Specific', function() {
             get: function(aliasMap) {
                 return Observable.
                     from(aliasMap.ids).
-                    delay(50).
+                    delay(100).
                     map(function(id) {
                         if (id === 0) {
                             return {
