@@ -52,6 +52,7 @@ function _recurseMatchAndExecute(match, actionRunner, paths, loopCount) {
                     var hasSuffix = suffix.length;
                     var nextPaths = [];
                     var insertedReferences = [];
+                    var len = -1;
 
                     values.forEach(function(jsongOrPV) {
                         var refs = [];
@@ -66,17 +67,16 @@ function _recurseMatchAndExecute(match, actionRunner, paths, loopCount) {
                         }
 
                         if (hasSuffix && refs.length) {
-                            var len = -1;
                             refs.forEach(function(refs) {
                                 nextPaths[++len] = refs.concat(suffix);
                             });
-
-                            // Explodes and collapse the tree to remove
-                            // redundants and get optimized next set of
-                            // paths to evaluate.
-                            nextPaths = toPaths(toTree(nextPaths));
                         }
                     });
+
+                    // Explodes and collapse the tree to remove
+                    // redundants and get optimized next set of
+                    // paths to evaluate.
+                    nextPaths = toPaths(toTree(nextPaths));
 
                     missing = missing.concat(matchedResults.missingPaths);
                     return Observable.
@@ -86,8 +86,9 @@ function _recurseMatchAndExecute(match, actionRunner, paths, loopCount) {
                 defaultIfEmpty([]);
 
         }).
-        filter(function(x) { return x.length === 0; }).
-        reduce(function(acc, x) {return acc;}, null).
+        reduce(function(acc, x) {
+            return acc;
+        }, null).
         map(function() {
             return {
                 missing: missing,
