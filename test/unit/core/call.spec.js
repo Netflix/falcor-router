@@ -1,14 +1,14 @@
-var TestRunner = require('./../TestRunner');
+var TestRunner = require('./../../TestRunner');
 var Observable = require('rx').Observable;
-var R = require('../../src/Router');
-var Routes = require('./../data');
-var Expected = require('./../data/expected');
+var R = require('../../../src/Router');
+var Routes = require('./../../data');
+var Expected = require('./../../data/expected');
 var noOp = function() {};
 var chai = require('chai');
 var expect = chai.expect;
 var falcor = require('falcor');
 var $ref = falcor.Model.ref;
-var errors = require('./../../src/exceptions');
+var errors = require('./../../../src/exceptions');
 
 describe('Call', function() {
     it('should perform a simple call.', function(done) {
