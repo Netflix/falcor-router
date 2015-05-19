@@ -84,10 +84,10 @@ function match(
     if ((isCall || isSet) && !atEndOfPath) {
         methodToUse = get;
     }
-    if (curr.__match && curr.__match[methodToUse]) {
+    if (curr[Keys.match] && curr[Keys.match][methodToUse]) {
         matchedFunctions[matchedFunctions.length] = {
-            action: curr.__match[methodToUse],
-            authorize: curr.__match.authorize,
+            action: curr[Keys.match][methodToUse],
+            authorize: curr[Keys.match].authorize,
             path: cloneArray(requested),
             fullPath: path.slice(0, depth),
             virtual: cloneArray(virtual),
