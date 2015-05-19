@@ -21,9 +21,20 @@ var set = 'set';
 var call = 'call';
 
 /**
+ * The match object gives all the information about what was matched
+ * and what it was matched against.
+ * @typedef {Object} Match
+ * @property {Array} path,
+ * @property {Array} virtual,
+ * @property {Number} precedence,
+ * @property {(undefined|Function)} authorize
+ *
+
+/**
  * Creates a custom matching function for the match tree.
  * @param Object rst The routed syntax tree
  * @param String method the method to call at the end of the path.
+ * @return {matched: Array.<Match>, missingPaths: Array.<Array>}
  */
 module.exports = function matcher(rst, method) {
 
@@ -48,7 +59,7 @@ function match(
         curr, path, method, matchedFunctions,
         missingPaths, depth, requested, virtual, precedence) {
 
-    // We are not at a node anymore.
+    // Nothing left to match
     if (!curr) {
         return;
     }
@@ -63,8 +74,9 @@ function match(
     // At this point in the traversal we have hit a matching function.
     // Its time to terminate.
     // Get: simple method matching
-    // Set: The set method is unique.  If the path is not complete
-    // then we match a 'get' method, else we match a 'set' method.
+    // Set/Call: The method is unique.  If the path is not complete,
+    // meaning the depth is equivalent to the length,
+    // then we match a 'get' method, else we match a 'set' or 'call' method.
     var atEndOfPath = path.length === depth;
     var isSet = method === set;
     var isCall = method === call;
@@ -75,6 +87,7 @@ function match(
     if (curr.__match && curr.__match[methodToUse]) {
         matchedFunctions[matchedFunctions.length] = {
             action: curr.__match[methodToUse],
+            authorize: curr.__match.authorize,
             path: cloneArray(requested),
             fullPath: path.slice(0, depth),
             virtual: cloneArray(virtual),
@@ -88,6 +101,7 @@ function match(
     var keySet = path[depth];
     var isKeySet = typeof keySet === 'object';
     var i, len, key, next;
+    // TODO:Perf do i really need to do this?
     if (isKeySet) {
         precedence = cloneArray(precedence);
     }
@@ -152,7 +166,7 @@ function match(
 
             precedence[depth] = prec;
 
-            // recurses further.
+            // Continue the matching algo.
             match(
                 next,
                 path, method, matchedFunctions,

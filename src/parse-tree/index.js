@@ -23,6 +23,7 @@ function buildParseTree(node, pathAndAction, depth, virtualRunner) {
     var get = pathAndAction.get;
     var set = pathAndAction.set;
     var call = pathAndAction.call;
+    var authorize = pathAndAction.authorize;
     var el = route[depth];
 
     el = !isNaN(+el) && +el || el;
@@ -70,7 +71,9 @@ function buildParseTree(node, pathAndAction, depth, virtualRunner) {
 
         // Continue to recurse or put get/set.
         if (depth + 1 === route.length) {
-            next.__match = {};
+            next.__match = {
+                authorize: authorize
+            };
             if (get) {
                 next.__match.get = actionWrapper(virtualRunner, get);
             }

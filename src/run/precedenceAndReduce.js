@@ -1,4 +1,5 @@
 var Observable = require('rx').Observable;
+var authorize = require('./authorize');
 /**
  * Processing the matches involve executing the highest
  * precedence match ... TODO: CR

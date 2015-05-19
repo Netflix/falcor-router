@@ -1,4 +1,6 @@
 var isJSONG = require('./../../support/isJSONG');
+var errors = require('./../../exceptions');
+var onNext = 'N';
 module.exports = function noteToJsongOrPV(match) {
     return function(note) {
         return convertNoteToJsongOrPV(match, note);
@@ -9,16 +11,12 @@ function convertNoteToJsongOrPV(match, note) {
     var incomingJSONGOrPathValues;
     var kind = note.kind;
 
-    if (kind === 'N') {
+    if (kind === onNext) {
         incomingJSONGOrPathValues = note.value;
     }
 
-    else if (note.value) {
-        incomingJSONGOrPathValues = value.value;
-    }
-
     else {
-        var exception = 'Unknown Error';
+        var exception = errors.unknown;
         if (note.exception) {
             exception = note.exception;
         }
