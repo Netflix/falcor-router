@@ -6,6 +6,7 @@ var runPaths = require('./runPaths');
 var runSuffix = require('./runSuffix');
 var Observable = require('rx').Observable;
 var errors = require('./../../exceptions');
+var authorize = require('./../authorize');
 
 module.exports =  outerRunCallAction;
 
@@ -62,7 +63,7 @@ function runCallAction(matches, routerInstance, args, suffixes, paths) {
         out = outputToObservable(out);
     }
 
-    return out.
+    return authorize(routerInstance, match, out).
         materialize().
         filter(function(note) {
             return note.kind !== 'C';

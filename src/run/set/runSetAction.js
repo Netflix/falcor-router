@@ -2,6 +2,7 @@ var isJSONG = require('./../../support/isJSONG');
 var isArray = Array.isArray;
 var outputToObservable = require('../conversion/outputToObservable');
 var noteToJsongOrPV = require('../conversion/noteToJsongOrPV');
+var authorize = require('./../authorize');
 
 module.exports = function outerRunSetAction(modelContext) {
     return function innerRunSetAction(matches) {
@@ -32,7 +33,7 @@ function runSetAction(modelContext, matches) {
         out = outputToObservable(out);
     }
 
-    return out.
+    return authorize(this, match, out).
         materialize().
         filter(function(note) {
             return note.kind !== 'C';

@@ -34,6 +34,7 @@
     "gulp-mocha": "^2.0.1",
     "gulp-rename": "~1.2.0",
     "lodash": "^3.8.0",
+    "promise": "^7.0.1",
     "rx": "~2.3.25",
     "through2": "~0.6.3"
   },
