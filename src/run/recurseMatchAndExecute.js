@@ -4,10 +4,11 @@ var jsongMerge = require('./../cache/jsongMerge');
 var pathValueMerge = require('./../cache/pathValueMerge');
 var isJSONG = require('./../support/isJSONG');
 var pluckHighestPrecedence = require('./pluckHighestPrecedence');
-var precedenceAndReduce = require('./precedenceAndReduce');
+var runByPrecedence = require('./runByPrecedence');
 var toPaths = require('./../operations/collapse/toPaths');
 var toTree = require('./../operations/collapse/toTree');
 var optimizePathSets = require('./../cache/optimizePathSets');
+var isArray = Array.isArray;
 
 /**
  * The recurse and match function will async recurse as long as
@@ -35,42 +36,44 @@ function _recurseMatchAndExecute(match, actionRunner, paths, loopCount) {
         // of collapsibility.
         from(paths).
         expand(function(nextPaths) {
-            if (!nextPaths.length) {
-                return Observable.empty();
+        if (!nextPaths.length) {
+            return Observable.empty();
+        }
+
+        var matchedResults = match(nextPaths);
+        return runByPrecedence(matchedResults.matched, actionRunner).
+
+            // Generate from the combined results the next requestable paths
+            // and insert errors / values into the cache.
+            flatMap(function(results) {
+            var value = results.value;
+            var suffix = results.match.suffix;
+            var hasSuffix = suffix.length;
+            var nextPaths = [];
+            var insertedReferences = [];
+            var len = -1;
+
+            if (!isArray(value)) {
+                value = [value];
             }
 
-            // TODO: Don't forget to check the cache to remove any paths
-            // that have already been evaluated.
-            var matchedResults = match(nextPaths);
-            return precedenceAndReduce(matchedResults.matched, actionRunner).
+            value.forEach(function(jsongOrPV) {
+                var refs = [];
+                if (isJSONG(jsongOrPV)) {
+                    refs = jsongMerge(jsongSeed, jsongOrPV);
+                } else {
+                    if (jsongOrPV.value === undefined) {
+                        invalidated[invalidated.length] = jsongOrPV;
+                    } else {
+                        refs = pathValueMerge(jsongSeed, jsongOrPV);
+                    }
+                }
 
-                // Generate from the combined results the next requestable paths
-                // and insert errors / values into the cache.
-                flatMap(function(results) {
-                    var values = results.values;
-                    var suffix = results.match.suffix;
-                    var hasSuffix = suffix.length;
-                    var nextPaths = [];
-                    var insertedReferences = [];
-                    var len = -1;
-
-                    values.forEach(function(jsongOrPV) {
-                        var refs = [];
-                        if (isJSONG(jsongOrPV)) {
-                            refs = jsongMerge(jsongSeed, jsongOrPV);
-                        } else {
-                            if (jsongOrPV.value === undefined) {
-                                invalidated[invalidated.length] = jsongOrPV;
-                            } else {
-                                refs = pathValueMerge(jsongSeed, jsongOrPV);
-                            }
-                        }
-
-                        if (hasSuffix && refs.length) {
-                            refs.forEach(function(refs) {
-                                nextPaths[++len] = refs.concat(suffix);
-                            });
-                        }
+                if (hasSuffix && refs.length) {
+                    refs.forEach(function(refs) {
+                        nextPaths[++len] = refs.concat(suffix);
+                    });
+                }
                     });
 
                     // Explodes and collapse the tree to remove

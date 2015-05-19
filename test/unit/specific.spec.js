@@ -168,7 +168,10 @@ describe('Specific', function() {
                             path: ['lists', id],
                             value: $ref('lists[0]')
                         };
-                    });
+                    }).
+
+                    // Note: this causes the batching to work.
+                    toArray();
             }
         }, {
             route: 'two.be[{integers:ids}].summary',
