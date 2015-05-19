@@ -1,3 +1,2 @@
-// This may look like an empty string, but it's actually a single zero-width-space character.
-module.exports = "​";
+module.exports = String.fromCharCode(30);
 
