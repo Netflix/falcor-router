@@ -4,14 +4,13 @@ var outputToObservable = require('../conversion/outputToObservable');
 var noteToJsongOrPV = require('../conversion/noteToJsongOrPV');
 var authorize = require('./../authorize');
 
-module.exports = function outerRunSetAction(modelContext) {
+module.exports = function outerRunSetAction(routerInstance, modelContext) {
     return function innerRunSetAction(matches) {
-        return runSetAction(modelContext, matches);
+        return runSetAction(routerInstance, modelContext, matches);
     };
 };
 
-function runSetAction(modelContext, matches) {
-    var self = this;
+function runSetAction(routerInstance, modelContext, matches) {
     var match = matches[0];
     var matchedPath = match.path;
     var out;
@@ -25,15 +24,16 @@ function runSetAction(modelContext, matches) {
                 toPathValues().
                 toArray().
                 flatMap(function(pathValues) {
-                    var matchedResults = match.action.call(self, pathValues);
+                    var matchedResults =
+                        match.action.call(routerInstance, pathValues);
                     return outputToObservable(matchedResults);
                 });
     } else {
-        out = match.action.call(self, match.path);
+        out = match.action.call(routerInstance, match.path);
         out = outputToObservable(out);
     }
 
-    return authorize(this, match, out).
+    return authorize(routerInstance, match, out).
         materialize().
         filter(function(note) {
             return note.kind !== 'C';

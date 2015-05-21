@@ -4,6 +4,7 @@ var types = require('./../support/types');
 var $ref = types.$ref;
 var $atom = types.$atom;
 var clone = require('./../support/clone');
+var cloneArray = require('./../support/cloneArray');
 var catAndSlice = require('./../support/catAndSlice');
 
 /**
@@ -19,8 +20,13 @@ module.exports = function jsongMerge(cache, jsongEnv) {
     return insertedReferences;
 };
 
-function merge(cache, cacheRoot, message, messageRoot, path, depth, insertedReferences, fromParent, fromKey) {
+function merge(cache, cacheRoot, message,
+               messageRoot, path, depth,
+               insertedReferences, requestedPath, fromParent,
+               fromKey) {
+
     var typeOfMessage = typeof message;
+    requestedPath = requestedPath || [];
 
     // The message at this point should always be defined.
     if (message.$type || typeOfMessage !== 'object') {
@@ -30,7 +36,10 @@ function merge(cache, cacheRoot, message, messageRoot, path, depth, insertedRefe
         // and we have resolved our path then add the reference to
         // the unfulfilledRefernces.
         if (message.$type === $ref) {
-            insertedReferences[insertedReferences.length] = message.value;
+            insertedReferences[insertedReferences.length] = {
+                path: cloneArray(requestedPath),
+                value: message.value
+            };
         }
 
         return;
@@ -61,6 +70,7 @@ function merge(cache, cacheRoot, message, messageRoot, path, depth, insertedRefe
         var messageRes = message[key];
         var nextPath = path;
         var nextDepth = depth + 1;
+        requestedPath[depth] = key;
 
         // Cache does not exist but message does.
         if (!cacheRes) {
@@ -90,7 +100,8 @@ function merge(cache, cacheRoot, message, messageRoot, path, depth, insertedRefe
             // move forward down the path progression.
             merge(cacheRes, cacheRoot,
                   messageRes, messageRoot,
-                  nextPath, nextDepth, insertedReferences, cache, key);
+                  nextPath, nextDepth, insertedReferences,
+                  requestedPath, cache, key);
         }
 
         // The second the incoming jsong must be fully qualified,
@@ -101,7 +112,8 @@ function merge(cache, cacheRoot, message, messageRoot, path, depth, insertedRefe
             if (depth < path.length - 1) {
                 merge(cacheRes, cacheRoot,
                       {}, messageRoot,
-                      nextPath, nextDepth, insertedReferences, cache, key);
+                      nextPath, nextDepth, insertedReferences,
+                      requestedPath, cache, key);
             }
 
             // materialize the node
@@ -110,7 +122,7 @@ function merge(cache, cacheRoot, message, messageRoot, path, depth, insertedRefe
             }
         }
 
-
+        requestedPath.length = depth;
 
         // Are we done with the loop?
         if (memo) {

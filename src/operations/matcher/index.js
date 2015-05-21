@@ -36,7 +36,7 @@ var call = 'call';
  * @param String method the method to call at the end of the path.
  * @return {matched: Array.<Match>, missingPaths: Array.<Array>}
  */
-module.exports = function matcher(rst, method) {
+module.exports = function matcher(rst) {
 
     /**
      * This is where the matching is done.  Will recursively
@@ -44,7 +44,7 @@ module.exports = function matcher(rst, method) {
      * functions.
      * @param [] paths
      */
-    return function innerMatcher(paths) {
+    return function innerMatcher(method, paths) {
         var matched = [];
         var missing = [];
         match(rst, paths, method, matched, missing);

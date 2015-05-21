@@ -75,4 +75,16 @@ describe('PathValue - Merge', function() {
         pathValueMerge(cache, pV);
         expect(cache).to.deep.equals(expected);
     });
+    it('should get the set refs.', function() {
+        var pV = {
+            path: ['there', 'is'],
+            value: $ref('a')
+        };
+        var cache = {};
+        var refs = pathValueMerge(cache, pV);
+        expect(refs).to.deep.equals([{
+            path: ['there', 'is'],
+            value: ['a']
+        }]);
+    });
 });
