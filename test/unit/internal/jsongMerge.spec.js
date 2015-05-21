@@ -71,6 +71,22 @@ describe('JSONG - Merge', function() {
 
         mergeTest(jsong);
     });
+    it('should get the set refs.', function() {
+        var jsong = {
+            jsong: {
+                there: {
+                    is: $ref('a')
+                }
+            },
+            paths: [['there', 'is']]
+        };
+        var cache = {};
+        var refs = jsongMerge(cache, jsong);
+        expect(refs).to.deep.equals([{
+            path: ['there', 'is'],
+            value: ['a']
+        }]);
+    });
 });
 
 function mergeTest(jsong) {

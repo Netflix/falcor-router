@@ -53,14 +53,17 @@ Router.prototype = {
         var action = runCallAction(this, callPath, args, suffixes, paths);
         var callPaths = [callPath];
         return run(this._call, action, callPaths, call).
-            map(function(jsongEnv) {
-                return materializeMissing(
+            map(function(jsongResult) {
+                var jsongEnv = materializeMissing(
                     callPaths,
-                    jsongEnv,
-                    materializeMissing, {
+                    jsongResult,
+                    {
                         $type: $atom,
                         $expires: 0
                     });
+
+                jsongEnv.paths = jsongResult.reportedPaths.concat(callPaths);
+                return jsongEnv;
             });
     }
 };

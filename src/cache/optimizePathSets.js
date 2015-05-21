@@ -68,8 +68,9 @@ function optimizePathSet(cache, cacheRoot, pathSet, depth, out, optimizedPath) {
 
     do {
         next = cache[key];
+        var optimizedPathLength = optimizedPath.length;
         if (key !== null) {
-            optimizedPath[depth] = key;
+            optimizedPath[optimizedPathLength] = key;
         }
 
         if (next && next.$type === $ref && nextDepth < pathSet.length) {
@@ -83,7 +84,7 @@ function optimizePathSet(cache, cacheRoot, pathSet, depth, out, optimizedPath) {
         }
 
         optimizePathSet(next, cacheRoot, pathSet, nextDepth, out, nextOptimized);
-        optimizedPath.length = depth;
+        optimizedPath.length = optimizedPathLength;
 
         if (memo && !memo.done) {
             key = permuteKey(keySet, memo);

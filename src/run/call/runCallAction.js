@@ -35,17 +35,17 @@ function runCallAction(matches, routerInstance, callPath, args, suffixes, paths)
         var tmpCache = {};
         out = outputToObservable(out).
             toArray().
-            flatMap(function(res) {
+            map(function(res) {
                 // checks call for isJSONG and if there is jsong without paths
                 // throw errors.
                 var refs = [];
-                var len = -1;
                 var mergedRefs;
 
                 // Will flatten any arrays of jsong/pathValues.
                 res = res.reduce(function(flattenedRes, next) {
                     return flattenedRes.concat(next);
                 }, []);
+                var len = res.length - 1;
 
                 res.forEach(function(r) {
                     // its json graph.
@@ -57,14 +57,14 @@ function runCallAction(matches, routerInstance, callPath, args, suffixes, paths)
                             err.throwToNext = true;
                             throw err;
                         }
-                        if (paths) {
-                            mergedRefs = jsongMerge(tpmCache, r);
+                        if (suffixes) {
+                            mergedRefs = jsongMerge(tmpCache, r);
                         }
                     }
 
                     // Only merge if we have to.
-                    else if (paths) {
-                        mergedRefs = pathValueMerge(tpmCache, r);
+                    else if (suffixes) {
+                        mergedRefs = pathValueMerge(tmpCache, r);
                     }
 
                     // Merges in the refs from the pV or jsong Merge.
@@ -81,22 +81,40 @@ function runCallAction(matches, routerInstance, callPath, args, suffixes, paths)
                 // To do this, we are going to use the outside expand to
                 // continue to operate on the returned paths and merge in
                 // the call result.
-                if (paths && len || suffixes) {
+                if (paths && (len + 1) || suffixes) {
 
                     // Sends a message to the outside expand saying to
                     // become a get rather than call.
                     res[++len] = {isMessage: true, method: 'get'};
 
-                    if (paths && len) {
-                        var callPathSave1 = callPath.slice(0, callPath.length - 1);
+                    var callPathSave1 = callPath.slice(0, callPath.length - 1);
+                    if (paths && (len + 1)) {
+                        paths.forEach(function(path) {
+                            res[++len] = {
+                                isMessage: true,
+                                additionalPath: callPathSave1.concat(path)
+                            };
+                        });
+                    }
+
+                    if (suffixes) {
+                        var optimizedPathLength = matchedPath.length - 1;
+
                         // Now its time to merge in some more path messages.
                         refs.forEach(function(ref) {
-
+                            var deoptimizedPath = callPathSave1.concat(
+                                    ref.path.slice(optimizedPathLength));
+                            suffixes.forEach(function(suffix) {
+                                res[++len] = {
+                                    isMessage: true,
+                                    additionalPath: deoptimizedPath.concat(suffix)
+                                };
+                            });
                         });
                     }
                 }
 
-                return Observable.from(res);
+                return res;
             });
     } else {
         out = match.action.call(null, match.path);

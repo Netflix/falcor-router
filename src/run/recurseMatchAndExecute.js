@@ -26,6 +26,7 @@ function _recurseMatchAndExecute(match, actionRunner, paths, method) {
     var jsongSeed = {};
     var missing = [];
     var invalidated = [];
+    var reportedPaths = [];
 
     return Observable.
 
@@ -60,24 +61,29 @@ function _recurseMatchAndExecute(match, actionRunner, paths, method) {
                     var nextInvalidations = invalidationsNextPathsAndMessages[0];
                     var nextPaths = invalidationsNextPathsAndMessages[1];
                     var messages = invalidationsNextPathsAndMessages[2];
-
-                    // Alters the behavior of the expand
-                    messages.forEach(function(message) {
-                        if (message.method) {
-                            method = message.method;
-                        }
-                    });
-
                     nextInvalidations.forEach(function(invalidation) {
                         invalidated[invalidated.length] = invalidation;
                     });
 
                     // Merges the remaining suffix with remaining nextPaths
-                    if (hasSuffix && nextPaths.length) {
-                        nextPaths = nextPaths.map(function(next) {
-                            return next.concat(suffix);
-                        });
-                    }
+                    nextPaths = nextPaths.map(function(next) {
+                        return next.value.concat(suffix);
+                    });
+
+                    // Alters the behavior of the expand
+                    messages.forEach(function(message) {
+                        // mutates the method type for the matcher
+                        if (message.method) {
+                            method = message.method;
+                        }
+
+                        // Mutates the nextPaths and adds any additionalPaths
+                        else if (message.additionalPath) {
+                            var path = message.additionalPath;
+                            nextPaths[nextPaths.length] = path;
+                            reportedPaths[reportedPaths.length] = path;
+                        }
+                    });
 
                     // Explodes and collapse the tree to remove
                     // redundants and get optimized next set of
@@ -101,7 +107,8 @@ function _recurseMatchAndExecute(match, actionRunner, paths, method) {
             return {
                 missing: missing,
                 invalidated: invalidated,
-                jsong: jsongSeed
+                jsong: jsongSeed,
+                reportedPaths: reportedPaths
             };
         });
 }
