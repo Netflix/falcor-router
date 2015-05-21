@@ -45,7 +45,8 @@ function optimizePathSet(cache, cacheRoot, pathSet, depth, out, optimizedPath) {
     }
 
     // all other sentinels are short circuited.
-    if (cache.$type && cache.$type !== $ref) {
+    // Or we found a primitive.
+    if (cache.$type && cache.$type !== $ref || typeof cache !== 'object') {
         return;
     }
 

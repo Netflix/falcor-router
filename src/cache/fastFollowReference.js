@@ -37,6 +37,7 @@ module.exports = function fastFollowReference(cacheRoot, ref) {
                 depth = -1;
                 refPath = ref = next.value;
                 length = ref.length;
+                next = cacheRoot;
             }
         }
         current = next;

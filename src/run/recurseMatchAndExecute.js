@@ -41,54 +41,58 @@ function _recurseMatchAndExecute(match, actionRunner, paths, loopCount) {
         }
 
         var matchedResults = match(nextPaths);
+        if (!matchedResults.matched.length) {
+            return Observable.empty();
+        }
+
         return runByPrecedence(matchedResults.matched, actionRunner).
 
             // Generate from the combined results the next requestable paths
             // and insert errors / values into the cache.
             flatMap(function(results) {
-            var value = results.value;
-            var suffix = results.match.suffix;
-            var hasSuffix = suffix.length;
-            var nextPaths = [];
-            var insertedReferences = [];
-            var len = -1;
+                var value = results.value;
+                var suffix = results.match.suffix;
+                var hasSuffix = suffix.length;
+                var nextPaths = [];
+                var insertedReferences = [];
+                var len = -1;
 
-            if (!isArray(value)) {
-                value = [value];
-            }
+                if (!isArray(value)) {
+                    value = [value];
+                }
 
-            value.forEach(function(jsongOrPV) {
-                var refs = [];
-                if (isJSONG(jsongOrPV)) {
-                    refs = jsongMerge(jsongSeed, jsongOrPV);
-                } else {
-                    if (jsongOrPV.value === undefined) {
-                        invalidated[invalidated.length] = jsongOrPV;
+                value.forEach(function(jsongOrPV) {
+                    var refs = [];
+                    if (isJSONG(jsongOrPV)) {
+                        refs = jsongMerge(jsongSeed, jsongOrPV);
                     } else {
-                        refs = pathValueMerge(jsongSeed, jsongOrPV);
-                    }
-                }
-
-                if (hasSuffix && refs.length) {
-                    refs.forEach(function(refs) {
-                        nextPaths[++len] = refs.concat(suffix);
-                    });
-                }
-                    });
-
-                    // Explodes and collapse the tree to remove
-                    // redundants and get optimized next set of
-                    // paths to evaluate.
-                    nextPaths = optimizePathSets(jsongSeed, nextPaths);
-                    if (nextPaths.length) {
-                        nextPaths = toPaths(toTree(nextPaths));
+                        if (jsongOrPV.value === undefined) {
+                            invalidated[invalidated.length] = jsongOrPV;
+                        } else {
+                            refs = pathValueMerge(jsongSeed, jsongOrPV);
+                        }
                     }
 
-                    missing = missing.concat(matchedResults.missingPaths);
-                    return Observable.
-                        from(nextPaths);
-                }).
-                defaultIfEmpty([]);
+                    if (hasSuffix && refs.length) {
+                        refs.forEach(function(refs) {
+                            nextPaths[++len] = refs.concat(suffix);
+                        });
+                    }
+                });
+
+                // Explodes and collapse the tree to remove
+                // redundants and get optimized next set of
+                // paths to evaluate.
+                nextPaths = optimizePathSets(jsongSeed, nextPaths);
+                if (nextPaths.length) {
+                    nextPaths = toPaths(toTree(nextPaths));
+                }
+
+                missing = missing.concat(matchedResults.missingPaths);
+                return Observable.
+                    from(nextPaths);
+            }).
+            defaultIfEmpty([]);
 
         }).
         reduce(function(acc, x) {
