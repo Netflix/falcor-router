@@ -50,6 +50,7 @@ describe('Set', function() {
                 ]
             }).
             doAction(function(result) {
+                debugger
                 expect(result).to.deep.equals({
                     jsong: {
                         videos: {
@@ -115,6 +116,7 @@ describe('Set', function() {
                 ]
             }).
             doAction(function(res) {
+                debugger
                 expect(res).to.deep.equals({
                     jsong: {
                         genreLists: {
