@@ -13,6 +13,9 @@ var runSetAction = require('./run/set/runSetAction');
 var runCallAction = require('./run/call/runCallAction');
 var falcor = require('falcor');
 var $atom = require('./support/types').$atom;
+var get = 'get';
+var set = 'set';
+var call = 'call';
 
 Rx.config.longStackSupport = true;
 var Router = function(routes, options) {
@@ -20,56 +23,67 @@ var Router = function(routes, options) {
 
     this._routes = routes;
     this._rst = parseTree(routes);
-    this._get = matcher(this._rst, 'get');
-    this._set = matcher(this._rst, 'set');
-    this._call = matcher(this._rst, 'call');
+    this._get = matcher(this._rst);
+    this._set = matcher(this._rst);
+    this._call = matcher(this._rst);
     this._debug = options.debug;
 };
 
 Router.prototype = {
     get: function(paths) {
-        return run(this._get,
-                   runGetAction.bind(this),
-                   normalizePathSets(paths));
+        var action = runGetAction(this);
+        return run(this._get, action, normalizePathSets(paths), get).
+            map(function(jsongEnv) {
+                return materializeMissing(paths, jsongEnv);
+            });
     },
 
     set: function(jsong) {
+        // TODO: Remove the modelContext and replace with just jsongEnv
+        // when http://github.com/Netflix/falcor-router/issues/24 is addressed
         var modelContext = new falcor.Model({cache: jsong.jsong});
-        return run(this._set,
-                   runSetAction.call(this, modelContext),
-                   jsong.paths);
+        var action = runSetAction(this, modelContext);
+        return run(this._set, action, jsong.paths, set).
+            map(function(jsongEnv) {
+                return materializeMissing(jsong.paths, jsongEnv);
+            });
     },
 
     call: function(callPath, args, suffixes, paths) {
-        var action = runCallAction(this, args, suffixes, paths);
-        return run(this._call,
-                   action,
-                   [callPath]);
+        var action = runCallAction(this, callPath, args, suffixes, paths);
+        var callPaths = [callPath];
+        return run(this._call, action, callPaths, call).
+            map(function(jsongEnv) {
+                return materializeMissing(
+                    callPaths,
+                    jsongEnv,
+                    materializeMissing, {
+                        $type: $atom,
+                        $expires: 0
+                    });
+            });
     }
 };
 
-function run(method, actionRunner, paths) {
-    return recurseMatchAndExecute(method, actionRunner, paths).
-        // TODO:  This will work with call, but paths key will not be
-        // emitted, but it must!
+function run(matcher, actionRunner, paths, method) {
+    return recurseMatchAndExecute(matcher, actionRunner, paths, method);
+}
 
-        // Materializes any paths that do not exist but were matched.
-        map(function(jsongEnv) {
-            var jsong = jsongEnv.jsong;
-            var missingAtom = {$type: $atom};
+function materializeMissing(paths, jsongEnv, missingAtom) {
+    var jsong = jsongEnv.jsong;
+    missingAtom = missingAtom || {$type: $atom};
 
-            // Optimizes the pathSets from the jsong then
-            // inserts atoms of undefined.
-            optimizePathSets(jsong, paths).
-                forEach(function(optMissingPath) {
-                    pathValueMerge(jsong, {
-                        path: optMissingPath,
-                        value: missingAtom
-                    });
-                });
-
-            return {jsong: jsong};
+    // Optimizes the pathSets from the jsong then
+    // inserts atoms of undefined.
+    optimizePathSets(jsong, paths).
+        forEach(function(optMissingPath) {
+            pathValueMerge(jsong, {
+                path: optMissingPath,
+                value: missingAtom
+            });
         });
+
+    return {jsong: jsong};
 }
 
 Router.ranges = Keys.ranges;

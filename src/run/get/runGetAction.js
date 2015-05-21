@@ -4,12 +4,17 @@ var outputToObservable = require('../conversion/outputToObservable');
 var noteToJsongOrPV = require('../conversion/noteToJsongOrPV');
 var authorize = require('./../authorize');
 
-module.exports = function runGetAction(matches) {
-    var self = this;
-    var match = matches[0];
-    var out = outputToObservable(match.action.call(self, match.path));
+module.exports = function runGetAction(routerInstance) {
+    return function innerGetAction(matches) {
+        return getAction(routerInstance, matches);
+    };
+};
 
-    return authorize(this, match, out).
+function getAction(routerInstance, matches) {
+    var match = matches[0];
+    var out = outputToObservable(match.action.call(routerInstance, match.path));
+
+    return authorize(routerInstance, match, out).
         materialize().
         filter(function(note) {
             return note.kind !== 'C';
