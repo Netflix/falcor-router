@@ -55,9 +55,9 @@ function buildParseTree(parseMap, node, pathAndAction, depth, virtualRunner) {
             next = decendTreeByRoutedToken(node, value);
             // we have to create a falcor-router virtual object
             // so that the rest of the algorithm can match and coerse
-            // when needed.  It is unnamed.
+            // when needed.
             if (next) {
-                virtualRunner[depth] = {type: value};
+                virtualRunner[depth] = {type: value, named: false};
             }
             else {
                 if (!node[value]) {

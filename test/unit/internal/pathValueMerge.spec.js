@@ -33,7 +33,7 @@ describe('PathValue - Merge', function() {
         };
 
         pathValueMerge(cache, pV);
-        expect(cache).to.deep.equals(expected);
+        expect(cache).is.deep.equals(expected);
     });
     it('should write a complex leaf path to the cache with pathValue.', function() {
         var expected = {
@@ -52,7 +52,7 @@ describe('PathValue - Merge', function() {
         };
 
         pathValueMerge(cache, pV);
-        expect(cache).to.deep.equals(expected);
+        expect(cache).is.deep.equals(expected);
     });
     it('should write a complex branch path to the cache with pathValue.', function() {
         var expected = {
@@ -73,7 +73,7 @@ describe('PathValue - Merge', function() {
         };
 
         pathValueMerge(cache, pV);
-        expect(cache).to.deep.equals(expected);
+        expect(cache).is.deep.equals(expected);
     });
     it('should get the set refs.', function() {
         var pV = {
@@ -82,7 +82,7 @@ describe('PathValue - Merge', function() {
         };
         var cache = {};
         var refs = pathValueMerge(cache, pV);
-        expect(refs).to.deep.equals([{
+        expect(refs).is.deep.equals([{
             path: ['there', 'is'],
             value: ['a']
         }]);

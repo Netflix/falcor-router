@@ -21,16 +21,6 @@ var set = 'set';
 var call = 'call';
 
 /**
- * The match object gives all the information about what was matched
- * and what it was matched against.
- * @typedef {Object} Match
- * @property {Array} path,
- * @property {Array} virtual,
- * @property {Number} precedence,
- * @property {(undefined|Function)} authorize
- *
-
-/**
  * Creates a custom matching function for the match tree.
  * @param Object rst The routed syntax tree
  * @param String method the method to call at the end of the path.

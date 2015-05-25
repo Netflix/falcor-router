@@ -4,4 +4,5 @@ describe('Internals', function() {
     require('./toTree.spec');
     require('./toPaths.spec');
     require('./optimizePathSets.spec');
+    require('./strip.spec');
 });
