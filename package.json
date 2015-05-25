@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "falcor": "git+ssh://git@github.com/Netflix/falcor.git",
+    "rx": "~2.3.25",
     "falcor-path-syntax": "git+ssh://git@github.com/Netflix/falcor-path-syntax.git"
   },
   "devDependencies": {
@@ -35,7 +36,6 @@
     "gulp-rename": "~1.2.0",
     "lodash": "^3.8.0",
     "promise": "^7.0.1",
-    "rx": "~2.3.25",
     "through2": "~0.6.3"
   },
   "scripts": {
