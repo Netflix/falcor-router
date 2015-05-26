@@ -68,6 +68,7 @@ describe('Specific', function() {
         var obs = router.
             get([['lists', [0, 1], 'summary']]);
         var count = 0;
+        debugger
         obs.
             doAction(function(res) {
                 expect(res).to.deep.equals({

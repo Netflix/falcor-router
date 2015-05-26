@@ -34,7 +34,8 @@ module.exports = function stripPath(matchedPath, virtualPath) {
     var exactMatch = [];
     var current = [];
 
-    for (var i = 0, len = matchedPath.length; i < len; ++i) {
+    // Always use virtual path because it can be shorter.
+    for (var i = 0, len = virtualPath.length; i < len; ++i) {
         var matchedAtom = matchedPath[i];
         var virtualAtom = virtualPath[i];
         var stripResults = strip(matchedAtom, virtualAtom);

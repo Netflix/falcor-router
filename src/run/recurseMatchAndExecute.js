@@ -1,7 +1,6 @@
 var Rx = require('rx');
 var Observable = Rx.Observable;
-var pluckHighestPrecedence = require('./pluckHighestPrecedence');
-var runByPrecedence = require('./runByPrecedence');
+var runByPrecedence = require('./precedence/runByPrecedence');
 var toPaths = require('./../operations/collapse/toPaths');
 var toTree = require('./../operations/collapse/toTree');
 var optimizePathSets = require('./../cache/optimizePathSets');
@@ -44,11 +43,12 @@ function _recurseMatchAndExecute(match, actionRunner, paths, method) {
                 return Observable.empty();
             }
 
-            return runByPrecedence(matchedResults.matched, actionRunner).
+            return runByPrecedence(nextPaths, matchedResults.matched, actionRunner).
 
                 // Generate from the combined results the next requestable paths
                 // and insert errors / values into the cache.
                 flatMap(function(results) {
+                    debugger
                     var value = results.value;
                     var suffix = results.match.suffix;
                     var hasSuffix = suffix.length;

@@ -5,14 +5,14 @@ var noteToJsongOrPV = require('../conversion/noteToJsongOrPV');
 var authorize = require('./../authorize');
 
 module.exports = function outerRunSetAction(routerInstance, modelContext) {
-    return function innerRunSetAction(matches) {
-        return runSetAction(routerInstance, modelContext, matches);
+    return function innerRunSetAction(matchAndPath) {
+        return runSetAction(routerInstance, modelContext, matchAndPath);
     };
 };
 
-function runSetAction(routerInstance, modelContext, matches) {
-    var match = matches[0];
-    var matchedPath = match.path;
+function runSetAction(routerInstance, modelContext, matchAndPath) {
+    var match = matchAndPath.match;
+    var matchedPath = matchAndPath.path;
     var out;
 
     // We are at out destination.  Its time to get out
@@ -29,7 +29,7 @@ function runSetAction(routerInstance, modelContext, matches) {
                     return outputToObservable(matchedResults);
                 });
     } else {
-        out = match.action.call(routerInstance, match.path);
+        out = match.action.call(routerInstance, matchAndPath.path);
         out = outputToObservable(out);
     }
 
@@ -38,5 +38,5 @@ function runSetAction(routerInstance, modelContext, matches) {
         filter(function(note) {
             return note.kind !== 'C';
         }).
-        map(noteToJsongOrPV(match));
+        map(noteToJsongOrPV(matchAndPath));
 }

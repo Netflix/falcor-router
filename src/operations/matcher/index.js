@@ -78,8 +78,6 @@ function match(
         matchedFunctions[matchedFunctions.length] = {
             action: curr[Keys.match][methodToUse],
             authorize: curr[Keys.match].authorize,
-            path: cloneArray(requested),
-            fullPath: path.slice(0, depth),
             virtual: cloneArray(virtual),
             precedence: +(precedence.join('')),
             suffix: path.slice(depth),

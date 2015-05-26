@@ -1,10 +1,10 @@
 var Observable = require('rx').Observable;
-var authorize = require('./authorize');
+var getExecutableMatches = require('./getExecutableMatches');
+
 /**
- * Processing the matches involve executing the highest
- * precedence match ... TODO: CR
+ * Sorts and strips the set of available matches given the pathSet.
  */
-module.exports = function runByPrecedence(matches, actionRunner) {
+module.exports = function runByPrecedence(pathSet, matches, actionRunner) {
 
     // Precendence matching
     matches = matches.
@@ -18,11 +18,13 @@ module.exports = function runByPrecedence(matches, actionRunner) {
             return 0;
         });
 
+    var matchesWithPaths = getExecutableMatches(matches, [pathSet]);
     return Observable.
-        of(matches).
+        from(matchesWithPaths).
         flatMap(actionRunner).
 
-        // NOTE: We are not reducing per observable
+        // Note: We do not wait for each observable to finish,
+        // but repeat the cycle per onNext.
         map(function(actionTuple) {
 
             return {
