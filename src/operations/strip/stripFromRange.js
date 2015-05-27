@@ -1,5 +1,6 @@
 var isArray = Array.isArray;
 var rangeToArray = require('./../ranges/rangeToArray');
+var isNumber = require('./../../support/isNumber');
 /**
  *  Takes the first argument, toStrip, and strips it from
  * the range.  The output is an array of ranges that represents
@@ -13,20 +14,22 @@ var rangeToArray = require('./../ranges/rangeToArray');
  * check. consider: {from: 0, to: 1} and [0, 'one'] intersect at 0, but will
  * get 'one' fed into stripFromRange.
  *
- * @param {Array|String|Number|Object} toStrip can be a string, number,
+ * @param {Array|String|Number|Object} argToStrip can be a string, number,
  * or a routed token.  Cannot be a range itself.
  * @param {Range} range
  * @return {Array.<Range>} The relative complement.
  */
-module.exports = function stripFromRange(toStrip, range) {
+module.exports = function stripFromRange(argToStrip, range) {
     var ranges = [];
     var matches = [];
-    var wasTypeString = typeof toStrip === 'string';
-    toStrip = wasTypeString && Number(toStrip) || toStrip;
-    var toStripIsArray = isArray(toStrip);
+    var toStrip = argToStrip;
+    var toStripIsNumber = isNumber(toStrip);
+    if (toStripIsNumber) {
+        toStrip = +toStrip;
+    }
 
     // Strip out NaNs
-    if (wasTypeString && isNaN(toStrip)) {
+    if (!toStripIsNumber && typeof toStrip === 'string') {
         ranges = [range];
     }
 
@@ -34,9 +37,9 @@ module.exports = function stripFromRange(toStrip, range) {
         var currenRanges = [range];
         toStrip.forEach(function(atom) {
             var nextRanges = [];
-            currenRanges.forEach(function(range) {
-                var matchAndComplement = stripFromRange(atom, range);
-                if (matchAndComplement[0] !== undefined) {
+            currenRanges.forEach(function(currentRename) {
+                var matchAndComplement = stripFromRange(atom, currentRename);
+                if (matchAndComplement[0] !== undefined) { // eslint-disable-line no-undefined
                     matches = matches.concat(matchAndComplement[0]);
                 }
 
@@ -49,7 +52,7 @@ module.exports = function stripFromRange(toStrip, range) {
     }
 
     // The simple case, its just a number.
-    else if (typeof toStrip === 'number') {
+    else if (toStripIsNumber) {
 
         if (range.from < toStrip && toStrip < range.to) {
             ranges[0] = {

@@ -32,6 +32,10 @@ module.exports = function convertPathToVirtual(path, virtual) {
                     matched[matched.length] =
                         convertPathKeyToKeys(path[i]);
                     break;
+                default:
+                    var err = new Error('Unknown route type.');
+                    err.throwToNext = true;
+                    break;
             }
             if (virt.named) {
                 matched[virt.name] = matched[matched.length - 1];

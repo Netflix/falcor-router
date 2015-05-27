@@ -2,9 +2,7 @@ var Keys = require('./Keys');
 var parseTree = require('./parse-tree');
 var matcher = require('./operations/matcher');
 var Rx = require('rx');
-var Observable = Rx.Observable;
 var normalizePathSets = require('./operations/ranges/normalizePathSets');
-var isJSONG = require('./support/isJSONG');
 var recurseMatchAndExecute = require('./run/recurseMatchAndExecute');
 var optimizePathSets = require('./cache/optimizePathSets');
 var pathValueMerge = require('./cache/pathValueMerge');
@@ -17,16 +15,17 @@ var get = 'get';
 var set = 'set';
 var call = 'call';
 
+// TODO: We should move this into the constructor.
 Rx.config.longStackSupport = true;
 var Router = function(routes, options) {
-    options = options || {};
+    var opts = options || {};
 
     this._routes = routes;
     this._rst = parseTree(routes);
     this._get = matcher(this._rst);
     this._set = matcher(this._rst);
     this._call = matcher(this._rst);
-    this._debug = options.debug;
+    this._debug = opts.debug;
 };
 
 Router.prototype = {
@@ -68,13 +67,13 @@ Router.prototype = {
     }
 };
 
-function run(matcher, actionRunner, paths, method) {
-    return recurseMatchAndExecute(matcher, actionRunner, paths, method);
+function run(matcherFn, actionRunner, paths, method) {
+    return recurseMatchAndExecute(matcherFn, actionRunner, paths, method);
 }
 
 function materializeMissing(paths, jsongEnv, missingAtom) {
     var jsong = jsongEnv.jsong;
-    missingAtom = missingAtom || {$type: $atom};
+    var materializedAtom = missingAtom || {$type: $atom};
 
     // Optimizes the pathSets from the jsong then
     // inserts atoms of undefined.
@@ -82,7 +81,7 @@ function materializeMissing(paths, jsongEnv, missingAtom) {
         forEach(function(optMissingPath) {
             pathValueMerge(jsong, {
                 path: optMissingPath,
-                value: missingAtom
+                value: materializedAtom
             });
         });
 

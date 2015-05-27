@@ -1,5 +1,5 @@
 var convertPathKeyTo = require('./../convertPathKeyTo');
-var isArray = Array.isArray;
+var isNumber = require('./../../support/isNumber');
 var rangeToArray = require('./../ranges/rangeToArray');
 
 function onRange(out, range) {
@@ -10,8 +10,7 @@ function onRange(out, range) {
 }
 
 function onKey(out, key) {
-    key = +key;
-    if (!isNaN(key)) {
+    if (isNumber(key)) {
         out[out.length] = key;
     }
 }

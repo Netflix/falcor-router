@@ -11,11 +11,11 @@ module.exports = function fastFollowReference(cacheRoot, ref) {
     var current = cacheRoot;
     var refPath = ref;
     var depth = -1;
-    var length = ref.length;
+    var length = refPath.length;
     var key, next, type;
 
     while (++depth < length) {
-        key = ref[depth];
+        key = refPath[depth];
         next = current[key];
         type = next && next.$type;
 
@@ -24,7 +24,7 @@ module.exports = function fastFollowReference(cacheRoot, ref) {
             break;
         }
 
-        // This is bad!
+        // Show stopper exception.  This route is malformed.
         if (type && type === $ref && depth + 1 < length) {
             var err = new Error(errors.innerReferences);
             err.throwToNext = true;
@@ -35,8 +35,8 @@ module.exports = function fastFollowReference(cacheRoot, ref) {
         if (depth + 1 === length) {
             if (type === $ref) {
                 depth = -1;
-                refPath = ref = next.value;
-                length = ref.length;
+                refPath = next.value;
+                length = refPath.length;
                 next = cacheRoot;
             }
         }

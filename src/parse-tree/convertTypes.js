@@ -12,6 +12,10 @@ module.exports = function convertTypes(virtualPath) {
                 case 'ranges':
                     key.type = Keys.ranges;
                     break;
+                default:
+                    var err = new Error('Unknown route type.');
+                    err.throwToNext = true;
+                    break;
             }
         }
         return key;

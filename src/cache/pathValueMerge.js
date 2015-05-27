@@ -13,10 +13,15 @@ module.exports = function pathValueMerge(cache, pathValue, requestedPath) {
     var curr = cache;
     var next, key, cloned, outerKey, memo;
     var refs = [];
-    requestedPath = requestedPath || [];
-    var startingLength = requestedPath.length;
 
-    for (var i = 0, len = path.length - 1; i < len; ++i) {
+    /*eslint-disable no-func-assign, no-param-reassign*/
+    requestedPath = requestedPath || [];
+    /*eslint-enable no-func-assign, no-param-reassign*/
+
+    var startingLength = requestedPath.length;
+    var i, len;
+
+    for (i = 0, len = path.length - 1; i < len; ++i) {
         outerKey = path[i];
 
         // Setup the memo and the key.
@@ -64,7 +69,8 @@ module.exports = function pathValueMerge(cache, pathValue, requestedPath) {
     }
 
 
-    // TODO: Consider a simple depth recursive solution.
+    // TODO: This clearly needs a re-write.  I am just unsure of how i want
+    // this to look.  Plus i want to measure performance.
     outerKey = path[i];
 
     // Setup the memo and the key.

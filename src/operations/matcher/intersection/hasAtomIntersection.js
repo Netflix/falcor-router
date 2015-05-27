@@ -59,5 +59,5 @@ function isNumber(x) {
  * last elseif check.
  */
 function doubleEquals(a, b) {
-    return a == b;
+    return a == b; // eslint-disable-line eqeqeq
 }

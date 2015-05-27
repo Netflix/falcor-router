@@ -1,11 +1,19 @@
 var convertPathKeyTo = require('./../convertPathKeyTo');
-var isArray = Array.isArray;
+var isNumber = require('./../../support/isNumber');
 
 function onRange(out, range) {
     out[out.length] = range;
 }
 
+/**
+ * @param {Number|String} key must be a number
+ */
 function keyReduce(out, key, range) {
+    if (!isNumber(key)) {
+        return range;
+    }
+
+    /* eslint-disable no-param-reassign */
     key = +key;
     if (range) {
         if (key - 1 === range.to) {
@@ -25,6 +33,7 @@ function keyReduce(out, key, range) {
         range = {to: key, from: key};
         out[out.length] = range;
     }
+    /* eslint-enable no-param-reassign */
 
     return range;
 }

@@ -15,7 +15,7 @@ module.exports = function jsongMerge(cache, jsongEnv) {
     var j = jsongEnv.jsong;
     var insertedReferences = [];
     paths.forEach(function(p) {
-        merge(cache, cache, j, j, p, 0, insertedReferences);
+        merge(cache, cache, j, j, p, 0, insertedReferences, []);
     });
     return insertedReferences;
 };
@@ -26,7 +26,6 @@ function merge(cache, cacheRoot, message,
                fromKey) {
 
     var typeOfMessage = typeof message;
-    requestedPath = requestedPath || [];
 
     // The message at this point should always be defined.
     if (message.$type || typeOfMessage !== 'object') {

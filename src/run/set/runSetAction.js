@@ -1,5 +1,3 @@
-var isJSONG = require('./../../support/isJSONG');
-var isArray = Array.isArray;
 var outputToObservable = require('../conversion/outputToObservable');
 var noteToJsongOrPV = require('../conversion/noteToJsongOrPV');
 var authorize = require('./../authorize');
