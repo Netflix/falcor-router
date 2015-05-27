@@ -48,7 +48,6 @@ function _recurseMatchAndExecute(match, actionRunner, paths, method) {
                 // Generate from the combined results the next requestable paths
                 // and insert errors / values into the cache.
                 flatMap(function(results) {
-                    debugger
                     var value = results.value;
                     var suffix = results.match.suffix;
                     var hasSuffix = suffix.length;

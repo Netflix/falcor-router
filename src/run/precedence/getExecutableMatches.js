@@ -25,7 +25,7 @@ module.exports = function getExecutableMatches(matches, pathSet) {
         // is an intersection then strip and replace.
         // any relative complements, add to remainingPaths
         for (var j = 0; j < availablePaths.length; ++j) {
-            var path = availablePaths[i];
+            var path = availablePaths[j];
             if (hasIntersection(path, match.virtual)) {
                 var stripResults = stripPath(path, match.virtual);
                 matchAndPaths[matchAndPaths.length] = {

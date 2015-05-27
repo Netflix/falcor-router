@@ -9,7 +9,6 @@ function createNamedVariables(virtualPath, action) {
         var restOfArgs = slice(arguments, 1);
 
         // Could be an array of pathValues for a set operation.
-        debugger
         if (isPathValue(matchedPath[0])) {
             convertedArguments = [];
 
