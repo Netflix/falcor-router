@@ -1,6 +1,5 @@
 var Keys = require('./../../Keys');
 var Precedence = require('./../../Precedence');
-var permuteKey = require('./../../support/permuteKey');
 var cloneArray = require('./../../support/cloneArray');
 var specificMatcher = require('./specific');
 var pluckIntegers = require('./pluckIntergers');
@@ -54,12 +53,13 @@ function match(
         return;
     }
 
+    /* eslint-disable no-param-reassign */
     depth = depth || 0;
     requested = requested || [];
     virtual = virtual || [];
     precedence = precedence || [];
     matchedFunctions = matchedFunctions || [];
-    var result;
+    /* eslint-disable no-param-reassign */
 
     // At this point in the traversal we have hit a matching function.
     // Its time to terminate.
@@ -87,12 +87,7 @@ function match(
     }
 
     var keySet = path[depth];
-    var isKeySet = typeof keySet === 'object';
     var i, len, key, next;
-    // TODO:Perf do i really need to do this?
-    if (isKeySet) {
-        precedence = cloneArray(precedence);
-    }
 
     // -------------------------------------------
     // Specific key matcher.

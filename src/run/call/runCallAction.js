@@ -1,8 +1,6 @@
 var isJSONG = require('./../../support/isJSONG');
-var isArray = Array.isArray;
 var outputToObservable = require('./../conversion/outputToObservable');
 var noteToJsongOrPV = require('./../conversion/noteToJsongOrPV');
-var Observable = require('rx').Observable;
 var errors = require('./../../exceptions');
 var authorize = require('./../authorize');
 var jsongMerge = require('./../../cache/jsongMerge');
@@ -42,12 +40,12 @@ function runCallAction(matchAndPath, routerInstance, callPath, args, suffixes, p
                 var mergedRefs;
 
                 // Will flatten any arrays of jsong/pathValues.
-                res = res.reduce(function(flattenedRes, next) {
+                var returnValue = res.reduce(function(flattenedRes, next) {
                     return flattenedRes.concat(next);
                 }, []);
-                var len = res.length - 1;
+                var len = returnValue.length - 1;
 
-                res.forEach(function(r) {
+                returnValue.forEach(function(r) {
                     // its json graph.
                     if (isJSONG(r)) {
 
@@ -85,12 +83,12 @@ function runCallAction(matchAndPath, routerInstance, callPath, args, suffixes, p
 
                     // Sends a message to the outside expand saying to
                     // become a get rather than call.
-                    res[++len] = {isMessage: true, method: 'get'};
+                    returnValue[++len] = {isMessage: true, method: 'get'};
 
                     var callPathSave1 = callPath.slice(0, callPath.length - 1);
                     if (paths && (len + 1)) {
                         paths.forEach(function(path) {
-                            res[++len] = {
+                            returnValue[++len] = {
                                 isMessage: true,
                                 additionalPath: callPathSave1.concat(path)
                             };
@@ -105,7 +103,7 @@ function runCallAction(matchAndPath, routerInstance, callPath, args, suffixes, p
                             var deoptimizedPath = callPathSave1.concat(
                                     ref.path.slice(optimizedPathLength));
                             suffixes.forEach(function(suffix) {
-                                res[++len] = {
+                                returnValue[++len] = {
                                     isMessage: true,
                                     additionalPath: deoptimizedPath.concat(suffix)
                                 };
@@ -114,7 +112,7 @@ function runCallAction(matchAndPath, routerInstance, callPath, args, suffixes, p
                     }
                 }
 
-                return res;
+                return returnValue;
             });
     } else {
         out = match.action.call(null, matchAndPath.path);

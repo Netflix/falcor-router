@@ -7,14 +7,15 @@ var isArray = Array.isArray;
  * json graph) or an async type (observable or a thenable).
  */
 module.exports = function outputToObservable(valueOrObservable) {
+    var value = valueOrObservable;
 
     // place holder.  Observables have highest precedence.
-    if (valueOrObservable.subscribe) { }
+    if (value.subscribe) { }
 
     // promise
-    else if (valueOrObservable.then) {
-        valueOrObservable = Observable.
-            fromPromise(valueOrObservable).
+    else if (value.then) {
+        value = Observable.
+            fromPromise(value).
             flatMap(function(promiseResult) {
                 if (isArray(promiseResult)) {
                     return Observable.from(promiseResult);
@@ -24,15 +25,15 @@ module.exports = function outputToObservable(valueOrObservable) {
     }
 
     // from array of pathValues.
-    else if (isArray(valueOrObservable)) {
-        valueOrObservable = Observable.from(valueOrObservable);
+    else if (isArray(value)) {
+        value = Observable.from(value);
     }
 
     // this will be jsong or pathValue at this point.
     // NOTE: For the case of authorize this will be a boolean
     else {
-        valueOrObservable = Observable.of(valueOrObservable);
+        value = Observable.of(value);
     }
 
-    return valueOrObservable;
+    return value;
 };

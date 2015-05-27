@@ -4,7 +4,6 @@ var catAndSlice = require('./../support/catAndSlice');
 var isArray = Array.isArray;
 var $types = require('./../support/types');
 var $ref = $types.$ref;
-var $atom = $types.$atom;
 var fastFollowReference = require('./fastFollowReference');
 
 /**
@@ -19,7 +18,7 @@ var fastFollowReference = require('./fastFollowReference');
 module.exports = function optimizePathSets(cache, paths) {
     var optimized = [];
     paths.forEach(function(p) {
-        optimizePathSet(cache, cache, p, 0, optimized);
+        optimizePathSet(cache, cache, p, 0, optimized, []);
     });
 
     return optimized;
@@ -30,7 +29,6 @@ module.exports = function optimizePathSets(cache, paths) {
  * optimizes one pathSet at a time.
  */
 function optimizePathSet(cache, cacheRoot, pathSet, depth, out, optimizedPath) {
-    optimizedPath = optimizedPath || [];
 
     // at missing, report optimized path.
     if (!cache) {

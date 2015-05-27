@@ -25,7 +25,6 @@ var isArray = Array.isArray;
 module.exports = function stripFromArray(toStrip, array) {
     var complement;
     var matches = [];
-    var length = -1;
     var typeToStrip = typeof toStrip;
     var isRangedArray = typeof array[0] === 'object';
     var isNumber = typeToStrip === 'number';
@@ -47,7 +46,7 @@ module.exports = function stripFromArray(toStrip, array) {
         var currentArray = array;
         toStrip.forEach(function(atom) {
             var results = stripFromArray(atom, currentArray);
-            if (results[0] !== undefined) {
+            if (results[0] !== undefined) { // eslint-disable-line no-undefined
                 matches = matches.concat(results[0]);
             }
             currentArray = results[1];
@@ -67,7 +66,7 @@ module.exports = function stripFromArray(toStrip, array) {
     else if (isRangedArray && !isRoutedToken) {
         complement = array.reduce(function(comp, range) {
             var results = stripFromRange(toStrip, range);
-            if (results[0] !== undefined) {
+            if (results[0] !== undefined) { // eslint-disable-line no-undefined
                 matches = matches.concat(results[0]);
             }
             return comp.concat(results[1]);

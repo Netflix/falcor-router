@@ -14,7 +14,6 @@ module.exports = function collapse(pathMap) {
 function rangeCollapse(paths) {
     paths.forEach(function (path) {
         path.forEach(function (elt, index) {
-            var range;
             if (Array.isArray(elt) && elt.every(isNumber)) {
                 elt.sort(function(a, b) {
                     return a - b;
@@ -57,7 +56,9 @@ function buildQueries(root) {
 
         childIsNum = typeof child === 'string' && !charPattern.test(child);
 
-        if ((list = memo[key]) && (head = list.head)) {
+        list = memo[key];
+        head = list && list.head;
+        if (list && head) {
             head[head.length] = childIsNum ? parseInt(child, 10) : child;
         } else {
             memo[key] = {
@@ -68,6 +69,7 @@ function buildQueries(root) {
     }
 
     results = [];
+    /* eslint-disable guard-for-in */
     for(x in memo) {
         head = (list = memo[x]).head;
         tail = list.tail;
@@ -88,6 +90,7 @@ function buildQueries(root) {
             results[results.length] = clone;
         }
     }
+    /* eslint-enable guard-for-in */
     return results;
 }
 

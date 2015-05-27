@@ -2,7 +2,7 @@ var isArray = Array.isArray;
 module.exports = function convertPathKeyTo(onRange, onKey) {
     return function converter(keySet) {
         var isKeySet = typeof keySet === 'object';
-        var out = [], i, to, outIdx;
+        var out = [];
 
         // The keySet we determine what type is this keyset.
         if (isKeySet) {

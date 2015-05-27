@@ -5,7 +5,7 @@ var convertTypes = require('./convertTypes');
 var errors = require('./../exceptions');
 var cloneArray = require('./../support/cloneArray');
 var parseTree = function(virtualPaths) {
-    var parseTree = {};
+    var pTree = {};
     var parseMap = {};
     virtualPaths.forEach(function(virtualPath) {
         // converts the virtual string path to a real path with
@@ -14,14 +14,13 @@ var parseTree = function(virtualPaths) {
             virtualPath.route = pathSyntax(virtualPath.route, true);
             convertTypes(virtualPath);
         }
-        buildParseTree(parseMap, parseTree, virtualPath, 0);
+        buildParseTree(parseMap, pTree, virtualPath, 0, []);
     });
-    return parseTree;
+    return pTree;
 };
 module.exports = parseTree;
 
 function buildParseTree(parseMap, node, pathAndAction, depth, virtualRunner) {
-    virtualRunner = virtualRunner || [];
     var route = pathAndAction.route;
     var get = pathAndAction.get;
     var set = pathAndAction.set;
@@ -31,7 +30,7 @@ function buildParseTree(parseMap, node, pathAndAction, depth, virtualRunner) {
 
     el = !isNaN(+el) && +el || el;
     var isArray = Array.isArray(el);
-    var i = 0, j;
+    var i = 0;
 
     do {
         var value = el;
@@ -122,6 +121,9 @@ function decendTreeByRoutedToken(node, value, routeToken) {
             if (!next) {
                 next = node[value] = {};
             }
+            break;
+        default:
+            break;
     }
     if (next && routeToken) {
         // matches the naming information on the node.

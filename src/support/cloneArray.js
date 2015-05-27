@@ -1,7 +1,7 @@
-function cloneArray(arr, i) {
+function cloneArray(arr, index) {
     var a = [];
     var len = arr.length;
-    for (i = i || 0; i < len; i++) {
+    for (var i = index || 0; i < len; i++) {
         a[i] = arr[i];
     }
     return a;

@@ -7,7 +7,7 @@ var getExecutableMatches = require('./getExecutableMatches');
 module.exports = function runByPrecedence(pathSet, matches, actionRunner) {
 
     // Precendence matching
-    matches = matches.
+    var sortedMatches = matches.
         sort(function(a, b) {
             if (a.precedence > b.precedence) {
                 return 1;
@@ -18,7 +18,7 @@ module.exports = function runByPrecedence(pathSet, matches, actionRunner) {
             return 0;
         });
 
-    var matchesWithPaths = getExecutableMatches(matches, [pathSet]);
+    var matchesWithPaths = getExecutableMatches(sortedMatches, [pathSet]);
     return Observable.
         from(matchesWithPaths).
         flatMap(actionRunner).

@@ -1,7 +1,6 @@
 var toPaths = require('./../../operations/collapse/toPaths');
 var toTree = require('./../../operations/collapse/toTree');
 var stripPath = require('./../../operations/strip/stripPath');
-var Observable = require('rx').Observable;
 var hasIntersection = require('./../../operations/matcher/intersection/hasIntersection');
 
 /**

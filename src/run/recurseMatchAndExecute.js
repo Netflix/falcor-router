@@ -50,7 +50,6 @@ function _recurseMatchAndExecute(match, actionRunner, paths, method) {
                 flatMap(function(results) {
                     var value = results.value;
                     var suffix = results.match.suffix;
-                    var hasSuffix = suffix.length;
 
                     if (!isArray(value)) {
                         value = [value];
@@ -58,14 +57,14 @@ function _recurseMatchAndExecute(match, actionRunner, paths, method) {
                     var invalidationsNextPathsAndMessages =
                         mergeCacheAndGatherRefsAndInvalidations(jsongSeed, value);
                     var nextInvalidations = invalidationsNextPathsAndMessages[0];
-                    var nextPaths = invalidationsNextPathsAndMessages[1];
+                    var pathsToExpand = invalidationsNextPathsAndMessages[1];
                     var messages = invalidationsNextPathsAndMessages[2];
                     nextInvalidations.forEach(function(invalidation) {
                         invalidated[invalidated.length] = invalidation;
                     });
 
                     // Merges the remaining suffix with remaining nextPaths
-                    nextPaths = nextPaths.map(function(next) {
+                    pathsToExpand = pathsToExpand.map(function(next) {
                         return next.value.concat(suffix);
                     });
 
@@ -73,13 +72,13 @@ function _recurseMatchAndExecute(match, actionRunner, paths, method) {
                     messages.forEach(function(message) {
                         // mutates the method type for the matcher
                         if (message.method) {
-                            method = message.method;
+                            method = message.method; //eslint-disable-line no-param-reassign
                         }
 
                         // Mutates the nextPaths and adds any additionalPaths
                         else if (message.additionalPath) {
                             var path = message.additionalPath;
-                            nextPaths[nextPaths.length] = path;
+                            pathsToExpand[pathsToExpand.length] = path;
                             reportedPaths[reportedPaths.length] = path;
                         }
                     });
@@ -87,14 +86,14 @@ function _recurseMatchAndExecute(match, actionRunner, paths, method) {
                     // Explodes and collapse the tree to remove
                     // redundants and get optimized next set of
                     // paths to evaluate.
-                    nextPaths = optimizePathSets(jsongSeed, nextPaths);
-                    if (nextPaths.length) {
-                        nextPaths = toPaths(toTree(nextPaths));
+                    pathsToExpand = optimizePathSets(jsongSeed, pathsToExpand);
+                    if (pathsToExpand.length) {
+                        pathsToExpand = toPaths(toTree(pathsToExpand));
                     }
 
                     missing = missing.concat(matchedResults.missingPaths);
                     return Observable.
-                        from(nextPaths);
+                        from(pathsToExpand);
                 }).
                 defaultIfEmpty([]);
 

@@ -23,11 +23,8 @@ module.exports = function strip(matchedAtom, virtualAtom) {
     var relativeComplement = [];
     var matchedResults;
     var typeOfMatched = typeof matchedAtom;
-    var typeOfVirtual = typeof virtualAtom;
     var isArrayMatched = isArray(matchedAtom);
-    var isArrayVirtual = isArray(virtualAtom);
     var isObjectMatched = typeOfMatched === 'object';
-    var isObjectVirtual = typeOfVirtual === 'object';
 
     // Lets assume they are not objects  This covers the
     // string / number cases.

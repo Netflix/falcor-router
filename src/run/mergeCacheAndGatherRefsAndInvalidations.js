@@ -25,7 +25,8 @@ module.exports = function mergeCacheAndGatherRefsAndInvalidations(cache, jsongOr
         if (isJSONG(jsongOrPV)) {
             refs = jsongMerge(cache, jsongOrPV);
         } else {
-            if (jsongOrPV.value === undefined) {
+
+            if (jsongOrPV.value === undefined) { //eslint-disable-line no-undefined
                 invalidated[invalidated.length] = jsongOrPV;
             } else {
                 refs = pathValueMerge(cache, jsongOrPV);
@@ -33,8 +34,8 @@ module.exports = function mergeCacheAndGatherRefsAndInvalidations(cache, jsongOr
         }
 
         if (refs.length) {
-            refs.forEach(function(refs) {
-                nextPaths[++len] = refs;
+            refs.forEach(function(ref) {
+                nextPaths[++len] = ref;
             });
         }
     });

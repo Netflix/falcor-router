@@ -6,13 +6,12 @@ var isArray = Array.isArray;
  */
 module.exports = function toTree(paths) {
     return paths.reduce(function(acc, path) {
-        innerToTree(acc, path);
+        innerToTree(acc, path, 0);
         return acc;
     }, {});
 };
 
 function innerToTree(seed, path, depth) {
-    depth = depth || 0;
 
     var keySet = path[depth];
     var memo, key;

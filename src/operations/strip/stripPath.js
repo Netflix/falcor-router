@@ -1,6 +1,5 @@
 var strip = require('./strip');
 var catAndSlice = require('./../../support/catAndSlice');
-var slice = require('./../../support/slice');
 
 /**
  * Takes in the matched path and virtual path and creates the

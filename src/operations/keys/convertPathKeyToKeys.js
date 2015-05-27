@@ -1,5 +1,4 @@
 var convertPathKeyTo = require('./../convertPathKeyTo');
-var isArray = Array.isArray;
 var rangeToArray = require('./../ranges/rangeToArray');
 
 function onKey(out, key) {
