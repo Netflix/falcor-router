@@ -34,16 +34,16 @@ module.exports = function strip(matchedAtom, virtualAtom) {
     if (matchedAtom === virtualAtom ||
        String(matchedAtom) === String(virtualAtom)) {
 
-        matchedResults = matchedAtom;
+        matchedResults = [matchedAtom];
     }
 
     // See function comment 1)
     else if (!isObjectMatched) {
-        matchedResults = matchedAtom;
+        matchedResults = [matchedAtom];
     }
 
-    // both the stripFromRanges and Array can take in
-    // an array which simplifies this assignment.
+    // Its a complex object set potentially.  Let the
+    // subroutines handle the cases.
     else {
         var results;
 
@@ -58,6 +58,10 @@ module.exports = function strip(matchedAtom, virtualAtom) {
             matchedResults = results[0];
             relativeComplement = results[1];
         }
+    }
+
+    if (matchedResults.length === 1) {
+        matchedResults = matchedResults[0];
     }
 
     return [matchedResults, relativeComplement];

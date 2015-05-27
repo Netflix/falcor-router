@@ -7,7 +7,7 @@
     "rules": {
         // possible errors
         "comma-dangle": [ 2 ],
-        "no-cond-assign": [ 2 ],
+        "no-cond-assign": [ 2, 'always' ],
         "no-console": [ 2 ],
         "no-constant-condition": [ 2 ],
         "no-control-regex": [ 2 ],

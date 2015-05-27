@@ -48,7 +48,6 @@ describe('stripFromRange', function() {
     it('should pass in an array with mixed keys.', function() {
         var arg = [0, 'one', 2, 'three', 4];
         var range = {from: 0, to: 4};
-        debugger
         var out = stripFromRange(arg, range);
 
         expect(out).to.deep.equals([[0, 2, 4], [{from: 1, to: 1}, {from: 3, to: 3}]]);

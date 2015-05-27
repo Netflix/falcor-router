@@ -19,54 +19,31 @@ describe('Strip', function() {
         var range = {from: 0, to: 4};
         var out = strip(range, arg);
 
-        expect(out).to.deep.equals([[0], [{from: 1, to: 4}]]);
+        expect(out).to.deep.equals([0, [{from: 1, to: 4}]]);
     });
-    it('should split into 1 range when virtualAtom === matchedAtom.to', function() {
-        var arg = 4;
-        var range = {from: 0, to: 4};
-        var out = strip(range, arg);
-
-        expect(out).to.deep.equals([[4], [{from: 0, to: 3}]]);
-    });
-    it('should split into 1 range when matchedAtom.from < virtualAtom < matchedAtom.to', function() {
-        var arg = 2;
-        var range = {from: 0, to: 4};
-        var out = strip(range, arg);
-
-        expect(out).to.deep.equals([[2], [
-            {from: 0, to: 1},
-            {from: 3, to: 4}
-        ]]);
-    });
-    it('should pass in a string number as virtualAtom.', function() {
-        var arg = '2';
-        var range = {from: 0, to: 4};
-        var out = strip(range, arg);
-
-        expect(out).to.deep.equals([[2], [
-            {from: 0, to: 1},
-            {from: 3, to: 4}
-        ]]);
-    });
-    it('should pass in a routed token as virtualAtom.', function() {
+    it('should strip out all elements if keys used.', function() {
         var arg = getRoutedToken(Keys.keys);
-        var range = {from: 0, to: 4};
-        var out = strip(range, arg);
-        expect(out).to.deep.equals([{from: 0, to: 4}, []]);
+        var array = ['one', 2, 'three'];
+        var out = strip(array, arg);
+        expect(out).to.deep.equals([['one', 2, 'three'], []]);
     });
-    it('should pass in an array with mixed keys.', function() {
-        var arg = [0, 'one', 2, 'three', 4];
-        var range = {from: 0, to: 4};
-        var out = strip(range, arg);
-
-        expect(out).to.deep.equals([[0, 2, 4], [{from: 1, to: 1}, {from: 3, to: 3}]]);
+    it('should match numeric tokens.', function() {
+        var matchedAtom = 5;
+        var virtualAtom = 5;
+        var out = strip(matchedAtom, virtualAtom);
+        expect(out).to.deep.equals([5, []]);
     });
-    it('should return nothing when 1 length range is stripped.', function() {
-        var arg = 0;
-        var range = {from: 0, to: 0};
-        var out = strip(range, arg);
-
-        expect(out).to.deep.equals([[0], []]);
+    it('should match mismatched tokens.', function() {
+        var matchedAtom = 5;
+        var virtualAtom = '5';
+        var out = strip(matchedAtom, virtualAtom);
+        expect(out).to.deep.equals([5, []]);
+    });
+    it('should return an empty complement on any routed token with non matched object input.', function() {
+        var matchedAtom = 5;
+        var virtualAtom = getRoutedToken(Keys.keys);
+        var out = strip(matchedAtom, virtualAtom);
+        expect(out).to.deep.equals([5, []]);
     });
 });
 
