@@ -68,6 +68,7 @@ describe('Specific', function() {
         var obs = router.
             get([['lists', [0, 1], 'summary']]);
         var count = 0;
+        debugger
         obs.
             doAction(function(res) {
                 expect(res).to.deep.equals({
@@ -92,4 +93,76 @@ describe('Specific', function() {
             }).
             subscribe(noOp, done, done);
     });
+
+    it('should do precedence stripping.', function(done) {
+        var title = 0;
+        var rating = 0;
+        var called = 0;
+        var router = getPrecedenceRouter(
+            function onTitle(alias) {
+                var expected = ['videos', [123], 'title'];
+                expected.ids = expected[1];
+                expect(alias).to.deep.equals(expected);
+                title++;
+            },
+            function onRating(alias) {
+                var expected = ['videos', [123], 'rating'];
+                expected.ids = expected[1];
+                expect(alias).to.deep.equals(expected);
+                rating++;
+            });
+
+        router.
+            get([['videos', 123, ['title', 'rating']]]).
+            doAction(function(x) {
+                expect(x).to.deep.equals({
+                    jsong: {
+                        videos: {
+                            123: {
+                                title: 'title 123',
+                                rating: 'rating 123'
+                            }
+                        }
+                    }
+                });
+                called++;
+            }, noOp, function() {
+                expect(title).to.equals(1);
+                expect(rating).to.equals(1);
+                expect(called).to.equals(1);
+            }).
+            subscribe(noOp, done, done);
+    });
+
+    function getPrecedenceRouter(onTitle, onRating) {
+        return new R([{
+            route: 'videos[{integers:ids}].title',
+            get: function(alias) {
+                var ids = alias.ids;
+                onTitle(alias);
+                return Observable.
+                    from(ids).
+                    map(function(id) {
+                        return {
+                            path: ['videos', id, 'title'],
+                            value: 'title ' + id
+                        };
+                    });
+            }
+        }, {
+            route: 'videos[{integers:ids}].rating',
+            get: function(alias) {
+                var ids = alias.ids;
+                onRating(alias);
+                return Observable.
+                    from(ids).
+                    map(function(id) {
+                        return {
+                            path: ['videos', id, 'rating'],
+                            value: 'rating ' + id
+                        };
+                    });
+            }
+        }]);
+    }
 });

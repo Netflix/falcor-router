@@ -10,10 +10,9 @@ var gulp = require('gulp');
 var istanbul = require('gulp-istanbul');
 var mocha = require('gulp-mocha');
 
-var srcDir = 'lib';
 
 gulp.task('lint', function() {
-    return gulp.src(srcDir + '/**/*.js').
+    return gulp.src('noop/**/*.js').
         pipe(eslint({
             globals: {
                 'require': false,

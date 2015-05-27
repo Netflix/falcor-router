@@ -11,15 +11,15 @@ var pathValueMerge = require('./../../cache/pathValueMerge');
 module.exports =  outerRunCallAction;
 
 function outerRunCallAction(routerInstance, callPath, args, suffixes, paths) {
-    return function innerRunCallAction(matches) {
-        return runCallAction(matches, routerInstance, callPath,
+    return function innerRunCallAction(matchAndPath) {
+        return runCallAction(matchAndPath, routerInstance, callPath,
                              args, suffixes, paths);
     };
 }
 
-function runCallAction(matches, routerInstance, callPath, args, suffixes, paths) {
-    var match = matches[0];
-    var matchedPath = match.path;
+function runCallAction(matchAndPath, routerInstance, callPath, args, suffixes, paths) {
+    var match = matchAndPath.match;
+    var matchedPath = matchAndPath.path;
     var out;
 
     // We are at out destination.  Its time to get out
@@ -117,7 +117,7 @@ function runCallAction(matches, routerInstance, callPath, args, suffixes, paths)
                 return res;
             });
     } else {
-        out = match.action.call(null, match.path);
+        out = match.action.call(null, matchAndPath.path);
         out = outputToObservable(out);
     }
 
@@ -126,5 +126,5 @@ function runCallAction(matches, routerInstance, callPath, args, suffixes, paths)
         filter(function(note) {
             return note.kind !== 'C';
         }).
-        map(noteToJsongOrPV(match));
+        map(noteToJsongOrPV(matchAndPath));
 }

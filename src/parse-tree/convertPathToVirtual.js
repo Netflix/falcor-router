@@ -8,7 +8,9 @@ var convertPathKeyToKeys = require('./../operations/keys/convertPathKeyToKeys');
  */
 module.exports = function convertPathToVirtual(path, virtual) {
     var matched = [];
-    for (var i = 0, len = path.length; i < len; ++i) {
+    // Always use virtual path since path can be longer since
+    // it contains suffixes.
+    for (var i = 0, len = virtual.length; i < len; ++i) {
 
         // Specific key matching
         if (path[i] === virtual[i]) {

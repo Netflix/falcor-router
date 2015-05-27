@@ -7,7 +7,7 @@ module.exports = function noteToJsongOrPV(match) {
     };
 };
 
-function convertNoteToJsongOrPV(match, note) {
+function convertNoteToJsongOrPV(matchAndPath, note) {
     var incomingJSONGOrPathValues;
     var kind = note.kind;
 
@@ -24,7 +24,7 @@ function convertNoteToJsongOrPV(match, note) {
             throw exception;
         }
         incomingJSONGOrPathValues = {
-            path: match.path,
+            path: matchAndPath.path,
             value: {
                 $type: 'error',
                 value: {
@@ -42,10 +42,10 @@ function convertNoteToJsongOrPV(match, note) {
 
         incomingJSONGOrPathValues = {
             jsong: incomingJSONGOrPathValues.jsong,
-            paths: [match.path]
+            paths: [matchAndPath.path]
         };
     }
 
-    return [match, incomingJSONGOrPathValues];
+    return [matchAndPath.match, incomingJSONGOrPathValues];
 }
 

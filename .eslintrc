@@ -22,7 +22,6 @@
         "no-extra-semi": [ 2 ],
         "no-func-assign": [ 2 ],
         // this is for variable hoisting, not necessary if we use block scoped declarations
-        // "no-inner-declarations": [ 2, "both" ],
         "no-invalid-regexp": [ 2 ],
         "no-irregular-whitespace": [ 2 ],
         "no-negated-in-lhs": [ 2 ],
