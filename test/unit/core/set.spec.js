@@ -50,7 +50,6 @@ describe('Set', function() {
                 ]
             }).
             doAction(function(result) {
-                debugger
                 expect(result).to.deep.equals({
                     jsong: {
                         videos: {
@@ -70,6 +69,68 @@ describe('Set', function() {
                     expect(called).to.equals(1);
                     done();
                 }
+            });
+    });
+
+    it('should perform a set with get reference following.', function(done) {
+        var did = false;
+        var called = 0;
+        var refFollowed = false;
+        var router = new R(
+            Routes().Genrelists.Integers(function() {
+                refFollowed = true;
+            }).concat(
+            [{
+                route: 'videos[{integers:id}].rating',
+                set: function(pathValues) {
+                    called++;
+                    try {
+                        expect(pathValues.map(function(pV) {
+                            return {
+                                path: pV.path.concat(),
+                                value: pV.value
+                            };
+                        })).to.deep.equals([
+                            {path: ['videos', [0], 'rating'], value: 5}
+                        ]);
+                    } catch (e) {
+                        done(e);
+                        did = true;
+                    }
+                    return pathValues;
+                }
+            }]));
+
+        router.
+            set({
+                jsong: {
+                    genreLists: {
+                        0: {
+                            rating: 5
+                        }
+                    }
+                },
+                paths: [
+                    ['genreLists', 0, 'rating']
+                ]
+            }).
+            doAction(function(res) {
+                expect(res).to.deep.equals({
+                    jsong: {
+                        genreLists: {
+                            0: $ref('videos[0]')
+                        },
+                        videos: {
+                            0: {
+                                rating: 5
+                            }
+                        }
+                    }
+                });
+            }).
+            subscribe(noOp, done, function() {
+                expect(called && refFollowed).to.be.ok;
+                done();
             });
     });
 });
