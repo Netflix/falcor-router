@@ -9,7 +9,6 @@ var pathValueMerge = require('./cache/pathValueMerge');
 var runGetAction = require('./run/get/runGetAction');
 var runSetAction = require('./run/set/runSetAction');
 var runCallAction = require('./run/call/runCallAction');
-var falcor = require('falcor');
 var $atom = require('./support/types').$atom;
 var get = 'get';
 var set = 'set';

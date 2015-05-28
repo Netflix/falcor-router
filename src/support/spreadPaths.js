@@ -16,9 +16,9 @@ module.exports = function spreadPaths(paths) {
 
 function _spread(pathSet, depth, out, currentPath) {
 
-    /* eslisnt-disable no-param-reassign */
+    /* eslint-disable no-param-reassign */
     currentPath = currentPath || [];
-    /* eslisnt-enable no-param-reassign */
+    /* eslint-enable no-param-reassign */
 
     if (depth === pathSet.length) {
         out[out.length] = cloneArray(currentPath);
@@ -29,7 +29,8 @@ function _spread(pathSet, depth, out, currentPath) {
     var key = pathSet[depth];
     if (typeof key !== 'object') {
         currentPath[depth] = key;
-        return _spread(pathSet, depth + 1, out, currentPath);
+        _spread(pathSet, depth + 1, out, currentPath);
+        return;
     }
 
     // complex key.

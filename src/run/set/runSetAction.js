@@ -14,7 +14,6 @@ module.exports = function outerRunSetAction(routerInstance, modelContext) {
 function runSetAction(routerInstance, jsongMessage, matchAndPath) {
     var jsongCache = routerInstance.jsongCache;
     var match = matchAndPath.match;
-    var matchedPath = matchAndPath.path;
     var out;
     var arg = matchAndPath.path;
 
