@@ -4,7 +4,7 @@ var catAndSlice = require('./../support/catAndSlice');
 var isArray = Array.isArray;
 var $types = require('./../support/types');
 var $ref = $types.$ref;
-var fastFollowReference = require('./fastFollowReference');
+var followReference = require('./followReference');
 
 /**
  * The fastest possible optimize of paths.
@@ -72,7 +72,7 @@ function optimizePathSet(cache, cacheRoot, pathSet, depth, out, optimizedPath) {
         }
 
         if (next && next.$type === $ref && nextDepth < pathSet.length) {
-            var refResults = fastFollowReference(cacheRoot, next.value);
+            var refResults = followReference(cacheRoot, next.value);
             next = refResults[0];
 
             // must clone to avoid the mutation from above destroying the cache.

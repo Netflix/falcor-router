@@ -14,15 +14,22 @@ var isArray = Array.isArray;
  * is matched.  If there still is more, denoted by suffixes,
  * paths to be matched then the recurser will keep running.
  */
-module.exports = function recurseMatchAndExecute(match, actionRunner, paths, method) {
-    return _recurseMatchAndExecute(match, actionRunner, paths, method);
+module.exports = function recurseMatchAndExecute(
+        match, actionRunner, paths,
+        method, routerInstance) {
+
+    return _recurseMatchAndExecute(
+        match, actionRunner, paths,
+        method, routerInstance);
 };
 
 /**
  * performs the actual recursing
  */
-function _recurseMatchAndExecute(match, actionRunner, paths, method) {
-    var jsongSeed = {};
+function _recurseMatchAndExecute(
+        match, actionRunner, paths,
+        method, routerInstance) {
+    var jsongCache = routerInstance.jsongCache;
     var missing = [];
     var invalidated = [];
     var reportedPaths = [];
@@ -55,7 +62,7 @@ function _recurseMatchAndExecute(match, actionRunner, paths, method) {
                         value = [value];
                     }
                     var invalidationsNextPathsAndMessages =
-                        mergeCacheAndGatherRefsAndInvalidations(jsongSeed, value);
+                        mergeCacheAndGatherRefsAndInvalidations(jsongCache, value);
                     var nextInvalidations = invalidationsNextPathsAndMessages[0];
                     var pathsToExpand = invalidationsNextPathsAndMessages[1];
                     var messages = invalidationsNextPathsAndMessages[2];
@@ -86,7 +93,7 @@ function _recurseMatchAndExecute(match, actionRunner, paths, method) {
                     // Explodes and collapse the tree to remove
                     // redundants and get optimized next set of
                     // paths to evaluate.
-                    pathsToExpand = optimizePathSets(jsongSeed, pathsToExpand);
+                    pathsToExpand = optimizePathSets(jsongCache, pathsToExpand);
                     if (pathsToExpand.length) {
                         pathsToExpand = toPaths(toTree(pathsToExpand));
                     }
@@ -105,7 +112,7 @@ function _recurseMatchAndExecute(match, actionRunner, paths, method) {
             return {
                 missing: missing,
                 invalidated: invalidated,
-                jsong: jsongSeed,
+                jsong: jsongCache,
                 reportedPaths: reportedPaths
             };
         });

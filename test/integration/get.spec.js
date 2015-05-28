@@ -51,7 +51,6 @@ describe('Get', function() {
             }).
             doAction(function(x) {
                 called = true;
-                debugger
                 expect(x).to.deep.equals({
                     json: {
                         genreLists: {
@@ -64,7 +63,6 @@ describe('Get', function() {
                     }
                 });
             }, noOp, function() {
-                debugger
                 expect(called).to.be.ok;
             }).
             subscribe(noOp, done, done);
