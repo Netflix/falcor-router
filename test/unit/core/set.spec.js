@@ -15,22 +15,25 @@ describe('Set', function() {
         var called = 0;
         var router = new R([{
             route: 'videos[{integers:id}].rating',
-            set: function(pathValues) {
+            set: function(json) {
                 try {
-                    expect(pathValues.map(function(pV) {
-                        return {
-                            path: pV.path.concat(),
-                            value: pV.value
-                        };
-                    })).to.deep.equals([
-                        {path: ['videos', [1234], 'rating'], value: 5},
-                        {path: ['videos', [333], 'rating'], value: 5}
-                    ]);
+                    expect(json).to.deep.equals({
+                        videos: {
+                            1234: { rating: 5 },
+                            333: { rating: 5 }
+                        }
+                    });
                 } catch (e) {
                     done(e);
                     did = true;
                 }
-                return pathValues;
+                return [{
+                    path: ['videos', 1234, 'rating'],
+                    value: 5
+                }, {
+                    path: ['videos', 333, 'rating'],
+                    value: 5
+                }];
             }
         }]);
         router.
@@ -82,22 +85,22 @@ describe('Set', function() {
             }).concat(
             [{
                 route: 'videos[{integers:id}].rating',
-                set: function(pathValues) {
+                set: function(json) {
                     called++;
                     try {
-                        expect(pathValues.map(function(pV) {
-                            return {
-                                path: pV.path.concat(),
-                                value: pV.value
-                            };
-                        })).to.deep.equals([
-                            {path: ['videos', [0], 'rating'], value: 5}
-                        ]);
+                        expect(json).to.deep.equals({
+                            videos: {
+                                0: { rating: 5 }
+                            }
+                        });
                     } catch (e) {
                         done(e);
                         did = true;
                     }
-                    return pathValues;
+                    return [{
+                        path: ['videos', 0, 'rating'],
+                        value: 5
+                    }];
                 }
             }]));
 
@@ -129,8 +132,14 @@ describe('Set', function() {
                 });
             }).
             subscribe(noOp, done, function() {
-                expect(called && refFollowed).to.be.ok;
-                done();
+                if (!did) {
+                    try {
+                        expect(called && refFollowed).to.be.ok;
+                        done();
+                    } catch(e) {
+                        done(e);
+                    }
+                }
             });
     });
 });

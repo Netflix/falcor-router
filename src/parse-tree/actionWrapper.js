@@ -1,15 +1,23 @@
 var convertPathToVirtual = require('./convertPathToVirtual');
 var isPathValue = require('./../support/isPathValue');
 var slice = require('./../support/slice');
+var isArray = Array.isArray;
 
 function createNamedVariables(virtualPath, action) {
     return function(matchedPath) {
         var convertedArguments;
         var len = -1;
         var restOfArgs = slice(arguments, 1);
+        var isJSONObject = !isArray(matchedPath);
+
+        // A set uses a json object
+        if (isJSONObject) {
+            restOfArgs = [];
+            convertedArguments = matchedPath;
+        }
 
         // Could be an array of pathValues for a set operation.
-        if (isPathValue(matchedPath[0])) {
+        else if (isPathValue(matchedPath[0])) {
             convertedArguments = [];
 
             matchedPath.forEach(function(pV) {
