@@ -4,6 +4,8 @@ var authorize = require('./../authorize');
 var spreadPaths = require('./../../support/spreadPaths');
 var getValue = require('./../../cache/getValue');
 var optimizePathSets = require('./../../cache/optimizePathSets');
+var hasIntersection = require('./../../operations/matcher/intersection/hasIntersection');
+var pathValueMerge = require('./../../cache/pathValueMerge');
 
 module.exports = function outerRunSetAction(routerInstance, modelContext) {
     return function innerRunSetAction(matchAndPath) {
@@ -24,17 +26,27 @@ function runSetAction(routerInstance, jsongMessage, matchAndPath) {
 
         // We have to ensure that the paths maps in order
         // to the optimized paths array.
-        var optimizedPaths = paths.map(function(path) {
-            return optimizePathSets(jsongCache, [path])[0];
-        });
+        var optimizedPaths =
+            paths.
+                // Optimizes each path.
+                map(function(path) {
+                    return optimizePathSets(jsongCache, [path])[0];
+                }).
+                // only includes the paths from the set that intersect
+                // the virtual path
+                filter(function(path) {
+                    return hasIntersection(path, match.virtual);
+                });
 
+        // Constructs the json that is the set request virtual path.
         arg = paths.
-            map(function(path, i) {
-                return {
+            reduce(function(json, path, i) {
+                pathValueMerge(json, {
                     path: optimizedPaths[i],
                     value: getValue(jsongMessage.jsong, path)
-                };
-            });
+                });
+                return json;
+            }, {});
     }
     out = match.action.call(routerInstance, arg);
     out = outputToObservable(out);
