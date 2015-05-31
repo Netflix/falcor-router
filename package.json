@@ -39,8 +39,8 @@
     "through2": "~0.6.3"
   },
   "scripts": {
-    "test": "./node_modules/gulp/bin/gulp.js test-coverage",
-    "dist": "./node_modules/gulp/bin/gulp.js dist"
+    "test": "node node_modules/gulp/bin/gulp.js test-coverage",
+    "dist": "node node_modules/gulp/bin/gulp.js dist"
   },
   "repository": {
     "type": "git",
