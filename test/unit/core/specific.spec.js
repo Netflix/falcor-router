@@ -185,6 +185,23 @@ describe('Specific', function() {
         });
     });
 
+/*    it('should tolerate routes which return an empty observable', function (done) {
+        return new R([{
+            route: 'videos[{integers:ids}].title',
+            get: function (alias) {
+                return Observable.empty();
+            }
+        }]);
+        var obs = router.get([["videos", 1, "title"]]);
+        var called = false;
+        obs.subscribe(function (res) {
+            called = true;
+        }, done, function () {
+            expect(called, 'expect onNext called 1 time.').to.equal(true);
+            done();
+        });
+    });*/
+
     function getPrecedenceRouter(onTitle, onRating) {
         return new R([{
             route: 'videos[{integers:ids}].title',
