@@ -13,8 +13,7 @@ module.exports = function outerRunSetAction(routerInstance, modelContext) {
     };
 };
 
-function runSetAction(routerInstance, jsongMessage, matchAndPath) {
-    var jsongCache = routerInstance.jsongCache;
+function runSetAction(routerInstance, jsongMessage, matchAndPath, jsongCache) {
     var match = matchAndPath.match;
     var out;
     var arg = matchAndPath.path;
