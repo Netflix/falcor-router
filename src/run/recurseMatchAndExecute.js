@@ -16,11 +16,11 @@ var isArray = Array.isArray;
  */
 module.exports = function recurseMatchAndExecute(
         match, actionRunner, paths,
-        method, routerInstance) {
+        method, routerInstance, jsongCache) {
 
     return _recurseMatchAndExecute(
         match, actionRunner, paths,
-        method, routerInstance);
+        method, routerInstance, jsongCache);
 };
 
 /**
@@ -28,8 +28,7 @@ module.exports = function recurseMatchAndExecute(
  */
 function _recurseMatchAndExecute(
         match, actionRunner, paths,
-        method, routerInstance) {
-    var jsongCache = routerInstance.jsongCache;
+        method, routerInstance, jsongCache) {
     var missing = [];
     var invalidated = [];
     var reportedPaths = [];

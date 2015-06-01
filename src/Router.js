@@ -25,13 +25,12 @@ var Router = function(routes, options) {
     this._set = matcher(this._rst);
     this._call = matcher(this._rst);
     this._debug = opts.debug;
-    this.jsongCache = {};
 };
 
 Router.prototype = {
     get: function(paths) {
         var action = runGetAction(this);
-        return run(this._get, action, normalizePathSets(paths), get, this).
+        return run(this._get, action, normalizePathSets(paths), get, this, {}).
             map(function(jsongEnv) {
                 return materializeMissing(paths, jsongEnv);
             });
@@ -41,7 +40,7 @@ Router.prototype = {
         // TODO: Remove the modelContext and replace with just jsongEnv
         // when http://github.com/Netflix/falcor-router/issues/24 is addressed
         var action = runSetAction(this, jsong);
-        return run(this._set, action, jsong.paths, set, this).
+        return run(this._set, action, jsong.paths, set, this, {}).
             map(function(jsongEnv) {
                 return materializeMissing(jsong.paths, jsongEnv);
             });
@@ -50,7 +49,7 @@ Router.prototype = {
     call: function(callPath, args, suffixes, paths) {
         var action = runCallAction(this, callPath, args, suffixes, paths);
         var callPaths = [callPath];
-        return run(this._call, action, callPaths, call, this).
+        return run(this._call, action, callPaths, call, this, {}).
             map(function(jsongResult) {
                 var jsongEnv = materializeMissing(
                     callPaths,
@@ -66,9 +65,9 @@ Router.prototype = {
     }
 };
 
-function run(matcherFn, actionRunner, paths, method, routerInstance) {
+function run(matcherFn, actionRunner, paths, method, routerInstance, jsongCache) {
     return recurseMatchAndExecute(
-            matcherFn, actionRunner, paths, method, routerInstance);
+            matcherFn, actionRunner, paths, method, routerInstance, jsongCache);
 }
 
 function materializeMissing(paths, jsongEnv, missingAtom) {
