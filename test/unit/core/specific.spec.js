@@ -133,12 +133,36 @@ describe('Specific', function() {
             subscribe(noOp, done, done);
     });
 
+    it('should grab a reference.', function(done) {
+        var title = 0;
+        var rating = 0;
+        var called = 0;
+        var router = getPrecedenceRouter();
+        router.
+            get([['lists', 'abc', 0]]).
+            doAction(function(x) {
+                expect(x).to.deep.equals({
+                    jsong: {
+                        lists: {
+                            abc: {
+                                0: $ref('videos[0]')
+                            }
+                        }
+                    }
+                });
+                called++;
+            }, noOp, function() {
+                expect(called).to.equals(1);
+            }).
+            subscribe(noOp, done, done);
+    });
+
     function getPrecedenceRouter(onTitle, onRating) {
         return new R([{
             route: 'videos[{integers:ids}].title',
             get: function(alias) {
                 var ids = alias.ids;
-                onTitle(alias);
+                onTitle && onTitle(alias);
                 return Observable.
                     from(ids).
                     map(function(id) {
@@ -152,13 +176,33 @@ describe('Specific', function() {
             route: 'videos[{integers:ids}].rating',
             get: function(alias) {
                 var ids = alias.ids;
-                onRating(alias);
+                onRating && onRating(alias);
                 return Observable.
                     from(ids).
                     map(function(id) {
                         return {
                             path: ['videos', id, 'rating'],
                             value: 'rating ' + id
+                        };
+                    });
+            }
+
+        }, {
+            route: 'lists[{keys:ids}][{integers:indices}]',
+            get: function(alias) {
+                return Observable.
+                    from(alias.ids).
+                    flatMap(function(id) {
+                        return Observable.
+                            from(alias.indices).
+                            map(function(idx) {
+                                return {id: id, idx: idx};
+                            });
+                    }).
+                    map(function(data) {
+                        return {
+                            path: ['lists', data.id, data.idx],
+                            value: $ref(['videos', data.idx])
                         };
                     });
             }
