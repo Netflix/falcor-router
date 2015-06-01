@@ -4,7 +4,7 @@ var runByPrecedence = require('./precedence/runByPrecedence');
 var toPaths = require('./../operations/collapse/toPaths');
 var toTree = require('./../operations/collapse/toTree');
 var optimizePathSets = require('./../cache/optimizePathSets');
-var mergeCacheAndGatherRefsAndInvalidations = require('./mergeCacheAndGatherRefsAndInvalidations');
+var mCGRI = require('./mergeCacheAndGatherRefsAndInvalidations');
 var isArray = Array.isArray;
 
 /**
@@ -16,11 +16,11 @@ var isArray = Array.isArray;
  */
 module.exports = function recurseMatchAndExecute(
         match, actionRunner, paths,
-        method, routerInstance) {
+        method, routerInstance, jsongCache) {
 
     return _recurseMatchAndExecute(
         match, actionRunner, paths,
-        method, routerInstance);
+        method, routerInstance, jsongCache);
 };
 
 /**
@@ -28,8 +28,7 @@ module.exports = function recurseMatchAndExecute(
  */
 function _recurseMatchAndExecute(
         match, actionRunner, paths,
-        method, routerInstance) {
-    var jsongCache = routerInstance.jsongCache;
+        method, routerInstance, jsongCache) {
     var missing = [];
     var invalidated = [];
     var reportedPaths = [];
@@ -62,7 +61,7 @@ function _recurseMatchAndExecute(
                         value = [value];
                     }
                     var invalidationsNextPathsAndMessages =
-                        mergeCacheAndGatherRefsAndInvalidations(jsongCache, value);
+                            mCGRI(jsongCache, value, suffix.length > 0);
                     var nextInvalidations = invalidationsNextPathsAndMessages[0];
                     var pathsToExpand = invalidationsNextPathsAndMessages[1];
                     var messages = invalidationsNextPathsAndMessages[2];

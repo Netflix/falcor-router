@@ -8,14 +8,14 @@ var pathValueMerge = require('./../../cache/pathValueMerge');
 
 module.exports =  outerRunCallAction;
 
-function outerRunCallAction(routerInstance, callPath, args, suffixes, paths) {
+function outerRunCallAction(routerInstance, callPath, args, suffixes, paths, jsongCache) {
     return function innerRunCallAction(matchAndPath) {
         return runCallAction(matchAndPath, routerInstance, callPath,
-                             args, suffixes, paths);
+                             args, suffixes, paths, jsongCache);
     };
 }
 
-function runCallAction(matchAndPath, routerInstance, callPath, args, suffixes, paths) {
+function runCallAction(matchAndPath, routerInstance, callPath, args, suffixes, paths, jsongCache) {
     var match = matchAndPath.match;
     var matchedPath = matchAndPath.path;
     var out;

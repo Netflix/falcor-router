@@ -157,6 +157,79 @@ describe('Specific', function() {
             subscribe(noOp, done, done);
     });
 
+    it('should not follow references if no keys specified after path to reference', function (done) {
+        var routeResponse = {
+            "jsong": {
+                "ProffersById": {
+                    "1": {
+                        "ProductsList": {
+                            "0": {
+                                "$size": 52,
+                                "$type": "ref",
+                                "value": [
+                                    "ProductsById",
+                                    "CSC1471105X"
+                                ]
+                            },
+                            "1": {
+                                "$size": 52,
+                                "$type": "ref",
+                                "value": [
+                                    "ProductsById",
+                                    "HON4033T"
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        var router = new R([
+            {
+                route: "ProductsById[{keys}][{keys}]",
+                get: function (pathSet) {
+                    throw "reference was followed in error";
+                }
+            },
+            {
+                route: "ProffersById[{integers}].ProductsList[{ranges}]",
+                get: function (pathSet) {
+                    return Observable.of(routeResponse);
+                }
+            }
+        ]);
+        var obs = router.get([["ProffersById", 1, "ProductsList", {"from": 0, "to": 1}]]);
+        var called = false;
+        obs.
+            doAction(function (res) {
+                expect(res).to.deep.equals(routeResponse);
+                called = true;
+            }, noOp, function () {
+                expect(called, 'expect onNext called 1 time.').to.equal(true);
+            }).
+            subscribe(noOp, done, done);
+    });
+
+    it('should tolerate routes which return an empty observable', function (done) {
+        var router = new R([{
+            route: 'videos[{integers:ids}].title',
+            get: function (alias) {
+                return Observable.empty();
+            }
+        }]);
+        var obs = router.get([["videos", 1, "title"]]);
+        var called = false;
+        obs.subscribe(function (res) {
+            expect(res).to.deep.equals({
+                jsong: {videos: {1: {title: {$type: 'atom'}}}}
+            });
+            called = true;
+        }, done, function () {
+            expect(called, 'expect onNext called 1 time.').to.equal(true);
+            done();
+        });
+    });
+
     function getPrecedenceRouter(onTitle, onRating) {
         return new R([{
             route: 'videos[{integers:ids}].title',
