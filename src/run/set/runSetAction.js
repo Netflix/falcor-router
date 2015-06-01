@@ -7,9 +7,9 @@ var optimizePathSets = require('./../../cache/optimizePathSets');
 var hasIntersection = require('./../../operations/matcher/intersection/hasIntersection');
 var pathValueMerge = require('./../../cache/pathValueMerge');
 
-module.exports = function outerRunSetAction(routerInstance, modelContext) {
+module.exports = function outerRunSetAction(routerInstance, modelContext, jsongCache) {
     return function innerRunSetAction(matchAndPath) {
-        return runSetAction(routerInstance, modelContext, matchAndPath);
+        return runSetAction(routerInstance, modelContext, matchAndPath, jsongCache);
     };
 };
 

@@ -133,7 +133,7 @@ describe('Specific', function() {
             subscribe(noOp, done, done);
     });
 
-    it('should not follow references if no keys specified after path to reference', function (done) {
+    xit('should not follow references if no keys specified after path to reference', function (done) {
         var routeResponse = {
             "jsong": {
                 "ProffersById": {
@@ -178,6 +178,26 @@ describe('Specific', function() {
         var called = false;
         obs.subscribe(function (res) {
             expect(res).to.deep.equals(routeResponse);
+            called = true;
+        }, done, function () {
+            expect(called, 'expect onNext called 1 time.').to.equal(true);
+            done();
+        });
+    });
+
+    it('should tolerate routes which return an empty observable', function (done) {
+        var router = new R([{
+            route: 'videos[{integers:ids}].title',
+            get: function (alias) {
+                return Observable.empty();
+            }
+        }]);
+        var obs = router.get([["videos", 1, "title"]]);
+        var called = false;
+        obs.subscribe(function (res) {
+            expect(res).to.deep.equals({
+                jsong: {videos: {1: {title: {$type: 'atom'}}}}
+            });
             called = true;
         }, done, function () {
             expect(called, 'expect onNext called 1 time.').to.equal(true);
