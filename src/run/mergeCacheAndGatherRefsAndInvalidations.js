@@ -46,4 +46,4 @@ function mergeCacheAndGatherRefsAndInvalidations(cache, jsongOrPVs, hasSuffix) {
     });
 
     return [invalidated, nextPaths, messages];
-};
+}
