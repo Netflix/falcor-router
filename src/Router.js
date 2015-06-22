@@ -14,9 +14,7 @@ var get = 'get';
 var set = 'set';
 var call = 'call';
 
-// TODO: We should move this into the constructor.
-Rx.config.longStackSupport = true;
-var Router = function(routes, options) {
+var Router = function(routes) {
     var opts = options || {};
 
     this._routes = routes;
@@ -25,6 +23,17 @@ var Router = function(routes, options) {
     this._set = matcher(this._rst);
     this._call = matcher(this._rst);
     this._debug = opts.debug;
+};
+
+Router.createClass = function(routes) {
+  function C(options) {
+    this._debug = options.debug;
+  };
+
+  C.prototype = new Router(routes);
+  C.prototype.constructor = C;
+
+  return C;
 };
 
 Router.prototype = {
