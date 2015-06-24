@@ -14,7 +14,7 @@ var get = 'get';
 var set = 'set';
 var call = 'call';
 
-var Router = function(routes) {
+var Router = function(routes, options) {
     var opts = options || {};
 
     this._routes = routes;
