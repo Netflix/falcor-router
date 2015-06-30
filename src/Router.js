@@ -15,6 +15,9 @@ var set = 'set';
 var call = 'call';
 var MAX_REF_FOLLOW = 50;
 
+// TODO: We should move this into the constructor.
+Rx.config.longStackSupport = true;
+
 var Router = function(routes, options) {
     var opts = options || {};
 
@@ -30,7 +33,7 @@ var Router = function(routes, options) {
 Router.createClass = function(routes) {
   function C(options) {
     this._debug = options.debug;
-  };
+  }
 
   C.prototype = new Router(routes);
   C.prototype.constructor = C;
