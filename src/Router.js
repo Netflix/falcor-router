@@ -30,6 +30,17 @@ var Router = function(routes, options) {
     this.maxRefFollow = opts.maxRefFollow || MAX_REF_FOLLOW;
 };
 
+Router.createClass = function(routes) {
+  function C(options) {
+    this._debug = options.debug;
+  };
+
+  C.prototype = new Router(routes);
+  C.prototype.constructor = C;
+
+  return C;
+};
+
 Router.prototype = {
     get: function(paths) {
         var jsongCache = {};
