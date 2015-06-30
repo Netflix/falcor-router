@@ -2,6 +2,7 @@ var TestRunner = require('./../../TestRunner');
 var R = require('../../../src/Router');
 var Routes = require('./../../data');
 var Expected = require('./../../data/expected');
+var circularReference = require('./../../../src/exceptions').circularReference;
 var noOp = function() {};
 var chai = require('chai');
 var expect = chai.expect;
@@ -228,6 +229,35 @@ describe('Specific', function() {
             expect(called, 'expect onNext called 1 time.').to.equal(true);
             done();
         });
+    });
+
+    it('should throw an error when maxExpansion has been exceeded.', function(done) {
+        var router = new R([{
+            route: 'videos[{integers:ids}]',
+            get: function (alias) {
+                return {
+                    path: ['videos', 1],
+                    value: $ref('videos[1]')
+                };
+            }
+        }]);
+        var obs = router.get([["videos", 1, "title"]]);
+        var err = false;
+        obs.
+            doAction(
+                noOp,
+                function(e) {
+                    expect(e.message).to.equals(circularReference);
+                    err = true;
+                }).
+            subscribe(noOp, function(e) {
+                if (err) {
+                    return done();
+                }
+                return done(e);
+            }, function() {
+                done('should not of completed.');
+            });
     });
 
     function getPrecedenceRouter(onTitle, onRating) {
