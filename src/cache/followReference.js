@@ -9,14 +9,14 @@ var errors = require('./../exceptions');
  *
  * @param {Object} cacheRoot
  * @param {Array} ref
- * @param {Boolean} createCache
  */
-module.exports = function followReference(cacheRoot, ref) {
+module.exports = function followReference(cacheRoot, ref, maxRefFollow) {
     var current = cacheRoot;
     var refPath = ref;
     var depth = -1;
     var length = refPath.length;
     var key, next, type;
+    var referenceCount = 0;
 
     while (++depth < length) {
         key = refPath[depth];
@@ -42,6 +42,11 @@ module.exports = function followReference(cacheRoot, ref) {
                 refPath = next.value;
                 length = refPath.length;
                 next = cacheRoot;
+                referenceCount++;
+            }
+
+            if (referenceCount > maxRefFollow) {
+                throw new Error(errors.circularReference);
             }
         }
         current = next;

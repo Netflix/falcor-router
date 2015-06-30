@@ -92,7 +92,8 @@ function _recurseMatchAndExecute(
                     // Explodes and collapse the tree to remove
                     // redundants and get optimized next set of
                     // paths to evaluate.
-                    pathsToExpand = optimizePathSets(jsongCache, pathsToExpand);
+                    pathsToExpand = optimizePathSets(
+                        jsongCache, pathsToExpand, routerInstance.maxRefFollow);
                     if (pathsToExpand.length) {
                         pathsToExpand = toPaths(toTree(pathsToExpand));
                     }

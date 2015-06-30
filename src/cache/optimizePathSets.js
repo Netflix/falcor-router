@@ -15,10 +15,10 @@ var followReference = require('./followReference');
  *   ran afterwords.
  * - Any missing path will be optimized as much as possible.
  */
-module.exports = function optimizePathSets(cache, paths) {
+module.exports = function optimizePathSets(cache, paths, maxRefFollow) {
     var optimized = [];
     paths.forEach(function(p) {
-        optimizePathSet(cache, cache, p, 0, optimized, []);
+        optimizePathSet(cache, cache, p, 0, optimized, [], maxRefFollow);
     });
 
     return optimized;
@@ -28,7 +28,7 @@ module.exports = function optimizePathSets(cache, paths) {
 /**
  * optimizes one pathSet at a time.
  */
-function optimizePathSet(cache, cacheRoot, pathSet, depth, out, optimizedPath) {
+function optimizePathSet(cache, cacheRoot, pathSet, depth, out, optimizedPath, maxRefFollow) {
 
     // at missing, report optimized path.
     if (!cache) {
@@ -72,7 +72,7 @@ function optimizePathSet(cache, cacheRoot, pathSet, depth, out, optimizedPath) {
         }
 
         if (next && next.$type === $ref && nextDepth < pathSet.length) {
-            var refResults = followReference(cacheRoot, next.value);
+            var refResults = followReference(cacheRoot, next.value, maxRefFollow);
             next = refResults[0];
 
             // must clone to avoid the mutation from above destroying the cache.
@@ -81,7 +81,7 @@ function optimizePathSet(cache, cacheRoot, pathSet, depth, out, optimizedPath) {
             nextOptimized = optimizedPath;
         }
 
-        optimizePathSet(next, cacheRoot, pathSet, nextDepth, out, nextOptimized);
+        optimizePathSet(next, cacheRoot, pathSet, nextDepth, out, nextOptimized, maxRefFollow);
         optimizedPath.length = optimizedPathLength;
 
         if (memo && !memo.done) {

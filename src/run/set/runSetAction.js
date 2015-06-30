@@ -29,7 +29,8 @@ function runSetAction(routerInstance, jsongMessage, matchAndPath, jsongCache) {
             paths.
                 // Optimizes each path.
                 map(function(path) {
-                    return optimizePathSets(jsongCache, [path])[0];
+                    return optimizePathSets(
+                        jsongCache, [path], routerInstance.maxRefFollow)[0];
                 }).
                 // only includes the paths from the set that intersect
                 // the virtual path

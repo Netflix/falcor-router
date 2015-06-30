@@ -13,6 +13,7 @@ var $atom = require('./support/types').$atom;
 var get = 'get';
 var set = 'set';
 var call = 'call';
+var MAX_REF_FOLLOW = 50;
 
 var Router = function(routes, options) {
     var opts = options || {};
@@ -23,6 +24,7 @@ var Router = function(routes, options) {
     this._set = matcher(this._rst);
     this._call = matcher(this._rst);
     this._debug = opts.debug;
+    this.maxRefFollow = opts.maxRefFollow || MAX_REF_FOLLOW;
 };
 
 Router.createClass = function(routes) {
@@ -40,9 +42,10 @@ Router.prototype = {
     get: function(paths) {
         var jsongCache = {};
         var action = runGetAction(this, jsongCache);
+        var router = this;
         return run(this._get, action, normalizePathSets(paths), get, this, jsongCache).
             map(function(jsongEnv) {
-                return materializeMissing(paths, jsongEnv);
+                return materializeMissing(router, paths, jsongEnv);
             });
     },
 
@@ -51,9 +54,10 @@ Router.prototype = {
         // when http://github.com/Netflix/falcor-router/issues/24 is addressed
         var jsongCache = {};
         var action = runSetAction(this, jsong, jsongCache);
+        var router = this;
         return run(this._set, action, jsong.paths, set, this, jsongCache).
             map(function(jsongEnv) {
-                return materializeMissing(jsong.paths, jsongEnv);
+                return materializeMissing(router, jsong.paths, jsongEnv);
             });
     },
 
@@ -61,9 +65,11 @@ Router.prototype = {
         var jsongCache = {};
         var action = runCallAction(this, callPath, args, suffixes, paths, jsongCache);
         var callPaths = [callPath];
+        var router = this;
         return run(this._call, action, callPaths, call, this, jsongCache).
             map(function(jsongResult) {
                 var jsongEnv = materializeMissing(
+                    router,
                     callPaths,
                     jsongResult,
                     {
@@ -82,13 +88,13 @@ function run(matcherFn, actionRunner, paths, method, routerInstance, jsongCache)
             matcherFn, actionRunner, paths, method, routerInstance, jsongCache);
 }
 
-function materializeMissing(paths, jsongEnv, missingAtom) {
+function materializeMissing(router, paths, jsongEnv, missingAtom) {
     var jsong = jsongEnv.jsong;
     var materializedAtom = missingAtom || {$type: $atom};
 
     // Optimizes the pathSets from the jsong then
     // inserts atoms of undefined.
-    optimizePathSets(jsong, paths).
+    optimizePathSets(jsong, paths, router.maxRefFollow).
         forEach(function(optMissingPath) {
             pathValueMerge(jsong, {
                 path: optMissingPath,
