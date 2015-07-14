@@ -2,7 +2,7 @@ var $atom = require('./../../../src/support/types').$atom;
 module.exports = function() {
     var retVal = {
         Summary: {
-            jsong: {
+            jsonGraph: {
                 videos: {
                     summary: {
                         $type: $atom,
@@ -36,7 +36,7 @@ function generateSummary(id) {
     };
 
     return {
-        jsong: {videos: videos}
+        jsonGraph: {videos: videos}
     };
 }
 
@@ -50,6 +50,6 @@ function generateState(id) {
     };
 
     return {
-        jsong: {videos: videos}
+        jsonGraph: {videos: videos}
     };
 }

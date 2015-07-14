@@ -93,7 +93,7 @@ describe('return-types', function() {
                 videos[ids[i]] = { title: 'House of Cards' };
             }
             return {
-                jsong: {
+                jsonGraph: {
                     videos: videos
                 }
             };

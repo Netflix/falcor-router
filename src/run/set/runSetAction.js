@@ -43,7 +43,7 @@ function runSetAction(routerInstance, jsongMessage, matchAndPath, jsongCache) {
             reduce(function(json, path, i) {
                 pathValueMerge(json, {
                     path: optimizedPaths[i],
-                    value: getValue(jsongMessage.jsong, path)
+                    value: getValue(jsongMessage.jsonGraph, path)
                 });
                 return json;
             }, {});

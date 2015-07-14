@@ -17,7 +17,7 @@ describe('JSONG - Merge', function() {
     it('should write a simple path to the cache.', function() {
 
         var jsong = {
-            jsong: {
+            jsonGraph: {
                 there: {
                     is: $atom('a value')
                 }
@@ -29,7 +29,7 @@ describe('JSONG - Merge', function() {
     });
     it('should write a path with a reference to a value.', function() {
         var jsong = {
-            jsong: {
+            jsonGraph: {
                 there: {
                     is: $ref('a.value')
                 },
@@ -44,7 +44,7 @@ describe('JSONG - Merge', function() {
     it('should write a path with a reference to a branch.', function() {
 
         var jsong = {
-            jsong: {
+            jsonGraph: {
                 there: {
                     is: $ref('a')
                 },
@@ -59,7 +59,7 @@ describe('JSONG - Merge', function() {
     });
     it('should write a path with a reference to a reference.', function() {
         var jsong = {
-            jsong: {
+            jsonGraph: {
                 there: {
                     is: $ref('a')
                 },
@@ -73,7 +73,7 @@ describe('JSONG - Merge', function() {
     });
     it('should get the set refs.', function() {
         var jsong = {
-            jsong: {
+            jsonGraph: {
                 there: {
                     is: $ref('a')
                 }

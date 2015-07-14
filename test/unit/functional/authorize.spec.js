@@ -30,7 +30,7 @@ describe('isAuthorized', function() {
         obs.
             doAction(function(res) {
                 expect(res).to.deep.equals({
-                    jsong: {
+                    jsonGraph: {
                         lists: {
                             0: $error({message: 'unauthorized', exception: true}),
                             1: $error({message: 'unauthorized', exception: true})
@@ -60,7 +60,7 @@ describe('isAuthorized', function() {
         obs.
             doAction(function(res) {
                 expect(res).to.deep.equals({
-                    jsong: {
+                    jsonGraph: {
                         lists: {
                             0: $error({message: 'unauthorized', exception: true}),
                             1: $error({message: 'unauthorized', exception: true})
@@ -94,7 +94,7 @@ describe('isAuthorized', function() {
         obs.
             doAction(function(res) {
                 expect(res).to.deep.equals({
-                    jsong: {
+                    jsonGraph: {
                         lists: {
                             0: $error({message: 'unauthorized', exception: true}),
                             1: $error({message: 'unauthorized', exception: true})
@@ -128,7 +128,7 @@ describe('isAuthorized', function() {
         obs.
             doAction(function(res) {
                 expect(res).to.deep.equals({
-                    jsong: {
+                    jsonGraph: {
                         lists: {
                             0: 5,
                             1: 5
@@ -158,7 +158,7 @@ describe('isAuthorized', function() {
         obs.
             doAction(function(res) {
                 expect(res).to.deep.equals({
-                    jsong: {
+                    jsonGraph: {
                         lists: {
                             0: 5,
                             1: 5

@@ -112,7 +112,7 @@ function _recurseMatchAndExecute(
             return {
                 missing: missing,
                 invalidated: invalidated,
-                jsong: jsongCache,
+                jsonGraph: jsongCache,
                 reportedPaths: reportedPaths
             };
         });

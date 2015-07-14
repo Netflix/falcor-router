@@ -13,7 +13,7 @@ module.exports = function() {
                 get: function(path) {
                     fn && fn(path);
                     return Observable.return({
-                        jsong: {
+                        jsonGraph: {
                             videos: {
                                 summary: $atom(75)
                             }
@@ -116,7 +116,7 @@ module.exports = function() {
 function generateVideoJSONG(id) {
     var videos;
     var jsongEnv = {
-        jsong: {videos: (videos = {})},
+        jsonGraph: {videos: (videos = {})},
         paths: [['videos', id, 'summary']]
     };
     videos[id] = {summary: $atom({title: 'Some Movie ' + id})};
@@ -127,7 +127,7 @@ function generateVideoJSONG(id) {
 function generateVideoStateJSONG(id) {
     var videos;
     var jsongEnv = {
-        jsong: {videos: (videos = {state: {}})},
+        jsonGraph: {videos: (videos = {state: {}})},
         paths: [['videos', 'state', id]]
     };
     videos.state[id] = $atom({title: 'Some State ' + id});

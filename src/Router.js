@@ -92,20 +92,20 @@ function run(matcherFn, actionRunner, paths, method, routerInstance, jsongCache)
 }
 
 function materializeMissing(router, paths, jsongEnv, missingAtom) {
-    var jsong = jsongEnv.jsong;
+    var jsonGraph = jsongEnv.jsonGraph;
     var materializedAtom = missingAtom || {$type: $atom};
 
     // Optimizes the pathSets from the jsong then
     // inserts atoms of undefined.
-    optimizePathSets(jsong, paths, router.maxRefFollow).
+    optimizePathSets(jsonGraph, paths, router.maxRefFollow).
         forEach(function(optMissingPath) {
-            pathValueMerge(jsong, {
+            pathValueMerge(jsonGraph, {
                 path: optMissingPath,
                 value: materializedAtom
             });
         });
 
-    return {jsong: jsong};
+    return {jsonGraph: jsonGraph};
 }
 
 Router.ranges = Keys.ranges;
