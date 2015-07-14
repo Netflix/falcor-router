@@ -19,7 +19,7 @@ describe('Call', function() {
             call(['videos', 1234, 'rating'], [5]).
             doAction(function(x) {
                 expect(x).to.deep.equals({
-                    jsong: {
+                    jsonGraph: {
                         videos: {
                             1234: {
                                 rating: 5
@@ -42,7 +42,7 @@ describe('Call', function() {
             call(['lolomo', 'pvAdd'], ['Thrillers'], [['name']]).
             doAction(function(jsongEnv) {
                 expect(jsongEnv).to.deep.equals({
-                    jsong: {
+                    jsonGraph: {
                         lolomo: $ref('lolomos[123]'),
                         lolomos: {
                             123: {
@@ -78,7 +78,7 @@ describe('Call', function() {
             call(['lolomo', 'pvAdd'], ['Thrillers'], null, [['length']]).
             doAction(function(jsongEnv) {
                 expect(jsongEnv).to.deep.equals({
-                    jsong: {
+                    jsonGraph: {
                         lolomo: $ref('lolomos[123]'),
                         lolomos: {
                             123: {
@@ -110,7 +110,7 @@ describe('Call', function() {
             call(['lolomo', 'pvAdd'], ['Thrillers'], [['name']], [['length']]).
             doAction(function(jsongEnv) {
                 expect(jsongEnv).to.deep.equals({
-                    jsong: {
+                    jsonGraph: {
                         lolomo: $ref('lolomos[123]'),
                         lolomos: {
                             123: {
@@ -190,7 +190,7 @@ describe('Call', function() {
                     throw new Error('Oops?');
                 }
                 return {
-                    jsong: {
+                    jsonGraph: {
                         videos: {
                             1234: {
                                 rating: args[0]
@@ -312,7 +312,7 @@ describe('Call', function() {
                 lolomos[id] = {};
                 lolomos[id][idx] = $ref(['listsById', idx]);
                 return {
-                    jsong: {
+                    jsonGraph: {
                         lolomos: lolomos
                     },
                     paths: [['lolomos', id, idx]]

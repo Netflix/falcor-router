@@ -20,7 +20,7 @@ module.exports = function() {
                             });
 
                         return Observable.return({
-                            jsong: {
+                            jsonGraph: {
                                 genreLists: genreLists
                             }
                         });

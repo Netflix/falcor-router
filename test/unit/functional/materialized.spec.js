@@ -28,7 +28,7 @@ describe('Materialized Paths.', function() {
         obs.
             doAction(function(res) {
                 expect(res).to.deep.equals({
-                    jsong: {
+                    jsonGraph: {
                         one: {
                             0: $ref('two.be[956]'),
                             1: {
@@ -64,7 +64,7 @@ describe('Materialized Paths.', function() {
         obs.
             doAction(function(res) {
                 expect(res).to.deep.equals({
-                    jsong: {
+                    jsonGraph: {
                         one: {
                             0: {
                                 summary: {

@@ -72,7 +72,7 @@ describe('Specific', function() {
         obs.
             doAction(function(res) {
                 expect(res).to.deep.equals({
-                    jsong: {
+                    jsonGraph: {
                         lists: {
                             0: $ref('two.be[956]'),
                             1: $ref('lists[0]')
@@ -116,7 +116,7 @@ describe('Specific', function() {
             get([['videos', 123, ['title', 'rating']]]).
             doAction(function(x) {
                 expect(x).to.deep.equals({
-                    jsong: {
+                    jsonGraph: {
                         videos: {
                             123: {
                                 title: 'title 123',
@@ -143,7 +143,7 @@ describe('Specific', function() {
             get([['lists', 'abc', 0]]).
             doAction(function(x) {
                 expect(x).to.deep.equals({
-                    jsong: {
+                    jsonGraph: {
                         lists: {
                             abc: {
                                 0: $ref('videos[0]')
@@ -160,7 +160,7 @@ describe('Specific', function() {
 
     it('should not follow references if no keys specified after path to reference', function (done) {
         var routeResponse = {
-            "jsong": {
+            jsonGraph: {
                 "ProffersById": {
                     "1": {
                         "ProductsList": {
@@ -222,7 +222,7 @@ describe('Specific', function() {
         var called = false;
         obs.subscribe(function (res) {
             expect(res).to.deep.equals({
-                jsong: {videos: {1: {title: {$type: 'atom'}}}}
+                jsonGraph: {videos: {1: {title: {$type: 'atom'}}}}
             });
             called = true;
         }, done, function () {

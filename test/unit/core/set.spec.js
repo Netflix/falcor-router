@@ -38,7 +38,7 @@ describe('Set', function() {
         }]);
         router.
             set({
-                jsong: {
+                jsonGraph: {
                     videos: {
                         1234: {
                             rating: 5
@@ -54,7 +54,7 @@ describe('Set', function() {
             }).
             doAction(function(result) {
                 expect(result).to.deep.equals({
-                    jsong: {
+                    jsonGraph: {
                         videos: {
                             1234: {
                                 rating: 5
@@ -106,7 +106,7 @@ describe('Set', function() {
 
         router.
             set({
-                jsong: {
+                jsonGraph: {
                     genreLists: {
                         0: {
                             rating: 5
@@ -119,7 +119,7 @@ describe('Set', function() {
             }).
             doAction(function(res) {
                 expect(res).to.deep.equals({
-                    jsong: {
+                    jsonGraph: {
                         genreLists: {
                             0: $ref('videos[0]')
                         },

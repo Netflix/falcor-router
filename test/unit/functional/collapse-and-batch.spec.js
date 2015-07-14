@@ -26,7 +26,7 @@ describe('Collapse and Batch', function() {
         obs.
             doAction(function(res) {
                 expect(res).to.deep.equals({
-                    jsong: {
+                    jsonGraph: {
                         genreLists: {
                             0: $ref('videos[0]'),
                             1: $ref('videos[1]')
@@ -179,7 +179,7 @@ describe('Collapse and Batch', function() {
         obs.
             doAction(function(res) {
                 expect(res).to.deep.equals({
-                    jsong: {
+                    jsonGraph: {
                         lists: {
                             0: $ref('two.be[956]'),
                             1: $ref('lists[0]')
@@ -242,7 +242,7 @@ describe('Collapse and Batch', function() {
         obs.
             doAction(function(res) {
                 expect(res).to.deep.equals({
-                    jsong: {
+                    jsonGraph: {
                         lists: {
                             0: $ref('two.be[956]'),
                             1: $ref('lists[0]')

@@ -7,7 +7,7 @@ var TestRunner = {
             do(function(x) {
                 // Validates against all comparables
                 compares.forEach(function(c) {
-                    jsongPartialCompare(c.jsong, x.jsong);
+                    jsongPartialCompare(c.jsonGraph, x.jsonGraph);
                 });
                 count++;
             }, undefined, function() {

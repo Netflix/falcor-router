@@ -12,7 +12,7 @@ var catAndSlice = require('./../support/catAndSlice');
  */
 module.exports = function jsongMerge(cache, jsongEnv) {
     var paths = jsongEnv.paths;
-    var j = jsongEnv.jsong;
+    var j = jsongEnv.jsonGraph;
     var insertedReferences = [];
     paths.forEach(function(p) {
         merge(cache, cache, j, j, p, 0, insertedReferences, []);
