@@ -22,6 +22,38 @@ describe('Virtual Collisions', function() {
             expect(e.message).to.equal(errors.routeWithSamePath + ' ' + JSON.stringify(str));
         }
     });
+    it('should not collide when two paths have the exact same virtual path but different ops.', function() {
+        var done = false;
+        try {
+            new R([{
+                route: 'videos[{integers}].summary',
+                get: function() {}
+            }, {
+                route: 'videos[{integers}].summary',
+                set: function() {}
+            }]);
+            done = true;
+        } catch(e) {
+            return done(e);
+        }
+        expect(done).to.be.ok;
+    });
+    it('should not collide when two pathSets have the exact same virtual path but different ops.', function() {
+        var done = false;
+        try {
+            new R([{
+                route: 'videos[{integers}]["summary", "title", "rating"]',
+                get: function() {}
+            }, {
+                route: 'videos[{integers}].rating',
+                set: function() {}
+            }]);
+            done = true;
+        } catch(e) {
+            return done(e);
+        }
+        expect(done).to.be.ok;
+    });
     it('should collide when two paths have the same virtual path precedence.', function() {
         try {
             new R([{

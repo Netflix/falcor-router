@@ -18,13 +18,13 @@
     "test": "test"
   },
   "dependencies": {
-    "falcor": "git+ssh://git@github.com/Netflix/falcor.git",
     "rx": "~2.5.3",
     "falcor-path-syntax": "git+ssh://git@github.com/Netflix/falcor-path-syntax.git"
   },
   "devDependencies": {
     "chai": "^2.3.0",
     "coveralls": "^2.11.2",
+    "falcor": "git+ssh://git@github.com/Netflix/falcor.git",
     "gulp": "~3.8.11",
     "gulp-bump": "~0.1.13",
     "gulp-clean": "~0.3.1",

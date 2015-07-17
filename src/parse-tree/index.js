@@ -18,6 +18,7 @@ var parseTree = function(virtualPaths) {
     });
     return pTree;
 };
+
 module.exports = parseTree;
 
 function buildParseTree(parseMap, node, pathAndAction, depth, virtualRunner) {
@@ -68,24 +69,23 @@ function buildParseTree(parseMap, node, pathAndAction, depth, virtualRunner) {
 
         // Continue to recurse or put get/set.
         if (depth + 1 === route.length) {
+
+            // Insert match into routeSyntaxTree
+            var matchObject = next[Keys.match] || {authorize: authorize};
+            if (!next[Keys.match]) {
+                next[Keys.match] = matchObject;
+            }
+
             // Not the same path
-            if (next[Keys.match]) {
+            if (matchObject.get && get ||
+                matchObject.set && set ||
+                matchObject.call && call) {
                 var prettyRoute = prettifyVirtualPath(route);
                 throw new Error(
                     errors.routeWithSamePath + ' ' + JSON.stringify(prettyRoute));
             }
+            setHashOrThrowError(parseMap, virtualRunner, get, set, call);
 
-            // Not the same precedence path.
-            var hash = getHashFromVirtualPath(virtualRunner);
-            if (parseMap[hash]) {
-                throw new Error(errors.routeWithSamePrecedence);
-            }
-            parseMap[hash] = true;
-
-            // Insert match into routeSyntaxTree
-            var matchObject = next[Keys.match] = {
-                authorize: authorize
-            };
             var clonedVirtualRunner = cloneArray(virtualRunner);
             if (get) {
                 matchObject.get = actionWrapper(clonedVirtualRunner, get);
@@ -104,6 +104,29 @@ function buildParseTree(parseMap, node, pathAndAction, depth, virtualRunner) {
 
         virtualRunner.length = depth;
     } while(isArray && ++i < el.length);
+}
+
+/**
+ * ensure that two routes of the same precedence do not get
+ * set in.
+ */
+function setHashOrThrowError(parseMap, virtualRunner, get, set, call) {
+    var hash = getHashFromVirtualPath(virtualRunner);
+
+    if (get && parseMap[hash + 'get'] ||
+        set && parseMap[hash + 'set'] ||
+        call && parseMap[hash + 'call']) {
+        throw new Error(errors.routeWithSamePrecedence);
+    }
+    if (get) {
+        parseMap[hash + 'get'] = true;
+    }
+    if (set) {
+        parseMap[hash + 'set'] = true;
+    }
+    if (call) {
+        parseMap[hash + 'call'] = true;
+    }
 }
 
 /**
