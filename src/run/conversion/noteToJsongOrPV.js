@@ -1,8 +1,6 @@
 var isJSONG = require('./../../support/isJSONG');
-var isArray = Array.isArray;
 var errors = require('./../../exceptions');
 var onNext = 'N';
-var pathValueMerge = require('./../../cache/pathValueMerge');
 
 module.exports = function noteToJsongOrPV(match) {
     return function(note) {
