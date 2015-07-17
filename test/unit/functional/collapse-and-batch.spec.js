@@ -10,6 +10,7 @@ var $ref = falcor.Model.ref;
 var $atom = falcor.Model.atom;
 var $error = falcor.Model.error;
 var Observable = require('rx').Observable;
+var Promise = require('promise');
 
 describe('Collapse and Batch', function() {
     it('should ensure that collapse is being ran.', function(done) {
@@ -260,6 +261,43 @@ describe('Collapse and Batch', function() {
             }, noOp, function() {
                 expect(count, 'expect onNext called 1 time.').to.equal(1);
                 expect(serviceCalls).to.equal(2);
+            }).
+            subscribe(noOp, done, done);
+    });
+
+    it('should validate that a Promise that emits an array gets properly batched.', function(done) {
+        var serviceCalls = 0;
+        var routes = [{
+            route: 'promise[{integers:ids}]',
+            get: function(aliasMap) {
+                return new Promise(function(resolve) {
+                    var pVs = aliasMap.ids.map(function(id) {
+                        return {
+                            path: ['promise', id],
+                            value: $ref(['two', 'be', id, 'summary'])
+                        };
+                    });
+
+                    resolve(pVs);
+                });
+            }
+        }, {
+            route: 'two.be[{integers:ids}].summary',
+            get: function(aliasMap) {
+                serviceCalls++;
+                return aliasMap.ids.map(function(id) {
+                    return {
+                        path: ['two', 'be', id, 'summary'],
+                        value: 'hello promise'
+                    };
+                });
+            }
+        }];
+        var router = new R(routes);
+        var obs = router.
+            get([['promise', [0, 1], 'summary']]).
+            doAction(noOp, noOp, function() {
+                expect(serviceCalls).to.equal(1);
             }).
             subscribe(noOp, done, done);
     });

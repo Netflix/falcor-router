@@ -14,19 +14,12 @@ module.exports = function outputToObservable(valueOrObservable) {
 
     // promise
     else if (value.then) {
-        value = Observable.
-            fromPromise(value).
-            flatMap(function(promiseResult) {
-                if (isArray(promiseResult)) {
-                    return Observable.from(promiseResult);
-                }
-                return Observable.of(promiseResult);
-            });
+        value = Observable.fromPromise(value);
     }
 
     // from array of pathValues.
     else if (isArray(value)) {
-        value = Observable.from(value);
+        value = Observable.of(value);
     }
 
     // this will be jsong or pathValue at this point.

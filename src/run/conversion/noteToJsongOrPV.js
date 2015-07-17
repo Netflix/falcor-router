@@ -1,6 +1,7 @@
 var isJSONG = require('./../../support/isJSONG');
 var errors = require('./../../exceptions');
 var onNext = 'N';
+
 module.exports = function noteToJsongOrPV(match) {
     return function(note) {
         return convertNoteToJsongOrPV(match, note);
