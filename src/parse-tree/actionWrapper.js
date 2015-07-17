@@ -4,7 +4,7 @@ var slice = require('./../support/slice');
 var isArray = Array.isArray;
 
 function createNamedVariables(virtualPath, action) {
-    return function(matchedPath) {
+    return function innerCreateNamedVariables(matchedPath) {
         var convertedArguments;
         var len = -1;
         var restOfArgs = slice(arguments, 1);

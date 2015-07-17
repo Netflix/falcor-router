@@ -12,12 +12,7 @@ module.exports = function convertPathToVirtual(path, virtual) {
     // it contains suffixes.
     for (var i = 0, len = virtual.length; i < len; ++i) {
 
-        // Specific key matching
-        if (path[i] === virtual[i]) {
-            matched[matched.length] = path[i];
-        }
-
-        else {
+        if (virtual[i].type) {
             var virt = virtual[i];
             switch (virt.type) {
                 case Keys.ranges:
@@ -40,6 +35,12 @@ module.exports = function convertPathToVirtual(path, virtual) {
             if (virt.named) {
                 matched[virt.name] = matched[matched.length - 1];
             }
+        }
+
+        // Specific key matching, if there is no type, no need to
+        // try to convert matched path into correct path.
+        else {
+            matched[matched.length] = path[i];
         }
     }
 

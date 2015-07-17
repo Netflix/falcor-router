@@ -4,6 +4,8 @@ var pathSyntax = require('falcor-path-syntax');
 var convertTypes = require('./convertTypes');
 var errors = require('./../exceptions');
 var cloneArray = require('./../support/cloneArray');
+var ROUTE_ID = -3;
+
 var parseTree = function(virtualPaths) {
     var pTree = {};
     var parseMap = {};
@@ -14,14 +16,17 @@ var parseTree = function(virtualPaths) {
             virtualPath.route = pathSyntax(virtualPath.route, true);
             convertTypes(virtualPath);
         }
-        buildParseTree(parseMap, pTree, virtualPath, 0, []);
+        ROUTE_ID += 3;
+        buildParseTree(parseMap, pTree, virtualPath, 0, [], ROUTE_ID);
     });
     return pTree;
 };
 
 module.exports = parseTree;
 
-function buildParseTree(parseMap, node, pathAndAction, depth, virtualRunner) {
+function buildParseTree(parseMap, node, pathAndAction,
+                        depth, virtualRunner, routeId) {
+
     var route = pathAndAction.route;
     var get = pathAndAction.get;
     var set = pathAndAction.set;
@@ -89,17 +94,20 @@ function buildParseTree(parseMap, node, pathAndAction, depth, virtualRunner) {
             var clonedVirtualRunner = cloneArray(virtualRunner);
             if (get) {
                 matchObject.get = actionWrapper(clonedVirtualRunner, get);
+                matchObject.getId = routeId;
             }
             if (set) {
                 matchObject.set = actionWrapper(clonedVirtualRunner, set);
+                matchObject.setId = routeId + 1;
             }
             if (call) {
                 matchObject.call = actionWrapper(clonedVirtualRunner, call);
+                matchObject.callId = routeId + 2;
             }
         } else {
             buildParseTree(
                 parseMap, next, pathAndAction,
-                depth + 1, virtualRunner);
+                depth + 1, virtualRunner, routeId);
         }
 
         virtualRunner.length = depth;

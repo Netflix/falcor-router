@@ -3,6 +3,9 @@ var Precedence = require('./../../Precedence');
 var cloneArray = require('./../../support/cloneArray');
 var specificMatcher = require('./specific');
 var pluckIntegers = require('./pluckIntergers');
+var toTree = require('./../collapse/toTree');
+var toPaths = require('./../collapse/toPaths');
+
 var intTypes = [{
         type: Keys.ranges,
         precedence: Precedence.ranges
@@ -31,12 +34,41 @@ module.exports = function matcher(rst) {
      * This is where the matching is done.  Will recursively
      * match the paths until it has found all the matchable
      * functions.
-     * @param [] paths
+     * @param {[]} paths
      */
     return function innerMatcher(method, paths) {
         var matched = [];
         var missing = [];
         match(rst, paths, method, matched, missing);
+
+        var reducedMatched = matched.reduce(function(acc, matchedRoute) {
+            if (!acc[matchedRoute.id]) {
+                acc[matchedRoute.id] = [];
+            }
+            acc[matchedRoute.id].push(matchedRoute);
+
+            return acc;
+        }, {});
+
+        var collapsedMatched = [];
+        Object.
+            keys(reducedMatched).
+            forEach(function(k) {
+                var matched = reducedMatched[k];
+
+                // This one has no issues with collapsing, its ok to
+                // merge it back into the collapsedMatched array
+                if (matched.length === 1) {
+                    return collapsedMatched.push(matched[0]);
+                }
+
+                // Since there are more than 1 routes, we need to see if
+                // they can collapse and alter the amount of arrays.
+                var collapsedResults = toPaths(
+                    toTree(
+                        matched.map(function(x) { return
+
+            });
         return {
             matched: matched,
             missingPaths: missing
@@ -76,6 +108,11 @@ function match(
     }
     if (curr[Keys.match] && curr[Keys.match][methodToUse]) {
         matchedFunctions[matchedFunctions.length] = {
+
+            // Used for collapsing paths that use routes with multiple
+            // string indexers.
+            id: curr[Keys.match][methodToUse + 'Id'],
+
             action: curr[Keys.match][methodToUse],
             authorize: curr[Keys.match].authorize,
             virtual: cloneArray(virtual),
