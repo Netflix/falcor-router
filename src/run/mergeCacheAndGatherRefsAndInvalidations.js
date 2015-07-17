@@ -22,12 +22,12 @@ function mergeCacheAndGatherRefsAndInvalidations(cache, jsongOrPVs, hasSuffix) {
     var messages = [];
 
     jsongOrPVs.forEach(function(jsongOrPV) {
+        var refs = [];
         if (isMessage(jsongOrPV)) {
             messages[messages.length] = jsongOrPV;
         }
 
-        var refs = [];
-        if (isJSONG(jsongOrPV)) {
+        else if (isJSONG(jsongOrPV)) {
             refs = jsongMerge(cache, jsongOrPV);
         } else {
 
