@@ -13,7 +13,7 @@ var $error = falcor.Model.error;
 var Observable = require('rx').Observable;
 var sinon = require('sinon');
 
-describe('Multi-Indexer', function() {
+describe.only('Multi-Indexer', function() {
     it('should allow multiple string indexers to collapse into a single request in leaf position.', function(done) {
         var serviceCalls = 0;
         var onNext = sinon.spy();
@@ -24,7 +24,6 @@ describe('Multi-Indexer', function() {
                 serviceCalls++;
 
                 expect(Array.isArray(keys)).to.be.ok;
-                debugger
                 return keys.map(function(k) {
                     return {path: ['test', k], value: k};
                 });
@@ -58,7 +57,6 @@ describe('Multi-Indexer', function() {
                 serviceCalls++;
 
                 expect(Array.isArray(keys)).to.be.ok;
-                debugger
                 return keys.map(function(k) {
                     return {path: ['test', k, 'summary'], value: k};
                 });
@@ -75,6 +73,71 @@ describe('Multi-Indexer', function() {
                         test: {
                             one: {summary: 'one'},
                             two: {summary: 'two'},
+                        }
+                    }
+                });
+            }).
+            subscribe(noOp, done, done);
+    });
+
+    it('should allow multiple string indexers to collapse into a single request with named and unnamed routed tokens.', function(done) {
+        var serviceCalls = 0;
+        var onNext = sinon.spy();
+        var router = new R([{
+            route: 'test["one", "two", "three"][{ranges}][{integers:ids}]',
+            get: function(aliasMap) {
+                var keys = aliasMap[1];
+                serviceCalls++;
+
+                expect(Array.isArray(keys)).to.be.ok;
+                return keys.map(function(k) {
+                    return {path: ['test', k, 0, 0], value: k};
+                });
+            }
+        }]);
+
+        router.
+            get([['test', ['one', 'two'], 0, 0]]).
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                expect(onNext.called).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    jsonGraph: {
+                        test: {
+                            one: {0: {0: 'one'}},
+                            two: {0: {0: 'two'}},
+                        }
+                    }
+                });
+            }).
+            subscribe(noOp, done, done);
+    });
+
+    it('should allow single string indexers to be coerced into an array when handed to route.', function(done) {
+        var serviceCalls = 0;
+        var onNext = sinon.spy();
+        var router = new R([{
+            route: 'test["one", "two", "three"]',
+            get: function(aliasMap) {
+                var keys = aliasMap[1];
+                serviceCalls++;
+
+                expect(Array.isArray(keys)).to.be.ok;
+                return keys.map(function(k) {
+                    return {path: ['test', k], value: k};
+                });
+            }
+        }]);
+
+        router.
+            get([["test", ['one']]]).
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                expect(onNext.called).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    jsonGraph: {
+                        test: {
+                            one: 'one'
                         }
                     }
                 });
