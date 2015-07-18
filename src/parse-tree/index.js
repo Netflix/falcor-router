@@ -2,6 +2,7 @@ var Keys = require('../Keys');
 var actionWrapper = require('./actionWrapper');
 var pathSyntax = require('falcor-path-syntax');
 var convertTypes = require('./convertTypes');
+var prettifyRoute = require('./../support/prettifyRoute');
 var errors = require('./../exceptions');
 var cloneArray = require('./../support/cloneArray');
 var ROUTE_ID = -3;
@@ -86,14 +87,6 @@ function buildParseTree(node, routeObject, depth) {
                 next[Keys.match] = matchObject;
             }
 
-            // Not the same path
-            if (matchObject.get && get ||
-                matchObject.set && set ||
-                matchObject.call && call) {
-                throw new Error(errors.routeWithSamePath + ' ' +
-                        JSON.stringify(prettifyRoute(route)));
-            }
-
             if (get) {
                 matchObject.get = actionWrapper(route, get);
                 matchObject.getId = routeObject.getId;
@@ -129,7 +122,8 @@ function setHashOrThrowError(parseMap, routeObject) {
             if (get && parseMap[hash + 'get'] ||
                 set && parseMap[hash + 'set'] ||
                     call && parseMap[hash + 'call']) {
-                throw new Error(errors.routeWithSamePrecedence);
+                throw new Error(errors.routeWithSamePrecedence + ' ' +
+                               prettifyRoute(route));
             }
             if (get) {
                 parseMap[hash + 'get'] = true;

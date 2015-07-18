@@ -1,3 +1,5 @@
+var Keys = require('../Keys');
+
 /**
  * beautify the virtual path, meaning paths with virtual keys will
  * not be displayed as a stringified object but instead as a string.

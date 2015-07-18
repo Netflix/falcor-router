@@ -18,8 +18,8 @@ describe('Virtual Collisions', function() {
                 get: function() {}
             }]);
         } catch(e) {
-            var str = ['videos', 'integers', 'summary'];
-            expect(e.message).to.equal(errors.routeWithSamePath + ' ' + JSON.stringify(str));
+            var str = ['videos', 'integers', 'summary'].join(',');
+            expect(e.message).to.equal(errors.routeWithSamePrecedence + ' ' + str);
         }
     });
     it('should not collide when two paths have the exact same virtual path but different ops.', function() {
@@ -64,7 +64,8 @@ describe('Virtual Collisions', function() {
                 get: function() {}
             }]);
         } catch(e) {
-            expect(e.message).to.equal(errors.routeWithSamePrecedence);
+            var str = 'videos,ranges,summary';
+            expect(e.message).to.equal(errors.routeWithSamePrecedence + ' ' + str);
         }
     });
 });
