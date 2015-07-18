@@ -5,8 +5,7 @@ var Keys = {
     keys: prefix + 'keys',
     named: prefix + 'named',
     name: prefix + 'name',
-    match: prefix + 'match',
-    indexer: prefix + 'indexer'
+    match: prefix + 'match'
 };
 
 module.exports = Keys;
