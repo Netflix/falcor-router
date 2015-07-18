@@ -54,23 +54,23 @@ module.exports = function matcher(rst) {
         Object.
             keys(reducedMatched).
             forEach(function(k) {
-                var matched = reducedMatched[k];
+                var reducedMatch = reducedMatched[k];
 
                 // This one has no issues with collapsing, its ok to
                 // merge it back into the collapsedMatched array
-                if (matched.length === 1) {
-                    return collapsedMatched.push(matched[0]);
+                if (reducedMatch.length === 1) {
+                    return collapsedMatched.push(reducedMatch[0]);
                 }
 
                 // Since there are more than 1 routes, we need to see if
                 // they can collapse and alter the amount of arrays.
                 var collapsedResults = toPaths(
                     toTree(
-                        matched.map(function(x) { return x.requested; })));
+                        reducedMatch.map(function(x) { return x.requested; })));
 
                 collapsedResults.forEach(function(path, i) {
-                    matched[i].virtual = path;
-                    collapsedMatched.push(matched[i]);
+                    reducedMatch[i].virtual = path;
+                    collapsedMatched.push(reducedMatch[i]);
                 });
             });
         return {

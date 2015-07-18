@@ -7,10 +7,10 @@ var errors = require('./../exceptions');
 var cloneArray = require('./../support/cloneArray');
 var ROUTE_ID = -3;
 
-var parseTree = module.exports = function(routes) {
+module.exports = function parseTree(routes) {
     var pTree = {};
     var parseMap = {};
-    routes.forEach(function(route) {
+    routes.forEach(function forEachRoute(route) {
         // converts the virtual string path to a real path with
         // extended syntax on.
         if (typeof route.route === 'string') {
@@ -117,8 +117,8 @@ function setHashOrThrowError(parseMap, routeObject) {
     var call = routeObject.call;
 
     getHashesFromRoute(route).
-        map(function(hash) { return hash.join(','); }).
-        forEach(function(hash) {
+        map(function mapHashToString(hash) { return hash.join(','); }).
+        forEach(function forEachRouteHash(hash) {
             if (get && parseMap[hash + 'get'] ||
                 set && parseMap[hash + 'set'] ||
                     call && parseMap[hash + 'call']) {
@@ -170,9 +170,11 @@ function decendTreeByRoutedToken(node, value, routeToken) {
  * will collide but everything else is unique.
  */
 function getHashesFromRoute(route, depth, hashes, hash) {
+    /*eslint-disable no-func-assign, no-param-reassign*/
     depth = depth || 0;
     hashes = hashes || [];
     hash = hash || [];
+    /*eslint-enable no-func-assign, no-param-reassign*/
 
     var routeValue = route[depth];
     var isArray = Array.isArray(routeValue);
