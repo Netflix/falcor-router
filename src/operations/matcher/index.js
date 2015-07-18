@@ -64,9 +64,11 @@ module.exports = function matcher(rst) {
 
                 // Since there are more than 1 routes, we need to see if
                 // they can collapse and alter the amount of arrays.
-                var collapsedResults = toPaths(
-                    toTree(
-                        matched.map(function(x) { return
+                debugger
+                var collapsedResults =
+                    toPaths(
+                        toTree(
+                            matched.map(function(x) { return x.requested; })));
 
             });
         return {
@@ -112,6 +114,7 @@ function match(
             // Used for collapsing paths that use routes with multiple
             // string indexers.
             id: curr[Keys.match][methodToUse + 'Id'],
+            requested: cloneArray(requested),
 
             action: curr[Keys.match][methodToUse],
             authorize: curr[Keys.match].authorize,

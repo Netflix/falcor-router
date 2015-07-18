@@ -2,6 +2,7 @@ var Keys = require('./../Keys');
 var convertPathKeyToRange = require('./../operations/ranges/convertPathKeyToRange');
 var convertPathKeyToIntegers = require('./../operations/integers/convertPathKeyToIntegers');
 var convertPathKeyToKeys = require('./../operations/keys/convertPathKeyToKeys');
+var isArray = Array.isArray;
 /**
  * takes the path that was matched and converts it to the
  * virtual path.
@@ -16,16 +17,25 @@ module.exports = function convertPathToVirtual(path, virtual) {
             var virt = virtual[i];
             switch (virt.type) {
                 case Keys.ranges:
-                    matched[matched.length] =
+                    matched[i] =
                         convertPathKeyToRange(path[i]);
                     break;
                 case Keys.integers:
-                    matched[matched.length] =
+                    matched[i] =
                         convertPathKeyToIntegers(path[i]);
                     break;
                 case Keys.keys:
-                    matched[matched.length] =
+                    matched[i] =
                         convertPathKeyToKeys(path[i]);
+                    break;
+
+                // If type is an indexer.
+                case Keys.indexer:
+                    if (isArray(path[i])) {
+                        matched[i] = path[i];
+                    } else {
+                        matched[i] = [path[i]];
+                    }
                     break;
                 default:
                     var err = new Error('Unknown route type.');

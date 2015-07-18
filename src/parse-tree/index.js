@@ -6,32 +6,40 @@ var errors = require('./../exceptions');
 var cloneArray = require('./../support/cloneArray');
 var ROUTE_ID = -3;
 
-var parseTree = function(virtualPaths) {
+var parseTree = function(routes) {
     var pTree = {};
     var parseMap = {};
-    virtualPaths.forEach(function(virtualPath) {
+    routes.forEach(function(route) {
         // converts the virtual string path to a real path with
         // extended syntax on.
-        if (typeof virtualPath.route === 'string') {
-            virtualPath.route = pathSyntax(virtualPath.route, true);
-            convertTypes(virtualPath);
+        if (typeof route.route === 'string') {
+            route.route = pathSyntax(route.route, true);
+            convertTypes(route);
         }
-        ROUTE_ID += 3;
-        buildParseTree(parseMap, pTree, virtualPath, 0, [], ROUTE_ID);
+        if (route.get) {
+            route.getId = ++ROUTE_ID;
+        }
+        if (route.set) {
+            route.setId = ++ROUTE_ID;
+        }
+        if (route.call) {
+            route.callId = ++ROUTE_ID;
+        }
+
+        buildParseTree(parseMap, pTree, route, 0, []);
     });
     return pTree;
 };
 
 module.exports = parseTree;
 
-function buildParseTree(parseMap, node, pathAndAction,
-                        depth, virtualRunner, routeId) {
+function buildParseTree(parseMap, node, routeObject, depth) {
 
-    var route = pathAndAction.route;
-    var get = pathAndAction.get;
-    var set = pathAndAction.set;
-    var call = pathAndAction.call;
-    var authorize = pathAndAction.authorize;
+    var route = routeObject.route;
+    var get = routeObject.get;
+    var set = routeObject.set;
+    var call = routeObject.call;
+    var authorize = routeObject.authorize;
     var el = route[depth];
 
     el = !isNaN(+el) && +el || el;
@@ -45,9 +53,6 @@ function buildParseTree(parseMap, node, pathAndAction,
             value = value[i];
         }
 
-        // continue to build up the array.
-        virtualRunner[depth] = value;
-
         // There is a ranged token in this location with / without name.
         // only happens from parsed path-syntax paths.
         if (typeof value === 'object') {
@@ -58,11 +63,12 @@ function buildParseTree(parseMap, node, pathAndAction,
         // This is just a simple key.  Could be a ranged key.
         else {
             next = decendTreeByRoutedToken(node, value);
+
             // we have to create a falcor-router virtual object
             // so that the rest of the algorithm can match and coerse
             // when needed.
             if (next) {
-                virtualRunner[depth] = {type: value, named: false};
+                route[depth] = {type: value, named: false};
             }
             else {
                 if (!node[value]) {
@@ -89,28 +95,28 @@ function buildParseTree(parseMap, node, pathAndAction,
                 throw new Error(
                     errors.routeWithSamePath + ' ' + JSON.stringify(prettyRoute));
             }
-            setHashOrThrowError(parseMap, virtualRunner, get, set, call);
 
-            var clonedVirtualRunner = cloneArray(virtualRunner);
+            // TODO: Hashes from array routes...
+            setHashOrThrowError(parseMap, route, get, set, call);
+
             if (get) {
-                matchObject.get = actionWrapper(clonedVirtualRunner, get);
-                matchObject.getId = routeId;
+                matchObject.get = actionWrapper(route, get);
+                matchObject.getId = routeObject.getId;
             }
             if (set) {
-                matchObject.set = actionWrapper(clonedVirtualRunner, set);
-                matchObject.setId = routeId + 1;
+                matchObject.set = actionWrapper(route, set);
+                matchObject.setId = routeObject.setId;
             }
             if (call) {
-                matchObject.call = actionWrapper(clonedVirtualRunner, call);
-                matchObject.callId = routeId + 2;
+                matchObject.call = actionWrapper(route, call);
+                matchObject.callId = routeObject.callId;
             }
         } else {
             buildParseTree(
-                parseMap, next, pathAndAction,
-                depth + 1, virtualRunner, routeId);
+                parseMap, next, routeObject,
+                depth + 1, virtualRunner);
         }
 
-        virtualRunner.length = depth;
     } while(isArray && ++i < el.length);
 }
 

@@ -260,6 +260,19 @@ describe('Specific', function() {
             });
     });
 
+    it('should allow multiple string indexers to collapse into a single request in leaf position.', function(done) {
+        var router = new R([{
+            route: 'test["one", "two", "three"]',
+            get: function(aliasMap) {
+                var keys = aliasMap[1];
+
+                return {
+
+                };
+            }
+        }]);
+    });
+
     function getPrecedenceRouter(onTitle, onRating) {
         return new R([{
             route: 'videos[{integers:ids}].title',
