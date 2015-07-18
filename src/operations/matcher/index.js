@@ -69,6 +69,7 @@ module.exports = function matcher(rst) {
                         matched.map(function(x) { return x.requested; })));
 
                 collapsedResults.forEach(function(path, i) {
+                    matched[i].virtual = path;
                     collapsedMatched.push(matched[i]);
                 });
             });

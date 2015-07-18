@@ -261,7 +261,7 @@ describe('Specific', function() {
             });
     });
 
-    it.only('should allow multiple string indexers to collapse into a single request in leaf position.', function(done) {
+    it('should allow multiple string indexers to collapse into a single request in leaf position.', function(done) {
         var serviceCalls = 0;
         var onNext = sinon.spy();
         var router = new R([{
@@ -271,6 +271,7 @@ describe('Specific', function() {
                 serviceCalls++;
 
                 expect(Array.isArray(keys)).to.be.ok;
+                debugger
                 return keys.map(function(k) {
                     return {path: ['test', k], value: k};
                 });
