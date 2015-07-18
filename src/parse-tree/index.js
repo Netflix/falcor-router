@@ -6,7 +6,7 @@ var errors = require('./../exceptions');
 var cloneArray = require('./../support/cloneArray');
 var ROUTE_ID = -3;
 
-var parseTree = function(routes) {
+var parseTree = module.exports = function(routes) {
     var pTree = {};
     var parseMap = {};
     routes.forEach(function(route) {
@@ -26,14 +26,13 @@ var parseTree = function(routes) {
             route.callId = ++ROUTE_ID;
         }
 
-        buildParseTree(parseMap, pTree, route, 0, []);
+        setHashOrThrowError(parseMap, route);
+        buildParseTree(pTree, route, 0, []);
     });
     return pTree;
 };
 
-module.exports = parseTree;
-
-function buildParseTree(parseMap, node, routeObject, depth) {
+function buildParseTree(node, routeObject, depth) {
 
     var route = routeObject.route;
     var get = routeObject.get;
@@ -91,13 +90,9 @@ function buildParseTree(parseMap, node, routeObject, depth) {
             if (matchObject.get && get ||
                 matchObject.set && set ||
                 matchObject.call && call) {
-                var prettyRoute = prettifyVirtualPath(route);
-                throw new Error(
-                    errors.routeWithSamePath + ' ' + JSON.stringify(prettyRoute));
+                throw new Error(errors.routeWithSamePath + ' ' +
+                        JSON.stringify(prettifyRoute(route)));
             }
-
-            // TODO: Hashes from array routes...
-            setHashOrThrowError(parseMap, route, get, set, call);
 
             if (get) {
                 matchObject.get = actionWrapper(route, get);
@@ -112,35 +107,40 @@ function buildParseTree(parseMap, node, routeObject, depth) {
                 matchObject.callId = routeObject.callId;
             }
         } else {
-            buildParseTree(
-                parseMap, next, routeObject,
-                depth + 1, virtualRunner);
+            buildParseTree(next, routeObject, depth + 1);
         }
 
-    } while(isArray && ++i < el.length);
+    } while (isArray && ++i < el.length);
 }
 
 /**
  * ensure that two routes of the same precedence do not get
  * set in.
  */
-function setHashOrThrowError(parseMap, virtualRunner, get, set, call) {
-    var hash = getHashFromVirtualPath(virtualRunner);
+function setHashOrThrowError(parseMap, routeObject) {
+    var route = routeObject.route;
+    var get = routeObject.get;
+    var set = routeObject.set;
+    var call = routeObject.call;
 
-    if (get && parseMap[hash + 'get'] ||
-        set && parseMap[hash + 'set'] ||
-        call && parseMap[hash + 'call']) {
-        throw new Error(errors.routeWithSamePrecedence);
-    }
-    if (get) {
-        parseMap[hash + 'get'] = true;
-    }
-    if (set) {
-        parseMap[hash + 'set'] = true;
-    }
-    if (call) {
-        parseMap[hash + 'call'] = true;
-    }
+    getHashesFromRoute(route).
+        map(function(hash) { return hash.join(','); }).
+        forEach(function(hash) {
+            if (get && parseMap[hash + 'get'] ||
+                set && parseMap[hash + 'set'] ||
+                    call && parseMap[hash + 'call']) {
+                throw new Error(errors.routeWithSamePrecedence);
+            }
+            if (get) {
+                parseMap[hash + 'get'] = true;
+            }
+            if (set) {
+                parseMap[hash + 'set'] = true;
+            }
+            if (call) {
+                parseMap[hash + 'call'] = true;
+            }
+        });
 }
 
 /**
@@ -175,60 +175,53 @@ function decendTreeByRoutedToken(node, value, routeToken) {
  * creates a hash of the virtual path where integers and ranges
  * will collide but everything else is unique.
  */
-function getHashFromVirtualPath(virtualPath) {
-    var length = 0;
-    var str = [];
-    for (var i = 0, len = virtualPath.length; i < len; ++i, ++length) {
-        var value = virtualPath[i];
-        if (typeof value === 'object') {
-            value = value.type;
+function getHashesFromRoute(route, depth, hashes, hash) {
+    depth = depth || 0;
+    hashes = hashes || [];
+    hash = hash || [];
+
+    var routeValue = route[depth];
+    var isArray = Array.isArray(routeValue);
+    var length = isArray && routeValue.length || 0;
+    var idx = 0;
+    var value;
+
+    if (typeof routeValue === 'object' && !isArray) {
+        value = routeValue.type;
+    }
+
+    else if (!isArray) {
+        value = routeValue;
+    }
+
+    do {
+        if (isArray) {
+            value = routeValue[idx];
         }
 
         if (value === Keys.integers || value === Keys.ranges) {
-            str[length] = '__I__';
+            hash[depth] = '__I__';
         }
 
         else if (value === Keys.keys) {
-            str[length] = '__K__';
+            hash[depth] ='__K__';
         }
 
         else {
-            str[length] = value;
-        }
-    }
-
-    return str.join('');
-}
-
-/**
- * beautify the virtual path, meaning paths with virtual keys will
- * not be displayed as a stringified object but instead as a string.
- */
-function prettifyVirtualPath(virtualPath) {
-    var length = 0;
-    var str = [];
-    for (var i = 0, len = virtualPath.length; i < len; ++i, ++length) {
-        var value = virtualPath[i];
-        if (typeof value === 'object') {
-            value = value.type;
+            hash[depth] = value;
         }
 
-        if (value === Keys.integers) {
-            str[length] = 'integers';
+        // recurse down the routed token
+        if (depth + 1 !== route.length) {
+            getHashesFromRoute(route, depth + 1, hashes, hash);
         }
 
-        else if (value === Keys.ranges) {
-            str[length] = 'ranges';
-        }
-
-        else if (value === Keys.keys) {
-            str[length] = 'keys';
-        }
-
+        // Or just add it to hashes
         else {
-            str[length] = value;
+            hashes.push(cloneArray(hash));
         }
-    }
+    } while (isArray && ++idx < length);
 
-    return str;
+    return hashes;
 }
+

@@ -7,14 +7,14 @@ var isArray = Array.isArray;
  * takes the path that was matched and converts it to the
  * virtual path.
  */
-module.exports = function convertPathToVirtual(path, virtual) {
+module.exports = function convertPathToRoute(path, route) {
     var matched = [];
     // Always use virtual path since path can be longer since
     // it contains suffixes.
-    for (var i = 0, len = virtual.length; i < len; ++i) {
+    for (var i = 0, len = route.length; i < len; ++i) {
 
-        if (virtual[i].type) {
-            var virt = virtual[i];
+        if (route[i].type) {
+            var virt = route[i];
             switch (virt.type) {
                 case Keys.ranges:
                     matched[i] =
@@ -28,15 +28,6 @@ module.exports = function convertPathToVirtual(path, virtual) {
                     matched[i] =
                         convertPathKeyToKeys(path[i]);
                     break;
-
-                // If type is an indexer.
-                case Keys.indexer:
-                    if (isArray(path[i])) {
-                        matched[i] = path[i];
-                    } else {
-                        matched[i] = [path[i]];
-                    }
-                    break;
                 default:
                     var err = new Error('Unknown route type.');
                     err.throwToNext = true;
@@ -47,10 +38,17 @@ module.exports = function convertPathToVirtual(path, virtual) {
             }
         }
 
-        // Specific key matching, if there is no type, no need to
-        // try to convert matched path into correct path.
+        // Dealing with specific keys or array of specific keys.
+        // If route has an array at this position, arrayify the
+        // path[i] element.
         else {
-            matched[matched.length] = path[i];
+            if (isArray(route[i]) && !isArray(path[i])) {
+                matched[matched.length] = [path[i]];
+            }
+
+            else {
+                matched[matched.length] = path[i];
+            }
         }
     }
 

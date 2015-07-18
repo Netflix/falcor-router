@@ -11,6 +11,7 @@ var $ref = falcor.Model.ref;
 var $atom = falcor.Model.atom;
 var $error = falcor.Model.error;
 var Observable = require('rx').Observable;
+var sinon = require('sinon');
 
 describe('Specific', function() {
     it('should execute a simple route matching.', function(done) {
@@ -260,17 +261,37 @@ describe('Specific', function() {
             });
     });
 
-    it('should allow multiple string indexers to collapse into a single request in leaf position.', function(done) {
+    it.only('should allow multiple string indexers to collapse into a single request in leaf position.', function(done) {
+        var serviceCalls = 0;
+        var onNext = sinon.spy();
         var router = new R([{
             route: 'test["one", "two", "three"]',
             get: function(aliasMap) {
                 var keys = aliasMap[1];
+                serviceCalls++;
 
-                return {
-
-                };
+                expect(Array.isArray(keys)).to.be.ok;
+                return keys.map(function(k) {
+                    return {path: ['test', k], value: k};
+                });
             }
         }]);
+
+        router.
+            get([["test", ['one', 'two']]]).
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                expect(onNext.called).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    jsonGraph: {
+                        test: {
+                            one: 'one',
+                            two: 'two'
+                        }
+                    }
+                });
+            }).
+            subscribe(noOp, done, done);
     });
 
     function getPrecedenceRouter(onTitle, onRating) {

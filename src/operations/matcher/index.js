@@ -64,15 +64,16 @@ module.exports = function matcher(rst) {
 
                 // Since there are more than 1 routes, we need to see if
                 // they can collapse and alter the amount of arrays.
-                debugger
-                var collapsedResults =
-                    toPaths(
-                        toTree(
-                            matched.map(function(x) { return x.requested; })));
+                var collapsedResults = toPaths(
+                    toTree(
+                        matched.map(function(x) { return x.requested; })));
 
+                collapsedResults.forEach(function(path, i) {
+                    collapsedMatched.push(matched[i]);
+                });
             });
         return {
-            matched: matched,
+            matched: collapsedMatched,
             missingPaths: missing
         };
     };
