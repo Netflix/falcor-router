@@ -11,6 +11,7 @@ var $ref = falcor.Model.ref;
 var $atom = falcor.Model.atom;
 var $error = falcor.Model.error;
 var Observable = require('rx').Observable;
+var sinon = require('sinon');
 
 describe('Specific', function() {
     it('should execute a simple route matching.', function(done) {

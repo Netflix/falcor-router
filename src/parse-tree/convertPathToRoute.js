@@ -2,34 +2,30 @@ var Keys = require('./../Keys');
 var convertPathKeyToRange = require('./../operations/ranges/convertPathKeyToRange');
 var convertPathKeyToIntegers = require('./../operations/integers/convertPathKeyToIntegers');
 var convertPathKeyToKeys = require('./../operations/keys/convertPathKeyToKeys');
+var isArray = Array.isArray;
 /**
  * takes the path that was matched and converts it to the
  * virtual path.
  */
-module.exports = function convertPathToVirtual(path, virtual) {
+module.exports = function convertPathToRoute(path, route) {
     var matched = [];
     // Always use virtual path since path can be longer since
     // it contains suffixes.
-    for (var i = 0, len = virtual.length; i < len; ++i) {
+    for (var i = 0, len = route.length; i < len; ++i) {
 
-        // Specific key matching
-        if (path[i] === virtual[i]) {
-            matched[matched.length] = path[i];
-        }
-
-        else {
-            var virt = virtual[i];
+        if (route[i].type) {
+            var virt = route[i];
             switch (virt.type) {
                 case Keys.ranges:
-                    matched[matched.length] =
+                    matched[i] =
                         convertPathKeyToRange(path[i]);
                     break;
                 case Keys.integers:
-                    matched[matched.length] =
+                    matched[i] =
                         convertPathKeyToIntegers(path[i]);
                     break;
                 case Keys.keys:
-                    matched[matched.length] =
+                    matched[i] =
                         convertPathKeyToKeys(path[i]);
                     break;
                 default:
@@ -39,6 +35,19 @@ module.exports = function convertPathToVirtual(path, virtual) {
             }
             if (virt.named) {
                 matched[virt.name] = matched[matched.length - 1];
+            }
+        }
+
+        // Dealing with specific keys or array of specific keys.
+        // If route has an array at this position, arrayify the
+        // path[i] element.
+        else {
+            if (isArray(route[i]) && !isArray(path[i])) {
+                matched[matched.length] = [path[i]];
+            }
+
+            else {
+                matched[matched.length] = path[i];
             }
         }
     }

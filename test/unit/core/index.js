@@ -5,4 +5,5 @@ describe('Core', function() {
     require('./ranges.spec');
     require('./set.spec');
     require('./specific.spec');
+    require('./multi-indexer.spec');
 });

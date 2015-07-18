@@ -23,9 +23,7 @@ var Router = function(routes, options) {
 
     this._routes = routes;
     this._rst = parseTree(routes);
-    this._get = matcher(this._rst);
-    this._set = matcher(this._rst);
-    this._call = matcher(this._rst);
+    this._matcher = matcher(this._rst);
     this._debug = opts.debug;
     this.maxRefFollow = opts.maxRefFollow || MAX_REF_FOLLOW;
 };
@@ -46,7 +44,7 @@ Router.prototype = {
         var jsongCache = {};
         var action = runGetAction(this, jsongCache);
         var router = this;
-        return run(this._get, action, normalizePathSets(paths), get, this, jsongCache).
+        return run(this._matcher, action, normalizePathSets(paths), get, this, jsongCache).
             map(function(jsongEnv) {
                 return materializeMissing(router, paths, jsongEnv);
             });
@@ -58,7 +56,7 @@ Router.prototype = {
         var jsongCache = {};
         var action = runSetAction(this, jsong, jsongCache);
         var router = this;
-        return run(this._set, action, jsong.paths, set, this, jsongCache).
+        return run(this._matcher, action, jsong.paths, set, this, jsongCache).
             map(function(jsongEnv) {
                 return materializeMissing(router, jsong.paths, jsongEnv);
             });
@@ -69,7 +67,7 @@ Router.prototype = {
         var action = runCallAction(this, callPath, args, suffixes, paths, jsongCache);
         var callPaths = [callPath];
         var router = this;
-        return run(this._call, action, callPaths, call, this, jsongCache).
+        return run(this._matcher, action, callPaths, call, this, jsongCache).
             map(function(jsongResult) {
                 var jsongEnv = materializeMissing(
                     router,

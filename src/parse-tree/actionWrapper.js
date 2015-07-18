@@ -1,10 +1,17 @@
-var convertPathToVirtual = require('./convertPathToVirtual');
+var convertPathToRoute = require('./convertPathToRoute');
 var isPathValue = require('./../support/isPathValue');
 var slice = require('./../support/slice');
 var isArray = Array.isArray;
 
-function createNamedVariables(virtualPath, action) {
-    return function(matchedPath) {
+/**
+ *   Creates the named variables and coerces it into its
+ * virtual type.
+ *
+ * @param {Array} route - The route that produced this action wrapper
+ * @private
+ */
+function createNamedVariables(route, action) {
+    return function innerCreateNamedVariables(matchedPath) {
         var convertedArguments;
         var len = -1;
         var restOfArgs = slice(arguments, 1);
@@ -21,7 +28,7 @@ function createNamedVariables(virtualPath, action) {
             convertedArguments = [];
 
             matchedPath.forEach(function(pV) {
-                pV.path = convertPathToVirtual(pV.path, virtualPath);
+                pV.path = convertPathToRoute(pV.path, route);
                 convertedArguments[++len] = pV;
             });
         }
@@ -29,7 +36,7 @@ function createNamedVariables(virtualPath, action) {
         // else just convert and assign
         else {
             convertedArguments =
-                convertPathToVirtual(matchedPath, virtualPath);
+                convertPathToRoute(matchedPath, route);
         }
         return action.apply(this, [convertedArguments].concat(restOfArgs));
     };

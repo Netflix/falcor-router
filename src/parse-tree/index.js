@@ -2,31 +2,44 @@ var Keys = require('../Keys');
 var actionWrapper = require('./actionWrapper');
 var pathSyntax = require('falcor-path-syntax');
 var convertTypes = require('./convertTypes');
+var prettifyRoute = require('./../support/prettifyRoute');
 var errors = require('./../exceptions');
 var cloneArray = require('./../support/cloneArray');
-var parseTree = function(virtualPaths) {
+var ROUTE_ID = -3;
+
+module.exports = function parseTree(routes) {
     var pTree = {};
     var parseMap = {};
-    virtualPaths.forEach(function(virtualPath) {
+    routes.forEach(function forEachRoute(route) {
         // converts the virtual string path to a real path with
         // extended syntax on.
-        if (typeof virtualPath.route === 'string') {
-            virtualPath.route = pathSyntax(virtualPath.route, true);
-            convertTypes(virtualPath);
+        if (typeof route.route === 'string') {
+            route.route = pathSyntax(route.route, true);
+            convertTypes(route);
         }
-        buildParseTree(parseMap, pTree, virtualPath, 0, []);
+        if (route.get) {
+            route.getId = ++ROUTE_ID;
+        }
+        if (route.set) {
+            route.setId = ++ROUTE_ID;
+        }
+        if (route.call) {
+            route.callId = ++ROUTE_ID;
+        }
+
+        setHashOrThrowError(parseMap, route);
+        buildParseTree(pTree, route, 0, []);
     });
     return pTree;
 };
 
-module.exports = parseTree;
+function buildParseTree(node, routeObject, depth) {
 
-function buildParseTree(parseMap, node, pathAndAction, depth, virtualRunner) {
-    var route = pathAndAction.route;
-    var get = pathAndAction.get;
-    var set = pathAndAction.set;
-    var call = pathAndAction.call;
-    var authorize = pathAndAction.authorize;
+    var route = routeObject.route;
+    var get = routeObject.get;
+    var set = routeObject.set;
+    var call = routeObject.call;
+    var authorize = routeObject.authorize;
     var el = route[depth];
 
     el = !isNaN(+el) && +el || el;
@@ -40,9 +53,6 @@ function buildParseTree(parseMap, node, pathAndAction, depth, virtualRunner) {
             value = value[i];
         }
 
-        // continue to build up the array.
-        virtualRunner[depth] = value;
-
         // There is a ranged token in this location with / without name.
         // only happens from parsed path-syntax paths.
         if (typeof value === 'object') {
@@ -53,11 +63,12 @@ function buildParseTree(parseMap, node, pathAndAction, depth, virtualRunner) {
         // This is just a simple key.  Could be a ranged key.
         else {
             next = decendTreeByRoutedToken(node, value);
+
             // we have to create a falcor-router virtual object
             // so that the rest of the algorithm can match and coerse
             // when needed.
             if (next) {
-                virtualRunner[depth] = {type: value, named: false};
+                route[depth] = {type: value, named: false};
             }
             else {
                 if (!node[value]) {
@@ -76,57 +87,54 @@ function buildParseTree(parseMap, node, pathAndAction, depth, virtualRunner) {
                 next[Keys.match] = matchObject;
             }
 
-            // Not the same path
-            if (matchObject.get && get ||
-                matchObject.set && set ||
-                matchObject.call && call) {
-                var prettyRoute = prettifyVirtualPath(route);
-                throw new Error(
-                    errors.routeWithSamePath + ' ' + JSON.stringify(prettyRoute));
-            }
-            setHashOrThrowError(parseMap, virtualRunner, get, set, call);
-
-            var clonedVirtualRunner = cloneArray(virtualRunner);
             if (get) {
-                matchObject.get = actionWrapper(clonedVirtualRunner, get);
+                matchObject.get = actionWrapper(route, get);
+                matchObject.getId = routeObject.getId;
             }
             if (set) {
-                matchObject.set = actionWrapper(clonedVirtualRunner, set);
+                matchObject.set = actionWrapper(route, set);
+                matchObject.setId = routeObject.setId;
             }
             if (call) {
-                matchObject.call = actionWrapper(clonedVirtualRunner, call);
+                matchObject.call = actionWrapper(route, call);
+                matchObject.callId = routeObject.callId;
             }
         } else {
-            buildParseTree(
-                parseMap, next, pathAndAction,
-                depth + 1, virtualRunner);
+            buildParseTree(next, routeObject, depth + 1);
         }
 
-        virtualRunner.length = depth;
-    } while(isArray && ++i < el.length);
+    } while (isArray && ++i < el.length);
 }
 
 /**
  * ensure that two routes of the same precedence do not get
  * set in.
  */
-function setHashOrThrowError(parseMap, virtualRunner, get, set, call) {
-    var hash = getHashFromVirtualPath(virtualRunner);
+function setHashOrThrowError(parseMap, routeObject) {
+    var route = routeObject.route;
+    var get = routeObject.get;
+    var set = routeObject.set;
+    var call = routeObject.call;
 
-    if (get && parseMap[hash + 'get'] ||
-        set && parseMap[hash + 'set'] ||
-        call && parseMap[hash + 'call']) {
-        throw new Error(errors.routeWithSamePrecedence);
-    }
-    if (get) {
-        parseMap[hash + 'get'] = true;
-    }
-    if (set) {
-        parseMap[hash + 'set'] = true;
-    }
-    if (call) {
-        parseMap[hash + 'call'] = true;
-    }
+    getHashesFromRoute(route).
+        map(function mapHashToString(hash) { return hash.join(','); }).
+        forEach(function forEachRouteHash(hash) {
+            if (get && parseMap[hash + 'get'] ||
+                set && parseMap[hash + 'set'] ||
+                    call && parseMap[hash + 'call']) {
+                throw new Error(errors.routeWithSamePrecedence + ' ' +
+                               prettifyRoute(route));
+            }
+            if (get) {
+                parseMap[hash + 'get'] = true;
+            }
+            if (set) {
+                parseMap[hash + 'set'] = true;
+            }
+            if (call) {
+                parseMap[hash + 'call'] = true;
+            }
+        });
 }
 
 /**
@@ -161,60 +169,55 @@ function decendTreeByRoutedToken(node, value, routeToken) {
  * creates a hash of the virtual path where integers and ranges
  * will collide but everything else is unique.
  */
-function getHashFromVirtualPath(virtualPath) {
-    var length = 0;
-    var str = [];
-    for (var i = 0, len = virtualPath.length; i < len; ++i, ++length) {
-        var value = virtualPath[i];
-        if (typeof value === 'object') {
-            value = value.type;
+function getHashesFromRoute(route, depth, hashes, hash) {
+    /*eslint-disable no-func-assign, no-param-reassign*/
+    depth = depth || 0;
+    hashes = hashes || [];
+    hash = hash || [];
+    /*eslint-enable no-func-assign, no-param-reassign*/
+
+    var routeValue = route[depth];
+    var isArray = Array.isArray(routeValue);
+    var length = isArray && routeValue.length || 0;
+    var idx = 0;
+    var value;
+
+    if (typeof routeValue === 'object' && !isArray) {
+        value = routeValue.type;
+    }
+
+    else if (!isArray) {
+        value = routeValue;
+    }
+
+    do {
+        if (isArray) {
+            value = routeValue[idx];
         }
 
         if (value === Keys.integers || value === Keys.ranges) {
-            str[length] = '__I__';
+            hash[depth] = '__I__';
         }
 
         else if (value === Keys.keys) {
-            str[length] = '__K__';
+            hash[depth] ='__K__';
         }
 
         else {
-            str[length] = value;
-        }
-    }
-
-    return str.join('');
-}
-
-/**
- * beautify the virtual path, meaning paths with virtual keys will
- * not be displayed as a stringified object but instead as a string.
- */
-function prettifyVirtualPath(virtualPath) {
-    var length = 0;
-    var str = [];
-    for (var i = 0, len = virtualPath.length; i < len; ++i, ++length) {
-        var value = virtualPath[i];
-        if (typeof value === 'object') {
-            value = value.type;
+            hash[depth] = value;
         }
 
-        if (value === Keys.integers) {
-            str[length] = 'integers';
+        // recurse down the routed token
+        if (depth + 1 !== route.length) {
+            getHashesFromRoute(route, depth + 1, hashes, hash);
         }
 
-        else if (value === Keys.ranges) {
-            str[length] = 'ranges';
-        }
-
-        else if (value === Keys.keys) {
-            str[length] = 'keys';
-        }
-
+        // Or just add it to hashes
         else {
-            str[length] = value;
+            hashes.push(cloneArray(hash));
         }
-    }
+    } while (isArray && ++idx < length);
 
-    return str;
+    return hashes;
 }
+
