@@ -13,7 +13,7 @@ var $error = falcor.Model.error;
 var Observable = require('rx').Observable;
 var sinon = require('sinon');
 
-describe.only('Multi-Indexer', function() {
+describe('Multi-Indexer', function() {
     it('should allow multiple string indexers to collapse into a single request in leaf position.', function(done) {
         var serviceCalls = 0;
         var onNext = sinon.spy();
@@ -43,6 +43,7 @@ describe.only('Multi-Indexer', function() {
                         }
                     }
                 });
+                expect(serviceCalls).to.equal(1);
             }).
             subscribe(noOp, done, done);
     });
@@ -76,6 +77,7 @@ describe.only('Multi-Indexer', function() {
                         }
                     }
                 });
+                expect(serviceCalls).to.equal(1);
             }).
             subscribe(noOp, done, done);
     });
@@ -109,6 +111,7 @@ describe.only('Multi-Indexer', function() {
                         }
                     }
                 });
+                expect(serviceCalls).to.equal(1);
             }).
             subscribe(noOp, done, done);
     });
@@ -141,6 +144,51 @@ describe.only('Multi-Indexer', function() {
                         }
                     }
                 });
+                expect(serviceCalls).to.equal(1);
+            }).
+            subscribe(noOp, done, done);
+    });
+
+    it('should fire multiple service calls', function(done) {
+        var serviceCalls = 0;
+        var onNext = sinon.spy();
+        var router = new R([{
+            route: 'test["one", "two"]["three", "four"]',
+            get: function(aliasMap) {
+                var part1 = aliasMap[1];
+                var part2 = aliasMap[2];
+                serviceCalls++;
+
+                expect(Array.isArray(part1)).to.be.ok;
+                expect(Array.isArray(part2)).to.be.ok;
+                var res = [];
+                part1.forEach(function(p1) {
+                    part2.forEach(function(p2) {
+                        res.push({path: ['test', p1, p2], value: p1 + p2});
+                    });
+                });
+
+                return res;
+            }
+        }]);
+
+        router.
+            get([
+                ["test", 'one', 'three'],
+                ["test", 'two', 'four']
+            ]).
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                expect(onNext.called).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    jsonGraph: {
+                        test: {
+                            one: {three: 'onethree'},
+                            two: {four: 'twofour'}
+                        }
+                    }
+                });
+                expect(serviceCalls).to.equal(2);
             }).
             subscribe(noOp, done, done);
     });
