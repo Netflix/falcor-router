@@ -261,40 +261,6 @@ describe('Specific', function() {
             });
     });
 
-    it('should allow multiple string indexers to collapse into a single request in leaf position.', function(done) {
-        var serviceCalls = 0;
-        var onNext = sinon.spy();
-        var router = new R([{
-            route: 'test["one", "two", "three"]',
-            get: function(aliasMap) {
-                var keys = aliasMap[1];
-                serviceCalls++;
-
-                expect(Array.isArray(keys)).to.be.ok;
-                debugger
-                return keys.map(function(k) {
-                    return {path: ['test', k], value: k};
-                });
-            }
-        }]);
-
-        router.
-            get([["test", ['one', 'two']]]).
-            doAction(onNext).
-            doAction(noOp, noOp, function() {
-                expect(onNext.called).to.be.ok;
-                expect(onNext.getCall(0).args[0]).to.deep.equals({
-                    jsonGraph: {
-                        test: {
-                            one: 'one',
-                            two: 'two'
-                        }
-                    }
-                });
-            }).
-            subscribe(noOp, done, done);
-    });
-
     function getPrecedenceRouter(onTitle, onRating) {
         return new R([{
             route: 'videos[{integers:ids}].title',
