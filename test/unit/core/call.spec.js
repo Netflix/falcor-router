@@ -11,6 +11,7 @@ var $ref = falcor.Model.ref;
 var $atom = falcor.Model.atom;
 var errors = require('./../../../src/exceptions');
 var types = require('../../../src/support/types');
+var sinon = require("sinon");
 
 describe('Call', function() {
     it('should perform a simple call.', function(done) {
@@ -182,6 +183,110 @@ describe('Call', function() {
     });
 
 
+    it('should allow item to be pushed onto collection.', function(done) {
+        var called = 0;
+        var onNext = sinon.spy();
+        getCallRouter().
+            call(['genrelist', 0, 'titles', 'push'], [{ $type: 'ref', value: ['titlesById', 1] }]).
+            doAction(onNext).
+            doAction(noOp, noOp, function(x) {
+                expect(onNext.called).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    jsonGraph: {
+                        genrelist: {
+                            0: {
+                                titles: {
+                                    2: { 
+                                        $type: 'ref', 
+                                        value: ['titlesById', 1] 
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    paths: [['genrelist', 0, 'titles', 2]]
+                });
+                ++called;
+            }).
+            subscribe(noOp, done, function() {
+                expect(called).to.equals(1);
+                done();
+            });
+    });
+
+    it('should evaluate path suffixes on result of a function that adds an item to a collection.', function(done) {
+        var called = 0;
+        var onNext = sinon.spy();
+        getCallRouter().
+            call(['genrelist', 0, 'titles', 'push'], [{ $type: 'ref', value: ['titlesById', 1] }], [['name'], ['rating']]).
+            doAction(onNext).
+            doAction(noOp, noOp, function(x) {
+                expect(onNext.called).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    jsonGraph: {
+                        genrelist: {
+                            0: {
+                                titles: {
+                                    2: { 
+                                        $type: 'ref', 
+                                        value: ['titlesById', 1] 
+                                    }
+                                }
+                            }
+                        },
+                        titlesById: {
+                            1: {
+                                name: 'Orange is the new Black',
+                                rating: 5
+                            }
+                        }
+                    },
+                    paths: [['genrelist', 0, 'titles', 2, ['name', 'rating']]]
+                });
+                ++called;
+            }).
+            subscribe(noOp, done, function() {
+                expect(called).to.equals(1);
+                done();
+            });
+    });
+
+    function getCallRouter() {
+        return new R([{
+            route: 'genrelist[{integers}].titles.push',
+            call: function(callPath, args) {
+                return {
+                    path: ['genrelist', 0, 'titles', 2],
+                    value: {
+                        $type: 'ref',
+                        value: ['titlesById', 1]
+                    }
+                }
+            }
+        },
+        {
+            route: 'titlesById[{integers}]["name", "rating"]',
+            get: function(callPath, args) {
+                return [
+                    {
+                        path: ['titlesById', 1, 'name'],
+                        value: {
+                            $type: 'ref',
+                            value: 'Orange is the new Black'
+                        }
+                    },
+                    {
+                        path: ['titlesById', 1, 'rating'],
+                        value: {
+                            $type: 'ref',
+                            value: 5
+                        }
+                    }                    
+                ]
+            }
+        }]);
+    }
+
     function getRouter(noPaths, throwError) {
         return new R([{
             route: 'videos[{integers:id}].rating',
@@ -275,7 +380,6 @@ describe('Call', function() {
         }, {
             route: 'listsById[{integers:idices}].rating',
             get: function(alais) {
-                debugger
                 return Observable.
                     from(alais.idices).
                     map(function(idx) {
@@ -305,7 +409,6 @@ describe('Call', function() {
         }, {
             route: 'lolomos[{keys:ids}].jsongAdd',
             call: function(callPath, args) {
-                debugger
                 var id = callPath.ids[0];
                 var idx = addToList(args[0]);
                 var lolomos = {};
