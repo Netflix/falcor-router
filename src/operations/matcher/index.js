@@ -41,6 +41,12 @@ module.exports = function matcher(rst) {
         var missing = [];
         match(rst, paths, method, matched, missing);
 
+        // We are at the end of the path but there is no match and its a
+        // call.  Therefore we are going to throw an informative error.
+        if (method === call && matched.length === 0) {
+            throw new Error('function does not exist');
+        }
+
         var reducedMatched = matched.reduce(function(acc, matchedRoute) {
             if (!acc[matchedRoute.id]) {
                 acc[matchedRoute.id] = [];
@@ -110,16 +116,32 @@ function match(
     if ((isCall || isSet) && !atEndOfPath) {
         methodToUse = get;
     }
-    if (curr[Keys.match] && curr[Keys.match][methodToUse]) {
+
+    // Stores the matched result if found along or at the end of
+    // the path.  If we are doing a set and there is no set handler
+    // but there is a get handler, then we need to use the get
+    // handler.  This is so that the current value that is in the
+    // clients cache does not get materialized away.
+    var currentMatch = curr[Keys.match];
+
+    // From https://github.com/Netflix/falcor-router/issues/76
+    // Set: When there is no set hander then we should default to running
+    // the get handler so that we do not destroy the client local values.
+    if (currentMatch && isSet && !currentMatch[set]) {
+        methodToUse = get;
+    }
+
+    // Check to see if we have
+    if (currentMatch && currentMatch[methodToUse]) {
         matchedFunctions[matchedFunctions.length] = {
 
             // Used for collapsing paths that use routes with multiple
             // string indexers.
-            id: curr[Keys.match][methodToUse + 'Id'],
+            id: currentMatch[methodToUse + 'Id'],
             requested: cloneArray(requested),
 
-            action: curr[Keys.match][methodToUse],
-            authorize: curr[Keys.match].authorize,
+            action: currentMatch[methodToUse],
+            authorize: currentMatch.authorize,
             virtual: cloneArray(virtual),
             precedence: +(precedence.join('')),
             suffix: path.slice(depth),

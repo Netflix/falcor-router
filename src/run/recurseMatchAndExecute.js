@@ -45,7 +45,15 @@ function _recurseMatchAndExecute(
                 return Observable.empty();
             }
 
-            var matchedResults = match(currentMethod, nextPaths);
+            // We have to return an Observable of error instead of just
+            // throwing.
+            var matchedResults;
+            try {
+                matchedResults = match(currentMethod, nextPaths);
+            } catch (e) {
+                return Observable.throw(e);
+            }
+
             if (!matchedResults.matched.length) {
                 return Observable.empty();
             }

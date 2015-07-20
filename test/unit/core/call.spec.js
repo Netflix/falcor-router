@@ -230,12 +230,69 @@ describe('Call', function() {
             });
     });
 
+    it('should throw when calling a function that does not exist.', function(done) {
+        var router = new R([]);
+        var onError = sinon.spy();
+        router.
+            call(['videos', 1234, 'rating'], [5]).
+            doAction(noOp, onError).
+            doAction(noOp, function() {
+                expect(onError.calledOnce).to.be.ok;
+
+                var args = onError.getCall(0).args;
+                expect(args[0] instanceof Error).to.be.ok;
+                expect(args[0].message).to.deep.equals('function does not exist');
+            }).
+            subscribe(noOp, function(e) {
+                if (e.message === 'function does not exist') {
+                    return done();
+                }
+                return done(e);
+            }, done);
+    });
+
+    it('should throw when calling a function that does not exist, but get handler does.', function(done) {
+        var router = new R([{
+            route: 'videos[1234].rating',
+            get: function() { }
+        }]);
+        var onError = sinon.spy();
+        router.
+            call(['videos', 1234, 'rating'], [5]).
+            doAction(noOp, onError).
+            doAction(noOp, function() {
+                expect(onError.calledOnce).to.be.ok;
+
+                var args = onError.getCall(0).args;
+                expect(args[0] instanceof Error).to.be.ok;
+                expect(args[0].message).to.deep.equals('function does not exist');
+            }).
+            subscribe(noOp, function(e) {
+                if (e.message === 'function does not exist') {
+                    return done();
+                }
+                return done(e);
+            }, done);
+    });
+
     function getCallRouter() {
         return new R([{
             route: 'genrelist[{integers}].titles.push',
             call: function(callPath, args) {
                 return {
                     path: ['genrelist', 0, 'titles', 2],
+                    value: {
+                        $type: 'ref',
+                        value: ['titlesById', 1]
+                    }
+                };
+            }
+        },
+        {
+            route: 'genrelist[{integers}].titles[{integers}]',
+            get: function(pathSet) {
+                return {
+                    path: ['genrelist', 0, 'titles', 1],
                     value: {
                         $type: 'ref',
                         value: ['titlesById', 1]
