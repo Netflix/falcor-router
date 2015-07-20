@@ -1,7 +1,9 @@
+/* eslint-disable max-len */
 var toPaths = require('./../../operations/collapse/toPaths');
 var toTree = require('./../../operations/collapse/toTree');
 var stripPath = require('./../../operations/strip/stripPath');
 var hasIntersection = require('./../../operations/matcher/intersection/hasIntersection');
+/* eslint-enable max-len */
 
 /**
  * takes in the set of ordered matches and pathSet that got those matches.

@@ -39,7 +39,7 @@ module.exports = function stripFromRange(argToStrip, range) {
             var nextRanges = [];
             currenRanges.forEach(function(currentRename) {
                 var matchAndComplement = stripFromRange(atom, currentRename);
-                if (matchAndComplement[0] !== undefined) { // eslint-disable-line no-undefined
+                if (matchAndComplement[0] !== undefined) {
                     matches = matches.concat(matchAndComplement[0]);
                 }
 

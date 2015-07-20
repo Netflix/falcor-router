@@ -85,14 +85,14 @@ Router.prototype = {
     }
 };
 
-function run(matcherFn, actionRunner, paths, method, routerInstance, jsongCache) {
+function run(matcherFn, actionRunner, paths, method,
+             routerInstance, jsongCache) {
     return recurseMatchAndExecute(
             matcherFn, actionRunner, paths, method, routerInstance, jsongCache);
 }
 
 function materializeMissing(router, paths, jsongEnv, missingAtom) {
     var jsonGraph = jsongEnv.jsonGraph;
-    var isCall = !!missingAtom;
     var materializedAtom = missingAtom || {$type: $atom};
 
     // Optimizes the pathSets from the jsong then

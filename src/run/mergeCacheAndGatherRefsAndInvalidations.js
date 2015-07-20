@@ -30,8 +30,7 @@ function mergeCacheAndGatherRefsAndInvalidations(cache, jsongOrPVs, hasSuffix) {
         else if (isJSONG(jsongOrPV)) {
             refs = jsongMerge(cache, jsongOrPV);
         } else {
-
-            if (jsongOrPV.value === undefined) { //eslint-disable-line no-undefined
+            if (jsongOrPV.value === undefined) {
                 invalidated[invalidated.length] = jsongOrPV;
             } else {
                 refs = pathValueMerge(cache, jsongOrPV);

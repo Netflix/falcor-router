@@ -32,14 +32,13 @@ function _recurseMatchAndExecute(
     var missing = [];
     var invalidated = [];
     var reportedPaths = [];
-    var callRefs = [];
     var currentMethod = method;
 
     return Observable.
 
-        // Each pathSet (some form of collapsed path) need to be sent independently.
-        // for each collapsed pathSet will, if producing refs, be the highest likelihood
-        // of collapsibility.
+        // Each pathSet (some form of collapsed path) need to be sent
+        // independently.  for each collapsed pathSet will, if producing
+        // refs, be the highest likelihood of collapsibility.
         from(paths).
         expand(function(nextPaths) {
             if (!nextPaths.length) {

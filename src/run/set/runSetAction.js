@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 var outputToObservable = require('../conversion/outputToObservable');
 var noteToJsongOrPV = require('../conversion/noteToJsongOrPV');
 var authorize = require('./../authorize');
@@ -6,10 +7,13 @@ var getValue = require('./../../cache/getValue');
 var optimizePathSets = require('./../../cache/optimizePathSets');
 var hasIntersection = require('./../../operations/matcher/intersection/hasIntersection');
 var pathValueMerge = require('./../../cache/pathValueMerge');
+/* eslint-enable max-len */
 
-module.exports = function outerRunSetAction(routerInstance, modelContext, jsongCache) {
+module.exports = function outerRunSetAction(routerInstance, modelContext,
+                                            jsongCache) {
     return function innerRunSetAction(matchAndPath) {
-        return runSetAction(routerInstance, modelContext, matchAndPath, jsongCache);
+        return runSetAction(routerInstance, modelContext,
+                            matchAndPath, jsongCache);
     };
 };
 
