@@ -1,8 +1,5 @@
-var TestRunner = require('./../../TestRunner');
-var Observable = require('rx').Observable;
 var R = require('../../../src/Router');
 var Routes = require('./../../data');
-var Expected = require('./../../data/expected');
 var noOp = function() {};
 var chai = require('chai');
 var expect = chai.expect;

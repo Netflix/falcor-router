@@ -1,8 +1,5 @@
-var TestRunner = require('./../../TestRunner');
 var Observable = require('rx').Observable;
 var R = require('../../../src/Router');
-var Routes = require('./../../data');
-var Expected = require('./../../data/expected');
 var noOp = function() {};
 var chai = require('chai');
 var expect = chai.expect;
@@ -10,7 +7,6 @@ var falcor = require('falcor');
 var $ref = falcor.Model.ref;
 var $atom = falcor.Model.atom;
 var errors = require('./../../../src/exceptions');
-var types = require('../../../src/support/types');
 var sinon = require("sinon");
 
 describe('Call', function() {
@@ -39,7 +35,7 @@ describe('Call', function() {
 
     it('should pass the #30 base call test with only suffix.', function(done) {
         var called = 0;
-        var routes = getExtendedRouter().
+        getExtendedRouter().
             call(['lolomo', 'pvAdd'], ['Thrillers'], [['name']]).
             doAction(function(jsongEnv) {
                 expect(jsongEnv).to.deep.equals({
@@ -48,7 +44,7 @@ describe('Call', function() {
                         lolomos: {
                             123: {
                                 0: $ref('listsById[0]')
-                            },
+                            }
                         },
                         listsById: {
                             0: {
@@ -70,7 +66,7 @@ describe('Call', function() {
 
     it('should pass the #30 base call test with only paths.', function(done) {
         var called = 0;
-        var routes = getExtendedRouter().
+        getExtendedRouter().
             call(['lolomo', 'pvAdd'], ['Thrillers'], null, [['length']]).
             doAction(function(jsongEnv) {
                 expect(jsongEnv).to.deep.equals({
@@ -80,7 +76,7 @@ describe('Call', function() {
                             123: {
                                 0: $ref('listsById[0]'),
                                 length: 1
-                            },
+                            }
                         }
                     },
                     paths: [
@@ -98,7 +94,7 @@ describe('Call', function() {
 
     it('should pass the #30 base call test with both paths and suffixes.', function(done) {
         var called = 0;
-        var routes = getExtendedRouter().
+        getExtendedRouter().
             call(['lolomo', 'pvAdd'], ['Thrillers'], [['name']], [['length']]).
             doAction(function(jsongEnv) {
                 expect(jsongEnv).to.deep.equals({
@@ -108,7 +104,7 @@ describe('Call', function() {
                             123: {
                                 0: $ref('listsById[0]'),
                                 length: 1
-                            },
+                            }
                         },
                         listsById: {
                             0: {
@@ -134,11 +130,11 @@ describe('Call', function() {
         getRouter(true, true).
             call(['videos', 1234, 'rating'], [5]).
             doAction(function() {
-                throw 'Should not be called.  onNext';
+                throw new Error('Should not be called.  onNext');
             }, function(x) {
                 expect(x.message).to.equal('Oops?');
             }, function() {
-                throw 'Should not be called.  onCompleted';
+                throw new Error('Should not be called.  onCompleted');
             }).
             subscribe(noOp, function(e) {
                 if (e.message === 'Oops?') {
@@ -153,11 +149,11 @@ describe('Call', function() {
         getRouter(true).
             call(['videos', 1234, 'rating'], [5]).
             doAction(function() {
-                throw 'Should not be called.  onNext';
+                throw new Error('Should not be called.  onNext');
             }, function(x) {
                 expect(x.message).to.equal(errors.callJSONGraphWithouPaths);
             }, function() {
-                throw 'Should not be called.  onCompleted';
+                throw new Error('Should not be called.  onCompleted');
             }).
             subscribe(noOp, function(e) {
                 if (e.message === errors.callJSONGraphWithouPaths) {
@@ -170,7 +166,6 @@ describe('Call', function() {
 
 
     it('should allow item to be pushed onto collection.', function(done) {
-        var called = 0;
         var onNext = sinon.spy();
         getCallRouter().
             call(['genrelist', 0, 'titles', 'push'], [{ $type: 'ref', value: ['titlesById', 1] }]).

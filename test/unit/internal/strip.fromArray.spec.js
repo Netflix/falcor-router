@@ -1,6 +1,5 @@
 var stripFromArray = require('./../../../src/operations/strip/stripFromArray');
 var expect = require('chai').expect;
-var _ = require('lodash');
 var Keys = require('./../../../src/Keys');
 
 describe('stripFromArray', function() {

@@ -1,16 +1,7 @@
-var TestRunner = require('./../../TestRunner');
 var R = require('../../../src/Router');
-var Routes = require('./../../data');
-var Expected = require('./../../data/expected');
-var circularReference = require('./../../../src/exceptions').circularReference;
 var noOp = function() {};
 var chai = require('chai');
 var expect = chai.expect;
-var falcor = require('falcor');
-var $ref = falcor.Model.ref;
-var $atom = falcor.Model.atom;
-var $error = falcor.Model.error;
-var Observable = require('rx').Observable;
 var sinon = require('sinon');
 
 describe('Multi-Indexer', function() {
@@ -73,7 +64,7 @@ describe('Multi-Indexer', function() {
                     jsonGraph: {
                         test: {
                             one: {summary: 'one'},
-                            two: {summary: 'two'},
+                            two: {summary: 'two'}
                         }
                     }
                 });
@@ -107,7 +98,7 @@ describe('Multi-Indexer', function() {
                     jsonGraph: {
                         test: {
                             one: {0: {0: 'one'}},
-                            two: {0: {0: 'two'}},
+                            two: {0: {0: 'two'}}
                         }
                     }
                 });

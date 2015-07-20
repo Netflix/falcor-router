@@ -3,7 +3,6 @@ var Model = require('falcor').Model;
 var $ref = Model.ref;
 var $atom = Model.atom;
 var expect = require('chai').expect;
-var _ = require('lodash');
 var errors = require('./../../../src/exceptions');
 
 /**
@@ -73,7 +72,7 @@ describe('optimizePathSets', function() {
 
         var caught = false;
         try {
-            var out = optimizePathSets(cache, paths);
+            optimizePathSets(cache, paths);
         } catch (e) {
             caught = true;
             expect(e.message).to.equals(errors.innerReferences);
@@ -89,7 +88,7 @@ function getCache() {
             5: $ref('videos[5]'),
             double: $ref('videosList[3]'),
             short: $ref('videos[5].moreKeys'),
-            inner: $ref('videosList[3].inner'),
+            inner: $ref('videosList[3].inner')
         },
         videos: {
             5: $atom('title')

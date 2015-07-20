@@ -1,5 +1,4 @@
 var jsongMerge = require('./../../../src/cache/jsongMerge');
-var pathValueMerge = require('./../../../src/cache/pathValueMerge');
 var Model = require('falcor').Model;
 var $ref = Model.ref;
 var $atom = Model.atom;

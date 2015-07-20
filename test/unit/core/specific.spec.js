@@ -1,4 +1,3 @@
-var TestRunner = require('./../../TestRunner');
 var R = require('../../../src/Router');
 var Routes = require('./../../data');
 var Expected = require('./../../data/expected');
@@ -8,10 +7,7 @@ var chai = require('chai');
 var expect = chai.expect;
 var falcor = require('falcor');
 var $ref = falcor.Model.ref;
-var $atom = falcor.Model.atom;
-var $error = falcor.Model.error;
 var Observable = require('rx').Observable;
-var sinon = require('sinon');
 
 describe('Specific', function() {
     it('should execute a simple route matching.', function(done) {
@@ -136,8 +132,6 @@ describe('Specific', function() {
     });
 
     it('should grab a reference.', function(done) {
-        var title = 0;
-        var rating = 0;
         var called = 0;
         var router = getPrecedenceRouter();
         router.
@@ -190,7 +184,7 @@ describe('Specific', function() {
             {
                 route: "ProductsById[{keys}][{keys}]",
                 get: function (pathSet) {
-                    throw "reference was followed in error";
+                    throw new Error("reference was followed in error");
                 }
             },
             {

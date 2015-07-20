@@ -3,7 +3,6 @@ var Model = require('falcor').Model;
 var $ref = Model.ref;
 var $atom = Model.atom;
 var expect = require('chai').expect;
-var _ = require('lodash');
 
 /**
  * normally i don't test internals but i think the merges
@@ -57,10 +56,10 @@ describe('PathValue - Merge', function() {
     it('should write a complex branch path to the cache with pathValue.', function() {
         var expected = {
             there: {
-                be: $atom('a value'),
+                be: $atom('a value')
             },
             could: {
-                be: $atom('a value'),
+                be: $atom('a value')
             }
         };
 
