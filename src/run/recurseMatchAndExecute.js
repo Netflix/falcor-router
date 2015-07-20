@@ -32,24 +32,26 @@ function _recurseMatchAndExecute(
     var missing = [];
     var invalidated = [];
     var reportedPaths = [];
+    var currentMethod = method;
 
     return Observable.
 
-        // Each pathSet (some form of collapsed path) need to be sent independently.
-        // for each collapsed pathSet will, if producing refs, be the highest likelihood
-        // of collapsibility.
+        // Each pathSet (some form of collapsed path) need to be sent
+        // independently.  for each collapsed pathSet will, if producing
+        // refs, be the highest likelihood of collapsibility.
         from(paths).
         expand(function(nextPaths) {
             if (!nextPaths.length) {
                 return Observable.empty();
             }
 
-            var matchedResults = match(method, nextPaths);
+            var matchedResults = match(currentMethod, nextPaths);
             if (!matchedResults.matched.length) {
                 return Observable.empty();
             }
 
-            return runByPrecedence(nextPaths, matchedResults.matched, actionRunner).
+            var matchedResult = matchedResults.matched;
+            return runByPrecedence(nextPaths, matchedResult, actionRunner).
 
                 // Generate from the combined results the next requestable paths
                 // and insert errors / values into the cache.
@@ -62,10 +64,11 @@ function _recurseMatchAndExecute(
                     }
                     var invalidationsNextPathsAndMessages =
                             mCGRI(jsongCache, value, suffix.length > 0);
-                    var nextInvalidations = invalidationsNextPathsAndMessages[0];
+                    var invalidations = invalidationsNextPathsAndMessages[0];
                     var pathsToExpand = invalidationsNextPathsAndMessages[1];
                     var messages = invalidationsNextPathsAndMessages[2];
-                    nextInvalidations.forEach(function(invalidation) {
+
+                    invalidations.forEach(function(invalidation) {
                         invalidated[invalidated.length] = invalidation;
                     });
 
@@ -78,7 +81,7 @@ function _recurseMatchAndExecute(
                     messages.forEach(function(message) {
                         // mutates the method type for the matcher
                         if (message.method) {
-                            method = message.method; //eslint-disable-line no-param-reassign
+                            currentMethod = message.method;
                         }
 
                         // Mutates the nextPaths and adds any additionalPaths
@@ -94,6 +97,7 @@ function _recurseMatchAndExecute(
                     // paths to evaluate.
                     pathsToExpand = optimizePathSets(
                         jsongCache, pathsToExpand, routerInstance.maxRefFollow);
+
                     if (pathsToExpand.length) {
                         pathsToExpand = toPaths(toTree(pathsToExpand));
                     }

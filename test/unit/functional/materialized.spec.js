@@ -1,4 +1,3 @@
-var TestRunner = require('./../../TestRunner');
 var R = require('../../../src/Router');
 var $atom = require('../../../src/support/types').$atom;
 var noOp = function() {};
@@ -6,7 +5,6 @@ var chai = require('chai');
 var expect = chai.expect;
 var falcor = require('falcor');
 var $ref = falcor.Model.ref;
-var $error = falcor.Model.error;
 var Observable = require('rx').Observable;
 
 describe('Materialized Paths.', function() {

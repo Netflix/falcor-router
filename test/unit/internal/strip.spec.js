@@ -1,6 +1,5 @@
 var strip = require('./../../../src/operations/strip/strip');
 var expect = require('chai').expect;
-var _ = require('lodash');
 var Keys = require('./../../../src/Keys');
 
 /**

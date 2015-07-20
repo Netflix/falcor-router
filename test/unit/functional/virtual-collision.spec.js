@@ -1,11 +1,7 @@
-var TestRunner = require('./../../TestRunner');
 var R = require('../../../src/Router');
 var errors = require('../../../src/exceptions');
-var noOp = function() {};
 var chai = require('chai');
 var expect = chai.expect;
-var falcor = require('falcor');
-var Observable = require('rx').Observable;
 
 describe('Virtual Collisions', function() {
     it('should collide when two paths have the exact same virtual path.', function() {

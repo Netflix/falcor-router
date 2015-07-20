@@ -1,8 +1,12 @@
+// Disable eslint for import statements
+/* eslint-disable max-len */
 var Keys = require('./../Keys');
 var convertPathKeyToRange = require('./../operations/ranges/convertPathKeyToRange');
 var convertPathKeyToIntegers = require('./../operations/integers/convertPathKeyToIntegers');
 var convertPathKeyToKeys = require('./../operations/keys/convertPathKeyToKeys');
 var isArray = Array.isArray;
+/* eslint-enable max-len */
+
 /**
  * takes the path that was matched and converts it to the
  * virtual path.

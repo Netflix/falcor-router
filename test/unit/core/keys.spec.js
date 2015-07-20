@@ -14,7 +14,7 @@ describe('Keys', function() {
             })
         );
         var called = false;
-        var obs = router.
+        router.
             get([['videos', 1, 'summary']]).
             subscribe(function(res) {
                 expect(res).to.deep.equals(Expected().Videos[1].summary);
@@ -32,7 +32,7 @@ describe('Keys', function() {
             })
         );
         var called = false;
-        var obs = router.
+        router.
             get([['videos', 'someKey', 'summary']]).
             subscribe(function(res) {
                 expect(res).to.deep.equals(Expected().Videos.someKey.summary);

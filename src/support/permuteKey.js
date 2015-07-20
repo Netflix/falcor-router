@@ -15,11 +15,7 @@ module.exports = function permuteKey(key, memo) {
         var type = typeof el;
         if (type === 'object') {
             if (!memo.loaded) {
-                memo.from = el.from || 0;
-                memo.to = el.to ||
-                    typeof el.length === 'number' && memo.from + el.length - 1 || 0;
-                memo.rangeOffset = memo.from;
-                memo.loaded = true;
+                initializeRange(el, memo);
             }
 
             return memo.rangeOffset++;
@@ -29,11 +25,7 @@ module.exports = function permuteKey(key, memo) {
         }
     } else {
         if (!memo.loaded) {
-            memo.from = key.from || 0;
-            memo.to = key.to ||
-                typeof key.length === 'number' && memo.from + key.length - 1 || 0;
-            memo.rangeOffset = memo.from;
-            memo.loaded = true;
+            initializeRange(key, memo);
         }
         if (memo.rangeOffset > memo.to) {
             memo.done = true;
@@ -44,4 +36,11 @@ module.exports = function permuteKey(key, memo) {
     }
 };
 
-
+function initializeRange(key, memo) {
+    memo.from = key.from || 0;
+    memo.to = key.to ||
+        (typeof key.length === 'number' &&
+        memo.from + key.length - 1 || 0);
+    memo.rangeOffset = memo.from;
+    memo.loaded = true;
+}

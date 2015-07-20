@@ -10,7 +10,7 @@ module.exports = function() {
                     }
                 }
             }
-        },
+        }
     };
     [0, 1, 2, 'someKey'].forEach(function(key) {
         retVal[key] = {

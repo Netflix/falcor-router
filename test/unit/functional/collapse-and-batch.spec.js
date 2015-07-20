@@ -1,14 +1,11 @@
-var TestRunner = require('./../../TestRunner');
 var R = require('../../../src/Router');
 var Routes = require('./../../data');
-var Expected = require('./../../data/expected');
 var noOp = function() {};
 var chai = require('chai');
 var expect = chai.expect;
 var falcor = require('falcor');
 var $ref = falcor.Model.ref;
 var $atom = falcor.Model.atom;
-var $error = falcor.Model.error;
 var Observable = require('rx').Observable;
 var Promise = require('promise');
 
@@ -294,7 +291,7 @@ describe('Collapse and Batch', function() {
             }
         }];
         var router = new R(routes);
-        var obs = router.
+        router.
             get([['promise', [0, 1], 'summary']]).
             doAction(noOp, noOp, function() {
                 expect(serviceCalls).to.equal(1);

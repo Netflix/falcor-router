@@ -13,6 +13,8 @@ var $atom = require('./support/types').$atom;
 var get = 'get';
 var set = 'set';
 var call = 'call';
+var toPaths = require('./operations/collapse/toPaths');
+var toTree = require('./operations/collapse/toTree');
 var MAX_REF_FOLLOW = 50;
 
 // TODO: We should move this into the constructor.
@@ -44,7 +46,8 @@ Router.prototype = {
         var jsongCache = {};
         var action = runGetAction(this, jsongCache);
         var router = this;
-        return run(this._matcher, action, normalizePathSets(paths), get, this, jsongCache).
+        var normPS = normalizePathSets(paths);
+        return run(this._matcher, action, normPS, get, this, jsongCache).
             map(function(jsongEnv) {
                 return materializeMissing(router, paths, jsongEnv);
             });
@@ -64,27 +67,26 @@ Router.prototype = {
 
     call: function(callPath, args, suffixes, paths) {
         var jsongCache = {};
-        var action = runCallAction(this, callPath, args, suffixes, paths, jsongCache);
+        var action = runCallAction(this, callPath, args,
+                                   suffixes, paths, jsongCache);
         var callPaths = [callPath];
         var router = this;
         return run(this._matcher, action, callPaths, call, this, jsongCache).
             map(function(jsongResult) {
+                var reportedPaths = jsongResult.reportedPaths;
                 var jsongEnv = materializeMissing(
                     router,
-                    callPaths,
-                    jsongResult,
-                    {
-                        $type: $atom,
-                        $expires: 0
-                    });
+                    reportedPaths,
+                    jsongResult);
 
-                jsongEnv.paths = jsongResult.reportedPaths.concat(callPaths);
+                jsongEnv.paths = toPaths(toTree(jsongResult.reportedPaths));
                 return jsongEnv;
             });
     }
 };
 
-function run(matcherFn, actionRunner, paths, method, routerInstance, jsongCache) {
+function run(matcherFn, actionRunner, paths, method,
+             routerInstance, jsongCache) {
     return recurseMatchAndExecute(
             matcherFn, actionRunner, paths, method, routerInstance, jsongCache);
 }

@@ -28,7 +28,8 @@ module.exports = function optimizePathSets(cache, paths, maxRefFollow) {
 /**
  * optimizes one pathSet at a time.
  */
-function optimizePathSet(cache, cacheRoot, pathSet, depth, out, optimizedPath, maxRefFollow) {
+function optimizePathSet(cache, cacheRoot, pathSet,
+                         depth, out, optimizedPath, maxRefFollow) {
 
     // at missing, report optimized path.
     if (!cache) {
@@ -72,7 +73,8 @@ function optimizePathSet(cache, cacheRoot, pathSet, depth, out, optimizedPath, m
         }
 
         if (next && next.$type === $ref && nextDepth < pathSet.length) {
-            var refResults = followReference(cacheRoot, next.value, maxRefFollow);
+            var refResults =
+                followReference(cacheRoot, next.value, maxRefFollow);
             next = refResults[0];
 
             // must clone to avoid the mutation from above destroying the cache.
@@ -81,7 +83,8 @@ function optimizePathSet(cache, cacheRoot, pathSet, depth, out, optimizedPath, m
             nextOptimized = optimizedPath;
         }
 
-        optimizePathSet(next, cacheRoot, pathSet, nextDepth, out, nextOptimized, maxRefFollow);
+        optimizePathSet(next, cacheRoot, pathSet, nextDepth,
+                        out, nextOptimized, maxRefFollow);
         optimizedPath.length = optimizedPathLength;
 
         if (memo && !memo.done) {
