@@ -20,7 +20,6 @@ function mergeCacheAndGatherRefsAndInvalidations(cache, jsongOrPVs, hasSuffix) {
     var len = -1;
     var invalidated = [];
     var messages = [];
-    var foundPaths = [];
 
     jsongOrPVs.forEach(function(jsongOrPV) {
         var refs = [];
@@ -30,7 +29,6 @@ function mergeCacheAndGatherRefsAndInvalidations(cache, jsongOrPVs, hasSuffix) {
 
         else if (isJSONG(jsongOrPV)) {
             refs = jsongMerge(cache, jsongOrPV);
-            foundPaths = foundPaths.concat(jsongOrPV.paths);
         } else {
 
             if (jsongOrPV.value === undefined) { //eslint-disable-line no-undefined
@@ -38,8 +36,6 @@ function mergeCacheAndGatherRefsAndInvalidations(cache, jsongOrPVs, hasSuffix) {
             } else {
                 refs = pathValueMerge(cache, jsongOrPV);
             }
-
-            foundPaths.push(jsongOrPV.path);
         }
 
         if (hasSuffix && refs.length) {
@@ -49,5 +45,5 @@ function mergeCacheAndGatherRefsAndInvalidations(cache, jsongOrPVs, hasSuffix) {
         }
     });
 
-    return [invalidated, nextPaths, messages, foundPaths];
+    return [invalidated, nextPaths, messages];
 }

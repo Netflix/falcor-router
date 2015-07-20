@@ -69,13 +69,6 @@ function _recurseMatchAndExecute(
                     var pathsToExpand = invalidationsNextPathsAndMessages[1];
                     var messages = invalidationsNextPathsAndMessages[2];
 
-                    // Calls require the paths that were emitted from the
-                    // call function to be apart of the outgoing jsong message.
-                    if (results.match.isCall) {
-                        var mergePaths = invalidationsNextPathsAndMessages[3];
-                        reportedPaths = reportedPaths.concat(mergePaths);
-                    }
-
                     invalidations.forEach(function(invalidation) {
                         invalidated[invalidated.length] = invalidation;
                     });

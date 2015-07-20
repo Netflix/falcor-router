@@ -13,6 +13,8 @@ var $atom = require('./support/types').$atom;
 var get = 'get';
 var set = 'set';
 var call = 'call';
+var toPaths = require('./operations/collapse/toPaths');
+var toTree = require('./operations/collapse/toTree');
 var MAX_REF_FOLLOW = 50;
 
 // TODO: We should move this into the constructor.
@@ -71,16 +73,13 @@ Router.prototype = {
         var router = this;
         return run(this._matcher, action, callPaths, call, this, jsongCache).
             map(function(jsongResult) {
+                var reportedPaths = jsongResult.reportedPaths;
                 var jsongEnv = materializeMissing(
                     router,
-                    callPaths,
-                    jsongResult,
-                    {
-                        $type: $atom,
-                        $expires: 0
-                    });
+                    reportedPaths,
+                    jsongResult);
 
-                jsongEnv.paths = jsongResult.reportedPaths.concat(callPaths);
+                jsongEnv.paths = toPaths(toTree(jsongResult.reportedPaths));
                 return jsongEnv;
             });
     }

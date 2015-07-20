@@ -47,11 +47,7 @@ describe('Call', function() {
                         lolomo: $ref('lolomos[123]'),
                         lolomos: {
                             123: {
-                                0: $ref('listsById[0]'),
-                                pvAdd: {
-                                    $type: types.$atom,
-                                    $expires: 0
-                                }
+                                0: $ref('listsById[0]')
                             },
                         },
                         listsById: {
@@ -61,8 +57,7 @@ describe('Call', function() {
                         }
                     },
                     paths: [
-                        ['lolomo', 0, 'name'],
-                        ['lolomo', 'pvAdd']
+                        ['lolomo', 0, 'name']
                     ]
                 });
                 ++called;
@@ -84,17 +79,13 @@ describe('Call', function() {
                         lolomos: {
                             123: {
                                 0: $ref('listsById[0]'),
-                                length: 1,
-                                pvAdd: {
-                                    $type: types.$atom,
-                                    $expires: 0
-                                }
+                                length: 1
                             },
                         }
                     },
                     paths: [
                         ['lolomo', 'length'],
-                        ['lolomo', 'pvAdd']
+                        ['lolomos', 123, 0]
                     ]
                 });
                 ++called;
@@ -116,11 +107,7 @@ describe('Call', function() {
                         lolomos: {
                             123: {
                                 0: $ref('listsById[0]'),
-                                length: 1,
-                                pvAdd: {
-                                    $type: types.$atom,
-                                    $expires: 0
-                                }
+                                length: 1
                             },
                         },
                         listsById: {
@@ -130,9 +117,8 @@ describe('Call', function() {
                         }
                     },
                     paths: [
-                        ['lolomo', 'length'],
                         ['lolomo', 0, 'name'],
-                        ['lolomo', 'pvAdd']
+                        ['lolomo', 'length']
                     ]
                 });
                 ++called;
@@ -183,10 +169,9 @@ describe('Call', function() {
     });
 
 
-    it.only('should allow item to be pushed onto collection.', function(done) {
+    it('should allow item to be pushed onto collection.', function(done) {
         var called = 0;
         var onNext = sinon.spy();
-        debugger
         getCallRouter().
             call(['genrelist', 0, 'titles', 'push'], [{ $type: 'ref', value: ['titlesById', 1] }]).
             doAction(onNext).
@@ -269,17 +254,11 @@ describe('Call', function() {
                 return [
                     {
                         path: ['titlesById', 1, 'name'],
-                        value: {
-                            $type: 'ref',
-                            value: 'Orange is the new Black'
-                        }
+                        value: 'Orange is the new Black'
                     },
                     {
                         path: ['titlesById', 1, 'rating'],
-                        value: {
-                            $type: 'ref',
-                            value: 5
-                        }
+                        value: 5
                     }
                 ];
             }
