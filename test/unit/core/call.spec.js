@@ -251,12 +251,94 @@ describe('Call', function() {
             });
     });
 
+    it('should throw when calling a function that does not exist.', function(done) {
+        (new R([])).
+            call(['videos', 1234, 'rating'], [5]).
+            doAction(function() {
+                throw 'Should not be called.  onNext';
+            }, function(x) {
+                expect(x.message).to.equal('function does not exist');
+            }, function() {
+                throw 'Should not be called.  onCompleted';
+            }).
+            subscribe(noOp, function(e) {
+                if (e.message === 'Oops?') {
+                    done();
+                    return;
+                }
+                done(e);
+            });
+    });
+
+    it('should invoke getter on attempt to set read-only property.', function(done) {
+        var onNext = sinon.spy();
+        var called = 0;
+        getCallRouter().
+            set({
+                paths: [['genrelist', 0, 'titles', 0, ['name', 'rating']]],
+                jsonGraph: {
+                    'genrelist': {
+                        0: {
+                            'titles': {
+                                0: {
+                                    name: 'Die Hard',
+                                    rating: 9
+                                }
+                            }
+                        }
+                    }
+                }
+            }).
+            doAction(onNext).
+            doAction(noOp, noOp, function(x) {
+                expect(onNext.called).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    jsonGraph: {
+                        genrelist: {
+                            0: {
+                                titles: {
+                                    0: { 
+                                        $type: 'ref', 
+                                        value: ['titlesById', 1]
+                                    }
+                                }
+                            }
+                        },
+                        titlesById: {
+                            1: {
+                                name: 'Orange is the new Black',
+                                rating: 5
+                            }
+                        }
+                    },
+                    paths: [['genrelist', 0, 'titles', 0, ['name', 'rating']]]
+                });
+                ++called;
+            }).
+            subscribe(noOp, done, function() {
+                expect(called).to.equals(1);
+                done();
+            });
+    });
+
     function getCallRouter() {
         return new R([{
             route: 'genrelist[{integers}].titles.push',
             call: function(callPath, args) {
                 return {
                     path: ['genrelist', 0, 'titles', 2],
+                    value: {
+                        $type: 'ref',
+                        value: ['titlesById', 1]
+                    }
+                }
+            }
+        },
+        {
+            route: 'genrelist[{integers}].titles[{integers}]',
+            get: function(pathSet) {
+                return {
+                    path: ['genrelist', 0, 'titles', 1],
                     value: {
                         $type: 'ref',
                         value: ['titlesById', 1]
