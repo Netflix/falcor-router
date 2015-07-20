@@ -183,9 +183,10 @@ describe('Call', function() {
     });
 
 
-    it('should allow item to be pushed onto collection.', function(done) {
+    it.only('should allow item to be pushed onto collection.', function(done) {
         var called = 0;
         var onNext = sinon.spy();
+        debugger
         getCallRouter().
             call(['genrelist', 0, 'titles', 'push'], [{ $type: 'ref', value: ['titlesById', 1] }]).
             doAction(onNext).
@@ -196,9 +197,9 @@ describe('Call', function() {
                         genrelist: {
                             0: {
                                 titles: {
-                                    2: { 
-                                        $type: 'ref', 
-                                        value: ['titlesById', 1] 
+                                    2: {
+                                        $type: 'ref',
+                                        value: ['titlesById', 1]
                                     }
                                 }
                             }
@@ -206,12 +207,10 @@ describe('Call', function() {
                     },
                     paths: [['genrelist', 0, 'titles', 2]]
                 });
-                ++called;
+            }, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
             }).
-            subscribe(noOp, done, function() {
-                expect(called).to.equals(1);
-                done();
-            });
+            subscribe(noOp, done, done);
     });
 
     it('should evaluate path suffixes on result of a function that adds an item to a collection.', function(done) {
@@ -227,9 +226,9 @@ describe('Call', function() {
                         genrelist: {
                             0: {
                                 titles: {
-                                    2: { 
-                                        $type: 'ref', 
-                                        value: ['titlesById', 1] 
+                                    2: {
+                                        $type: 'ref',
+                                        value: ['titlesById', 1]
                                     }
                                 }
                             }
@@ -261,7 +260,7 @@ describe('Call', function() {
                         $type: 'ref',
                         value: ['titlesById', 1]
                     }
-                }
+                };
             }
         },
         {
@@ -281,8 +280,8 @@ describe('Call', function() {
                             $type: 'ref',
                             value: 5
                         }
-                    }                    
-                ]
+                    }
+                ];
             }
         }]);
     }

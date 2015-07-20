@@ -11,7 +11,8 @@ var istanbul = require('gulp-istanbul');
 var mocha = require('gulp-mocha');
 
 
-gulp.task('lint', function() {
+gulp.task('lint', ['lint-src', 'lint-test']);
+gulp.task('lint-src', function() {
     return gulp.src('src/**/*.js').
         pipe(eslint({
             globals: {
@@ -19,6 +20,21 @@ gulp.task('lint', function() {
                 'module': false
             },
             reset: true, // dz: remove me after linting is finished, else i can't do one at the time
+            useEslintrc: true,
+        })).
+        pipe(eslint.format()).
+        pipe(eslint.failOnError()); // dz: change back after finishing to failAfterError
+});
+
+gulp.task('lint-test', function() {
+    return gulp.src('src/**/*.js').
+        pipe(eslint({
+            globals: {
+                'require': false,
+                'module': false
+            },
+            reset: true, // dz: remove me after linting is finished, else i can't do one at the time
+            configFile: './test/.eslintrc',
             useEslintrc: true,
         })).
         pipe(eslint.format()).

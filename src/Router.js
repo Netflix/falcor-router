@@ -44,7 +44,8 @@ Router.prototype = {
         var jsongCache = {};
         var action = runGetAction(this, jsongCache);
         var router = this;
-        return run(this._matcher, action, normalizePathSets(paths), get, this, jsongCache).
+        var normPS = normalizePathSets(paths);
+        return run(this._matcher, action, normPS, get, this, jsongCache).
             map(function(jsongEnv) {
                 return materializeMissing(router, paths, jsongEnv);
             });
@@ -64,7 +65,8 @@ Router.prototype = {
 
     call: function(callPath, args, suffixes, paths) {
         var jsongCache = {};
-        var action = runCallAction(this, callPath, args, suffixes, paths, jsongCache);
+        var action = runCallAction(this, callPath, args,
+                                   suffixes, paths, jsongCache);
         var callPaths = [callPath];
         var router = this;
         return run(this._matcher, action, callPaths, call, this, jsongCache).
@@ -91,6 +93,7 @@ function run(matcherFn, actionRunner, paths, method, routerInstance, jsongCache)
 
 function materializeMissing(router, paths, jsongEnv, missingAtom) {
     var jsonGraph = jsongEnv.jsonGraph;
+    var isCall = !!missingAtom;
     var materializedAtom = missingAtom || {$type: $atom};
 
     // Optimizes the pathSets from the jsong then
