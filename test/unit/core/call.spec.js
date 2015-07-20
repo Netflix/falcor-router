@@ -233,7 +233,7 @@ describe('Call', function() {
     it('should throw when calling a function that does not exist.', function(done) {
         var router = new R([]);
         var onError = sinon.spy();
-        var obs = router.
+        router.
             call(['videos', 1234, 'rating'], [5]).
             doAction(noOp, onError).
             doAction(noOp, function() {
@@ -257,7 +257,7 @@ describe('Call', function() {
             get: function() { }
         }]);
         var onError = sinon.spy();
-        var obs = router.
+        router.
             call(['videos', 1234, 'rating'], [5]).
             doAction(noOp, onError).
             doAction(noOp, function() {
