@@ -251,6 +251,30 @@ describe('Call', function() {
             }, done);
     });
 
+    it('should throw when calling a function that does not exist, but get handler does.', function(done) {
+        var router = new R([{
+            route: 'videos[1234].rating',
+            get: function() { }
+        }]);
+        var onError = sinon.spy();
+        var obs = router.
+            call(['videos', 1234, 'rating'], [5]).
+            doAction(noOp, onError).
+            doAction(noOp, function() {
+                expect(onError.calledOnce).to.be.ok;
+
+                var args = onError.getCall(0).args;
+                expect(args[0] instanceof Error).to.be.ok;
+                expect(args[0].message).to.deep.equals('function does not exist');
+            }).
+            subscribe(noOp, function(e) {
+                if (e.message === 'function does not exist') {
+                    return done();
+                }
+                return done(e);
+            }, done);
+    });
+
     function getCallRouter() {
         return new R([{
             route: 'genrelist[{integers}].titles.push',
