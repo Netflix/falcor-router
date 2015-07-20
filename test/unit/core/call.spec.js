@@ -231,73 +231,24 @@ describe('Call', function() {
     });
 
     it('should throw when calling a function that does not exist.', function(done) {
-        (new R([])).
+        var router = new R([]);
+        var onError = sinon.spy();
+        var obs = router.
             call(['videos', 1234, 'rating'], [5]).
-            doAction(function() {
-                throw 'Should not be called.  onNext';
-            }, function(x) {
-                expect(x.message).to.equal('function does not exist');
-            }, function() {
-                throw 'Should not be called.  onCompleted';
+            doAction(noOp, onError).
+            doAction(noOp, function() {
+                expect(onError.calledOnce).to.be.ok;
+
+                var args = onError.getCall(0).args;
+                expect(args[0] instanceof Error).to.be.ok;
+                expect(args[0].message).to.deep.equals('function does not exist');
             }).
             subscribe(noOp, function(e) {
-                if (e.message === 'Oops?') {
-                    done();
-                    return;
+                if (e.message === 'function does not exist') {
+                    return done();
                 }
-                done(e);
-            });
-    });
-
-    it('should invoke getter on attempt to set read-only property.', function(done) {
-        var onNext = sinon.spy();
-        var called = 0;
-        getCallRouter().
-            set({
-                paths: [['genrelist', 0, 'titles', 0, ['name', 'rating']]],
-                jsonGraph: {
-                    'genrelist': {
-                        0: {
-                            'titles': {
-                                0: {
-                                    name: 'Die Hard',
-                                    rating: 9
-                                }
-                            }
-                        }
-                    }
-                }
-            }).
-            doAction(onNext).
-            doAction(noOp, noOp, function(x) {
-                expect(onNext.called).to.be.ok;
-                expect(onNext.getCall(0).args[0]).to.deep.equals({
-                    jsonGraph: {
-                        genrelist: {
-                            0: {
-                                titles: {
-                                    0: { 
-                                        $type: 'ref', 
-                                        value: ['titlesById', 1]
-                                    }
-                                }
-                            }
-                        },
-                        titlesById: {
-                            1: {
-                                name: 'Orange is the new Black',
-                                rating: 5
-                            }
-                        }
-                    },
-                    paths: [['genrelist', 0, 'titles', 0, ['name', 'rating']]]
-                });
-                ++called;
-            }).
-            subscribe(noOp, done, function() {
-                expect(called).to.equals(1);
-                done();
-            });
+                return done(e);
+            }, done);
     });
 
     function getCallRouter() {
@@ -322,7 +273,7 @@ describe('Call', function() {
                         $type: 'ref',
                         value: ['titlesById', 1]
                     }
-                }
+                };
             }
         },
         {

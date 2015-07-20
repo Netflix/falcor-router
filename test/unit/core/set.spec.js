@@ -5,6 +5,7 @@ var chai = require('chai');
 var expect = chai.expect;
 var falcor = require('falcor');
 var $ref = falcor.Model.ref;
+var sinon = require("sinon");
 
 describe('Set', function() {
     it('should perform a simple set.', function(done) {
@@ -138,5 +139,43 @@ describe('Set', function() {
                     }
                 }
             });
+    });
+
+    it('should invoke getter on attempt to set read-only property.', function(done) {
+        var onNext = sinon.spy();
+        var router = new R([{
+            route: 'a.b.c',
+            get: function() {
+                return {
+                    path: ['a', 'b', 'c'],
+                    value: 5
+                };
+            }
+        }]);
+        router.
+            set({
+                paths: [['a', 'b', 'c']],
+                jsonGraph: {
+                    a: {
+                        b: {
+                            c: 7
+                        }
+                    }
+                }
+            }).
+            doAction(onNext).
+            doAction(noOp, noOp, function(x) {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    jsonGraph: {
+                        a: {
+                            b: {
+                                c: 5
+                            }
+                        }
+                    }
+                });
+            }).
+            subscribe(noOp, done, done);
     });
 });
