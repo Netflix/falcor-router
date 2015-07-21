@@ -64,7 +64,7 @@ describe('Integers', function() {
             subscribe(noOp, done, done);
     });
 
-    it.only('should match ranges with integers pattern and coerce match into an array of integers.', function(done) {
+    it('should match ranges with integers pattern and coerce match into an array of integers.', function(done) {
         var onNext = sinon.spy();
         var router = new R([
             {
@@ -84,7 +84,6 @@ describe('Integers', function() {
             }
         ]);
 
-        debugger
         router.
             get([['titlesById', {from: 1, to: 1}, ["name", "rating"]]]).
             doAction(onNext).

@@ -75,7 +75,6 @@ module.exports = function matcher(rst) {
                     toTree(
                         reducedMatch.map(function(x) { return x.requested; })));
 
-                debugger
                 collapsedResults.forEach(function(path, i) {
                     var reducedVirtualPath = reducedMatch[i].virtual;
                     path.forEach(function(atom, index) {
