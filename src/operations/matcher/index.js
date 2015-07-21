@@ -5,6 +5,7 @@ var specificMatcher = require('./specific');
 var pluckIntegers = require('./pluckIntergers');
 var toTree = require('./../collapse/toTree');
 var toPaths = require('./../collapse/toPaths');
+var isRoutedToken = require('./../../support/isRoutedToken');
 
 var intTypes = [{
         type: Keys.ranges,
@@ -44,7 +45,10 @@ module.exports = function matcher(rst) {
         // We are at the end of the path but there is no match and its a
         // call.  Therefore we are going to throw an informative error.
         if (method === call && matched.length === 0) {
-            throw new Error('function does not exist');
+            var err = new Error('function does not exist');
+            err.throwToNext = true;
+
+            throw err;
         }
 
         var reducedMatched = matched.reduce(function(acc, matchedRoute) {
@@ -75,7 +79,14 @@ module.exports = function matcher(rst) {
                         reducedMatch.map(function(x) { return x.requested; })));
 
                 collapsedResults.forEach(function(path, i) {
-                    reducedMatch[i].virtual = path;
+                    var reducedVirtualPath = reducedMatch[i].virtual;
+                    path.forEach(function(atom, index) {
+
+                        // If its not a routed atom then wholesale replace
+                        if (!isRoutedToken(reducedVirtualPath[index])) {
+                            reducedVirtualPath[index] = atom;
+                        }
+                    });
                     collapsedMatched.push(reducedMatch[i]);
                 });
             });
