@@ -1,5 +1,4 @@
 var clone = require('./../support/clone');
-var cloneArray = require('./../support/cloneArray');
 var types = require('./../support/types');
 var $ref = types.$ref;
 var permuteKey = require('./../support/permuteKey');

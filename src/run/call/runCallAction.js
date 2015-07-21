@@ -3,8 +3,6 @@ var outputToObservable = require('./../conversion/outputToObservable');
 var noteToJsongOrPV = require('./../conversion/noteToJsongOrPV');
 var errors = require('./../../exceptions');
 var authorize = require('./../authorize');
-var jsongMerge = require('./../../cache/jsongMerge');
-var pathValueMerge = require('./../../cache/pathValueMerge');
 var mCGRI = require('./../mergeCacheAndGatherRefsAndInvalidations');
 
 module.exports =  outerRunCallAction;
@@ -34,7 +32,6 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
 
         // Required to get the references from the outputting jsong
         // and pathValues.
-        var tmpCache = {};
         out = outputToObservable(out).
             toArray().
             map(function(res) {
@@ -49,7 +46,6 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
                 }, []);
 
                 var refLen = -1;
-                var mergedRefs;
                 callOutput.forEach(function(r) {
 
                     // its json graph.
@@ -143,7 +139,7 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
                 // the paths to the references.  There may be values as well,
                 // add those to the output.
                 else if (refs.length || values.length) {
-                    var refPaths = refs.
+                    refs.
                         map(function(x) { return x.path; }).
                         concat(values).
                         forEach(function(path) {

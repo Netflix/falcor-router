@@ -110,7 +110,7 @@ describe('JSONG - Merge', function() {
             },
             paths: [
                 ['there', 'is', 'value'],
-                ['there', 'was'],
+                ['there', 'was']
             ]
         };
         var cache = {};

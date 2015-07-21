@@ -49,7 +49,7 @@ describe('Call', function() {
                                     $type: types.$atom,
                                     $expires: 0
                                 }
-                            },
+                            }
                         },
                         listsById: {
                             0: {
@@ -82,7 +82,7 @@ describe('Call', function() {
                                     $type: types.$atom,
                                     $expires: 0
                                 }
-                            },
+                            }
                         }
                     },
                     paths: [
@@ -403,9 +403,9 @@ describe('Call', function() {
 
     function getExtendedRouter(initialIdsAndNames) {
         var listsById = {};
-        initialIdsAndNames = initialIdsAndNames || {};
-        Object.keys(initialIdsAndNames).reduce(function(acc, id) {
-            var name = initialIdsAndNames[id];
+        idsAndNames = initialIdsAndNames || {};
+        Object.keys(idsAndNames).reduce(function(acc, id) {
+            var name = idsAndNames[id];
             listsById[id] = {name: name, rating: 3};
             return acc;
         }, listsById);

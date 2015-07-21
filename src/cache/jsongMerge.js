@@ -23,7 +23,7 @@ module.exports = function jsongMerge(cache, jsongEnv) {
             values: values,
             requestedPath: [],
             requestIdx: -1,
-            ignoreCount: 0,
+            ignoreCount: 0
         },  cache, j, 0, p);
     });
     return {
