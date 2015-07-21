@@ -12,7 +12,7 @@ var _ = require('lodash');
  * figure out where bugs are without much clarity into where they
  * are.
  */
-describe('JSONG - Merge', function() {
+describe.only('JSONG - Merge', function() {
     it('should write a simple path to the cache.', function() {
 
         var jsong = {
@@ -24,7 +24,14 @@ describe('JSONG - Merge', function() {
             paths: [['there', 'is']]
         };
 
-        mergeTest(jsong);
+        var out = mergeTest(jsong);
+        expect(out).to.deep.equals({
+            values: [{
+                path: ['there', 'is'],
+                value: 'a value'
+            }],
+            references: []
+        });
     });
     it('should write a path with a reference to a value.', function() {
         var jsong = {
@@ -80,11 +87,14 @@ describe('JSONG - Merge', function() {
             paths: [['there', 'is']]
         };
         var cache = {};
-        var refs = jsongMerge(cache, jsong);
-        expect(refs).to.deep.equals([{
-            path: ['there', 'is'],
-            value: ['a']
-        }]);
+        var out = jsongMerge(cache, jsong);
+        expect(out).to.deep.equals({
+            values: [],
+            references: [{
+                path: ['there', 'is'],
+                value: ['a']
+            }]
+        });
     });
 });
 
@@ -94,7 +104,9 @@ function mergeTest(jsong) {
             was: $atom('a value')
         }
     };
-    var expected = _.merge(cache, jsong);
-    jsongMerge(cache, jsong);
+    var expected = _.merge(cache, jsong.jsonGraph);
+    var out = jsongMerge(cache, jsong);
     expect(cache).to.deep.equals(expected);
+
+    return out;
 }

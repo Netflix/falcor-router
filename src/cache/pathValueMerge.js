@@ -13,6 +13,8 @@ module.exports = function pathValueMerge(cache, pathValue, requestedPath) {
     var curr = cache;
     var next, key, cloned, outerKey, memo;
     var refs = [];
+    var values = [];
+    var invalidations = [];
 
     /*eslint-disable no-func-assign, no-param-reassign*/
     requestedPath = requestedPath || [];
@@ -86,15 +88,34 @@ module.exports = function pathValueMerge(cache, pathValue, requestedPath) {
     }
 
     do {
+
         cloned = clone(pathValue.value);
         curr[key] = cloned;
         requestedPath[startingLength + i] = key;
 
-        if (cloned.$type === $ref) {
+        // The invalidation case.  Needed for reporting
+        // of call.
+        if (pathValue.value === undefined) {
+            invalidations.push({
+                path: cloneArray(requestedPath),
+            });
+        }
+
+        // References.  Needed for evaluationg suffixes in
+        // both call and get/set.
+        else if (cloned.$type === $ref) {
             refs[refs.length] = {
                 path: cloneArray(requestedPath),
                 value: cloned.value
             };
+        }
+
+        // Values.  Needed for reporting for call.
+        else {
+            values.push({
+                path: cloneArray(requestedPath),
+                value: clone.value
+            });
         }
 
         if (memo && !memo.done) {
@@ -103,7 +124,11 @@ module.exports = function pathValueMerge(cache, pathValue, requestedPath) {
         }
     } while (memo && !memo.done);
 
-    return refs;
+    return {
+        refs: refs,
+        invalidations: invalidations,
+        values: values
+    };
 };
 
 

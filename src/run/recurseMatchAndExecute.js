@@ -70,11 +70,14 @@ function _recurseMatchAndExecute(
                     if (!isArray(value)) {
                         value = [value];
                     }
-                    var invalidationsNextPathsAndMessages =
-                            mCGRI(jsongCache, value, suffix.length > 0);
-                    var invalidations = invalidationsNextPathsAndMessages[0];
-                    var pathsToExpand = invalidationsNextPathsAndMessages[1];
-                    var messages = invalidationsNextPathsAndMessages[2];
+                    var invsRefsAndValues = mCGRI(jsongCache, value);
+                    var invalidations = invsRefsAndValues.invalidations;
+                    var messages = invsRefsAndValues.messages;
+                    var pathsToExpand = [];
+
+                    if (suffix.length > 0) {
+                        pathsToExpand = invsRefsAndValues.references;
+                    }
 
                     invalidations.forEach(function(invalidation) {
                         invalidated[invalidated.length] = invalidation;

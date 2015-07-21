@@ -5,6 +5,7 @@ var errors = require('./../../exceptions');
 var authorize = require('./../authorize');
 var jsongMerge = require('./../../cache/jsongMerge');
 var pathValueMerge = require('./../../cache/pathValueMerge');
+var mCGRI = require('./../mergeCacheAndGatherRefsAndInvalidations');
 
 module.exports =  outerRunCallAction;
 
@@ -50,6 +51,7 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
                 var refLen = -1;
                 var mergedRefs;
                 callOutput.forEach(function(r) {
+
                     // its json graph.
                     if (isJSONG(r)) {
 
@@ -60,24 +62,23 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
                             err.throwToNext = true;
                             throw err;
                         }
-                        mergedRefs = jsongMerge(tmpCache, r);
-                        pathsFromCall = pathsFromCall.concat(r.paths);
                     }
 
-                    // Only merge if we have to.
-                    else {
-                        mergedRefs = pathValueMerge(tmpCache, r);
-                        pathsFromCall.push(r.path);
-                    }
-
-                    // Merges in the refs from the pV or jsong Merge.
-                    if (mergedRefs) {
-                        mergedRefs.forEach(function(nextRef) {
-                            refs[++refLen] = nextRef;
-                        });
-                        mergedRefs = null;
-                    }
                 });
+
+                debugger
+                var invsRefsAndValues = mCGRI(jsongCache, callOutput);
+                invsRefsAndValues.references.forEach(function(ref) {
+                    refs[++refLen] = ref;
+                });
+
+                debugger
+                invsRefsAndValues.
+                    invalidations.
+                    concat(invsRefsAndValues.values).
+                    forEach(function(pv) {
+                        pathsFromCall.push(pv.path);
+                    });
 
                 var callLength = callOutput.length;
                 var callPathSave1 = callPath.slice(0, callPath.length - 1);

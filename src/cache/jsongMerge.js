@@ -13,18 +13,27 @@ var catAndSlice = require('./../support/catAndSlice');
 module.exports = function jsongMerge(cache, jsongEnv) {
     var paths = jsongEnv.paths;
     var j = jsongEnv.jsonGraph;
-    var insertedReferences = [];
+    var references = [];
+    var values = [];
     paths.forEach(function(p) {
-        merge(cache, cache, j, j, p, 0, insertedReferences, []);
+        merge({
+            cacheRoot: cache,
+            messageRoot: j,
+            references: references,
+            values: values,
+            requestedPath: []
+        },  cache, j, 0, p);
     });
-    return insertedReferences;
+    return {
+        references: references,
+        values: values
+    };
 };
 
-function merge(cache, cacheRoot, message,
-               messageRoot, path, depth,
-               insertedReferences, requestedPath, fromParent,
-               fromKey) {
-
+function merge(config, cache, message, depth, path, fromParent, fromKey) {
+    var cacheRoot = config.cacheRoot;
+    var messageRoot = config.messageRoot;
+    var requestedPath = config.requestedPath;
     var typeOfMessage = typeof message;
 
     // The message at this point should always be defined.
@@ -35,10 +44,22 @@ function merge(cache, cacheRoot, message,
         // and we have resolved our path then add the reference to
         // the unfulfilledRefernces.
         if (message.$type === $ref) {
-            insertedReferences[insertedReferences.length] = {
+            var references = config.references;
+            references.push({
                 path: cloneArray(requestedPath),
                 value: message.value
-            };
+            });
+        }
+
+        // We are dealing with a value.  We need this for call
+        // Call needs to report all of its values into the jsongCache
+        // and paths.
+        else {
+            var values = config.values;
+            values.push({
+                path: cloneArray(requestedPath),
+                value: message.value
+            });
         }
 
         return;
@@ -97,10 +118,8 @@ function merge(cache, cacheRoot, message,
             }
 
             // move forward down the path progression.
-            merge(cacheRes, cacheRoot,
-                  messageRes, messageRoot,
-                  nextPath, nextDepth, insertedReferences,
-                  requestedPath, cache, key);
+            merge(config, cacheRes, messageRes,
+                  nextDepth, nextPath, cache, key);
         }
 
         // The second the incoming jsong must be fully qualified,
@@ -109,10 +128,7 @@ function merge(cache, cacheRoot, message,
 
             // do not materialize, continue down the cache.
             if (depth < path.length - 1) {
-                merge(cacheRes, cacheRoot,
-                      {}, messageRoot,
-                      nextPath, nextDepth, insertedReferences,
-                      requestedPath, cache, key);
+                merge(config, cacheRes, {}, nextDepth, nextPath, cache, key);
             }
 
             // materialize the node

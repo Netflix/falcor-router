@@ -277,6 +277,20 @@ describe('Call', function() {
             }, done);
     });
 
+    it('should return path bound invalidations', function(done) {
+        var onNext = sinon.spy();
+        var baseIds = {0: 'Thriller'};
+        getExtendedRouter(baseIds).
+            call(['lolomo', 0, 'invalidate']).
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                var args = onNext.getCall(0).args;
+                debugger
+            }).
+            subscribe(noOp, done, done);
+    });
+
     function getCallRouter() {
         return new R([{
             route: 'genrelist[{integers}].titles.push',
@@ -340,8 +354,15 @@ describe('Call', function() {
         }]);
     }
 
-    function getExtendedRouter() {
+    function getExtendedRouter(initialIdsAndNames) {
         var listsById = {};
+        initialIdsAndNames = initialIdsAndNames || {};
+        Object.keys(initialIdsAndNames).reduce(function(acc, id) {
+            var name = initialIdsAndNames[id];
+            listsById[id] = {name: name, rating: 3};
+            return acc;
+        }, listsById);
+
         function listsLength() {
             return Object.keys(listsById).length;
         }
@@ -392,10 +413,10 @@ describe('Call', function() {
                 };
             }
         }, {
-            route: 'listsById[{integers:idices}].name',
+            route: 'listsById[{integers:indices}].name',
             get: function(alais) {
                 return Observable.
-                    from(alais.idices).
+                    from(alais.indices).
                     map(function(idx) {
                         if (listsById[idx]) {
                             return {
@@ -410,10 +431,20 @@ describe('Call', function() {
                     });
             }
         }, {
-            route: 'listsById[{integers:idices}].rating',
+            route: 'listsById[{integers:indices}].invalidate',
+            call: function(alias, args) {
+                var indices = alias.indices;
+                return indices.map(function(idx) {
+                    return {
+                        path: ['listsById', idx, 'name']
+                    };
+                });
+            }
+        }, {
+            route: 'listsById[{integers:indices}].rating',
             get: function(alais) {
                 return Observable.
-                    from(alais.idices).
+                    from(alais.indices).
                     map(function(idx) {
                         if (listsById[idx]) {
                             return {
