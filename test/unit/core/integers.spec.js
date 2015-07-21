@@ -3,6 +3,9 @@ var R = require('../../../src/Router');
 var Routes = require('./../../data');
 var Expected = require('./../../data/expected');
 var noOp = function() {};
+var sinon = require("sinon");
+var chai = require('chai');
+var expect = chai.expect;
 
 describe('Integers', function() {
     it('should match integers for videos with int keys passed in.', function(done) {
@@ -60,4 +63,47 @@ describe('Integers', function() {
             run(obs, [Expected().Videos.state[0]]).
             subscribe(noOp, done, done);
     });
+
+    it('should match ranges with integers pattern and coerce match into an array of integers.', function(done) {
+        var onNext = sinon.spy();
+        var called = 0;
+        (new R([
+            {
+                route: 'titlesById[{integers}]["name", "rating"]',
+                get: function() {
+                    return [
+                        {
+                            path: ['titlesById', 1, 'name'],
+                            value: 'Orange is the new Black'
+                        },
+                        {
+                            path: ['titlesById', 1, 'rating'],
+                            value: 5
+                        }                    
+                    ]
+                }
+            }            
+        ])).
+            get([['titlesById', {from: 1, to: 1}, ["name", "rating"]]]).
+            doAction(onNext).
+            doAction(noOp, noOp, function(x) {
+                expect(onNext.called).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    jsonGraph: {
+                        titlesById: {
+                            1: {
+                                name: 'Orange is the new Black',
+                                rating: 5
+                            }
+                        }
+                    }
+                });
+                ++called;
+            }).
+            subscribe(noOp, done, function() {
+                expect(called).to.equals(1);
+                done();
+            });
+    });
+
 });
