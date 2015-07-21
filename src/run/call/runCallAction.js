@@ -154,11 +154,6 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
                         });
                 }
 
-                callOutput[++callLength] = {
-                    isMessage: true,
-                    invalidations: invsRefsAndValues.invalidations || []
-                };
-
                 return callOutput;
             });
     } else {

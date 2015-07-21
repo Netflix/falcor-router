@@ -7,6 +7,7 @@ var falcor = require('falcor');
 var $ref = falcor.Model.ref;
 var $atom = falcor.Model.atom;
 var errors = require('./../../../src/exceptions');
+var types = require('./../../../src/support/types');
 var sinon = require("sinon");
 
 describe('Call', function() {
@@ -43,8 +44,12 @@ describe('Call', function() {
                         lolomo: $ref('lolomos[123]'),
                         lolomos: {
                             123: {
-                                0: $ref('listsById[0]')
-                            }
+                                0: $ref('listsById[0]'),
+                                pvAdd: {
+                                    $type: types.$atom,
+                                    $expires: 0
+                                }
+                            },
                         },
                         listsById: {
                             0: {
@@ -53,7 +58,8 @@ describe('Call', function() {
                         }
                     },
                     paths: [
-                        ['lolomo', 0, 'name']
+                        ['lolomo', 0, 'name'],
+                        ['lolomo', 'pvAdd']
                     ]
                 });
             }).
@@ -71,12 +77,16 @@ describe('Call', function() {
                         lolomos: {
                             123: {
                                 0: $ref('listsById[0]'),
-                                length: 1
-                            }
+                                length: 1,
+                                pvAdd: {
+                                    $type: types.$atom,
+                                    $expires: 0
+                                }
+                            },
                         }
                     },
                     paths: [
-                        ['lolomo', 'length'],
+                        ['lolomo', ['length', 'pvAdd']],
                         ['lolomos', 123, 0]
                     ]
                 });
@@ -99,7 +109,11 @@ describe('Call', function() {
                         lolomos: {
                             123: {
                                 0: $ref('listsById[0]'),
-                                length: 1
+                                length: 1,
+                                pvAdd: {
+                                    $type: types.$atom,
+                                    $expires: 0
+                                }
                             }
                         },
                         listsById: {
@@ -110,7 +124,7 @@ describe('Call', function() {
                     },
                     paths: [
                         ['lolomo', 0, 'name'],
-                        ['lolomo', 'length']
+                        ['lolomo', ['length', 'pvAdd']]
                     ]
                 });
                 ++called;
@@ -176,12 +190,18 @@ describe('Call', function() {
                                     2: {
                                         $type: 'ref',
                                         value: ['titlesById', 1]
+                                    },
+                                    push: {
+                                        $type: types.$atom,
+                                        $expires: 0
                                     }
                                 }
                             }
                         }
                     },
-                    paths: [['genrelist', 0, 'titles', 2]]
+                    paths: [
+                        ['genrelist', 0, 'titles', [2, 'push']]
+                    ]
                 });
             }, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
@@ -207,6 +227,10 @@ describe('Call', function() {
                                     2: {
                                         $type: 'ref',
                                         value: ['titlesById', 1]
+                                    },
+                                    push: {
+                                        $type: types.$atom,
+                                        $expires: 0
                                     }
                                 }
                             }
@@ -218,7 +242,10 @@ describe('Call', function() {
                             }
                         }
                     },
-                    paths: [['genrelist', 0, 'titles', 2, ['name', 'rating']]]
+                    paths: [
+                        ['genrelist', 0, 'titles', 2, ['name', 'rating']],
+                        ['genrelist', 0, 'titles', 'push']
+                    ]
                 });
                 ++called;
             }).
@@ -282,7 +309,31 @@ describe('Call', function() {
             doAction(noOp, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 var args = onNext.getCall(0).args;
-                debugger
+
+                expect(args[0]).to.deep.equals({
+                    invalidations: [{
+                        path: ['listsById', 0, 'name']
+                    }],
+                    jsonGraph: {
+                        lolomo: $ref('lolomos[123]'),
+                        lolomos: {
+                            123: {
+                                0: $ref('listsById[0]')
+                            }
+                        },
+                        listsById: {
+                            0: {
+                                invalidate: {
+                                    $type: types.$atom,
+                                    $expires: 0
+                                }
+                            }
+                        }
+                    },
+                    paths: [
+                        ['lolomo', 0, 'invalidate']
+                    ]
+                });
             }).
             subscribe(noOp, done, done);
     });
@@ -383,7 +434,7 @@ describe('Call', function() {
         }, {
             route: 'lolomos[{keys:ids}][{integers:indices}]',
             get: function(alais) {
-                var id = alais[0];
+                var id = alais.ids[0];
                 return Observable.
                     from(alais.indices).
                     map(function(idx) {
