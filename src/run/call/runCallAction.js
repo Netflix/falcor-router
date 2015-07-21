@@ -129,7 +129,6 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
                     //
                     // Add the deoptimizedPath to the callOutput messages.
                     // This will make the outer expand run those as a 'get'
-                    //
                     refs.forEach(function(ref) {
                         var deoptimizedPath = callPathSave1.concat(
                                 ref.path.slice(optimizedPathLength));

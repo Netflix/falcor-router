@@ -45,7 +45,10 @@ module.exports = function matcher(rst) {
         // We are at the end of the path but there is no match and its a
         // call.  Therefore we are going to throw an informative error.
         if (method === call && matched.length === 0) {
-            throw new Error('function does not exist');
+            var err = new Error('function does not exist');
+            err.throwToNext = true;
+
+            throw err;
         }
 
         var reducedMatched = matched.reduce(function(acc, matchedRoute) {

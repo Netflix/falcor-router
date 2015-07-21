@@ -197,7 +197,9 @@ describe('Call', function() {
         var called = 0;
         var onNext = sinon.spy();
         getCallRouter().
-            call(['genrelist', 0, 'titles', 'push'], [{ $type: 'ref', value: ['titlesById', 1] }], [['name'], ['rating']]).
+            call(['genrelist', 0, 'titles', 'push'],
+                 [{ $type: 'ref', value: ['titlesById', 1] }],
+                 [['name'], ['rating']]).
             doAction(onNext).
             doAction(noOp, noOp, function(x) {
                 expect(onNext.called).to.be.ok;
