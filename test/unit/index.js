@@ -1,5 +1,5 @@
 describe('Unit', function() {
-    require('./internal');
+    //require('./internal');
     //require('./functional');
-    //require('./core');
+    require('./core');
 });

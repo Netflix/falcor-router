@@ -11,11 +11,13 @@ var sinon = require("sinon");
 
 describe('Call', function() {
     it('should perform a simple call.', function(done) {
-        var called = 0;
+        var onNext = sinon.spy();
         getRouter().
             call(['videos', 1234, 'rating'], [5]).
-            doAction(function(x) {
-                expect(x).to.deep.equals({
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
                         videos: {
                             1234: {
@@ -25,12 +27,8 @@ describe('Call', function() {
                     },
                     paths: [['videos', 1234, 'rating']]
                 });
-                ++called;
             }).
-            subscribe(noOp, done, function() {
-                expect(called).to.equals(1);
-                done();
-            });
+            subscribe(noOp, done, done);
     });
 
     it('should pass the #30 base call test with only suffix.', function(done) {

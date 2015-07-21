@@ -50,7 +50,7 @@ function mergeCacheAndGatherRefsAndInvalidations(cache, jsongOrPVs) {
         }
 
         if (refs && refs.length) {
-            references.forEach(function(ref) {
+            refs.forEach(function(ref) {
                 references[++len] = ref;
             });
         }

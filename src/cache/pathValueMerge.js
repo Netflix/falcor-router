@@ -51,7 +51,6 @@ function innerPathValueMerge(cache, pathValue) {
     var curr = cache;
     var next, key, cloned, outerKey, memo;
     var i, len;
-    debugger
 
     for (i = 0, len = path.length - 1; i < len; ++i) {
         outerKey = path[i];

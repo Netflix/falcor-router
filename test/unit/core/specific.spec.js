@@ -8,6 +8,7 @@ var expect = chai.expect;
 var falcor = require('falcor');
 var $ref = falcor.Model.ref;
 var Observable = require('rx').Observable;
+var sinon = require('sinon');
 
 describe('Specific', function() {
     it('should execute a simple route matching.', function(done) {
@@ -27,6 +28,7 @@ describe('Specific', function() {
     it('should validate that optimizedPathSets strips out already found data.', function(done) {
         this.timeout(10000);
         var serviceCalls = 0;
+        var onNext = sinon.spy();
         var routes = [{
             route: 'lists[{keys:ids}]',
             get: function(aliasMap) {
@@ -63,12 +65,12 @@ describe('Specific', function() {
             }
         }];
         var router = new R(routes);
-        var obs = router.
-            get([['lists', [0, 1], 'summary']]);
-        var count = 0;
-        obs.
-            doAction(function(res) {
-                expect(res).to.deep.equals({
+        router.
+            get([['lists', [0, 1], 'summary']]).
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
                         lists: {
                             0: $ref('two.be[956]'),
@@ -83,9 +85,6 @@ describe('Specific', function() {
                         }
                     }
                 });
-                count++;
-            }, noOp, function() {
-                expect(count, 'expect onNext called 1 time.').to.equal(1);
                 expect(serviceCalls).to.equal(1);
             }).
             subscribe(noOp, done, done);

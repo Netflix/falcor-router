@@ -41,7 +41,7 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
                 // checks call for isJSONG and if there is jsong without paths
                 // throw errors.
                 var refs = [];
-                var pathsFromCall = [];
+                var values = [];
 
                 // Will flatten any arrays of jsong/pathValues.
                 var callOutput = res.reduce(function(flattenedRes, next) {
@@ -66,19 +66,14 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
 
                 });
 
-                debugger
                 var invsRefsAndValues = mCGRI(jsongCache, callOutput);
                 invsRefsAndValues.references.forEach(function(ref) {
                     refs[++refLen] = ref;
                 });
 
-                debugger
-                invsRefsAndValues.
-                    invalidations.
-                    concat(invsRefsAndValues.values).
-                    forEach(function(pv) {
-                        pathsFromCall.push(pv.path);
-                    });
+                values = invsRefsAndValues.values.map(function(pv) {
+                    return pv.path;
+                });
 
                 var callLength = callOutput.length;
                 var callPathSave1 = callPath.slice(0, callPath.length - 1);
@@ -145,15 +140,24 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
                 }
 
                 // If there are no suffixes but there are references, report
-                // the paths to the references.
-                else if (pathsFromCall.length) {
-                    pathsFromCall.forEach(function(path) {
-                        callOutput[++callLength] = {
-                            isMessage: true,
-                            additionalPath: path
-                        };
-                    });
+                // the paths to the references.  There may be values as well,
+                // add those to the output.
+                else if (refs.length || values.length) {
+                    var refPaths = refs.
+                        map(function(x) { return x.path; }).
+                        concat(values).
+                        forEach(function(path) {
+                            callOutput[++callLength] = {
+                                isMessage: true,
+                                additionalPath: path
+                            };
+                        });
                 }
+
+                callOutput[++callLength] = {
+                    isMessage: true,
+                    invalidations: invsRefsAndValues.invalidations || []
+                };
 
                 return callOutput;
             });

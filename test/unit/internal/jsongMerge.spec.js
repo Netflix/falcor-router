@@ -12,7 +12,7 @@ var _ = require('lodash');
  * figure out where bugs are without much clarity into where they
  * are.
  */
-describe.only('JSONG - Merge', function() {
+describe('JSONG - Merge', function() {
     it('should write a simple path to the cache.', function() {
 
         var jsong = {

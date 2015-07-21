@@ -11,7 +11,7 @@ var expect = require('chai').expect;
  * figure out where bugs are without much clarity into where they
  * are.
  */
-describe.only('PathValue - Merge', function() {
+describe('PathValue - Merge', function() {
     it('should write a simple path to the cache with pathValue.', function() {
         var expected = {
             there: {
