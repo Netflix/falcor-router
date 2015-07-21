@@ -28,7 +28,7 @@ describe.only('JSONG - Merge', function() {
         expect(out).to.deep.equals({
             values: [{
                 path: ['there', 'is'],
-                value: 'a value'
+                value: $atom('a value')
             }],
             references: []
         });
@@ -93,6 +93,36 @@ describe.only('JSONG - Merge', function() {
             references: [{
                 path: ['there', 'is'],
                 value: ['a']
+            }]
+        });
+    });
+
+    it('should get the set values and refs.', function() {
+        var jsong = {
+            jsonGraph: {
+                there: {
+                    is: $ref('a'),
+                    was: $ref('b')
+                },
+                a: {
+                    value: 5
+                }
+            },
+            paths: [
+                ['there', 'is', 'value'],
+                ['there', 'was'],
+            ]
+        };
+        var cache = {};
+        var out = jsongMerge(cache, jsong);
+        expect(out).to.deep.equals({
+            values: [{
+                path: ['there', 'is', 'value'],
+                value: 5
+            }],
+            references: [{
+                path: ['there', 'was'],
+                value: ['b']
             }]
         });
     });

@@ -21,7 +21,9 @@ module.exports = function jsongMerge(cache, jsongEnv) {
             messageRoot: j,
             references: references,
             values: values,
-            requestedPath: []
+            requestedPath: [],
+            requestIdx: -1,
+            ignoreCount: 0,
         },  cache, j, 0, p);
     });
     return {
@@ -34,7 +36,13 @@ function merge(config, cache, message, depth, path, fromParent, fromKey) {
     var cacheRoot = config.cacheRoot;
     var messageRoot = config.messageRoot;
     var requestedPath = config.requestedPath;
+    var ignoreCount = config.ignoreCount;
     var typeOfMessage = typeof message;
+    var requestIdx = config.requestIdx;
+    var updateRequestedPath = ignoreCount <= depth;
+    if (updateRequestedPath) {
+        requestIdx = ++config.requestIdx;
+    }
 
     // The message at this point should always be defined.
     if (message.$type || typeOfMessage !== 'object') {
@@ -58,7 +66,7 @@ function merge(config, cache, message, depth, path, fromParent, fromKey) {
             var values = config.values;
             values.push({
                 path: cloneArray(requestedPath),
-                value: message.value
+                value: message.type ? message.value : message
             });
         }
 
@@ -90,7 +98,9 @@ function merge(config, cache, message, depth, path, fromParent, fromKey) {
         var messageRes = message[key];
         var nextPath = path;
         var nextDepth = depth + 1;
-        requestedPath[depth] = key;
+        if (updateRequestedPath) {
+            requestedPath[requestIdx] = key;
+        }
 
         // Cache does not exist but message does.
         if (!cacheRes) {
@@ -100,6 +110,7 @@ function merge(config, cache, message, depth, path, fromParent, fromKey) {
         // TODO: Can we hit a leaf node in the cache when traversing?
 
         if (messageRes) {
+            var nextIgnoreCount = 0;
 
             // TODO: Potential performance gain since we know that
             // references are always pathSets of 1, they can be evaluated
@@ -113,13 +124,16 @@ function merge(config, cache, message, depth, path, fromParent, fromKey) {
                 cache[key] = clone(messageRes);
 
                 // Reset position in message and cache.
+                nextIgnoreCount = messageRes.value.length;
                 messageRes = messageRoot;
                 cacheRes = cacheRoot;
             }
 
             // move forward down the path progression.
+            config.ignoreCount = nextIgnoreCount;
             merge(config, cacheRes, messageRes,
                   nextDepth, nextPath, cache, key);
+            config.ignoreCount = ignoreCount;
         }
 
         // The second the incoming jsong must be fully qualified,
@@ -137,7 +151,9 @@ function merge(config, cache, message, depth, path, fromParent, fromKey) {
             }
         }
 
-        requestedPath.length = depth;
+        if (updateRequestedPath) {
+            requestedPath.length = requestIdx;
+        }
 
         // Are we done with the loop?
         if (memo) {

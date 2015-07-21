@@ -15,6 +15,7 @@ module.exports = function pathValueMerge(cache, pathValue, requestedPath) {
     var refs = [];
     var values = [];
     var invalidations = [];
+    var recursiveValues = [];
 
     /*eslint-disable no-func-assign, no-param-reassign*/
     requestedPath = requestedPath || [];
@@ -47,11 +48,13 @@ module.exports = function pathValueMerge(cache, pathValue, requestedPath) {
             }
 
             if (memo) {
-                pathValueMerge(
+                var recursiveValue = pathValueMerge(
                     next, {
                         path: path.slice(i + 1),
                         value: pathValue.value
                     }, requestedPath);
+
+                recursiveValues.push(recursiveValue);
                 if (!memo.done) {
                     requestedPath.legth = startingLength + i;
                     key = permuteKey(outerKey, memo);
@@ -66,7 +69,7 @@ module.exports = function pathValueMerge(cache, pathValue, requestedPath) {
         // All memoized paths need to be stopped to avoid
         // extra key insertions.
         if (memo) {
-            return refs;
+            return reduceRecursiveValues(recursiveValues);
         }
     }
 
@@ -125,10 +128,23 @@ module.exports = function pathValueMerge(cache, pathValue, requestedPath) {
     } while (memo && !memo.done);
 
     return {
-        refs: refs,
+        references: refs,
         invalidations: invalidations,
         values: values
     };
 };
 
 
+function reduceRecursiveValues(recursiveValues) {
+    return recursiveValues.reduce(function(acc, value) {
+        acc.invalidations = acc.invalidations.concat(value.invalidations);
+        acc.references = acc.references.concat(value.references);
+        acc.values = acc.values.concat(value.values);
+
+        return acc;
+    }, {
+        invalidations: [],
+        references: [],
+        values: []
+    });
+}

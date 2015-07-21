@@ -80,10 +80,14 @@ describe('PathValue - Merge', function() {
             value: $ref('a')
         };
         var cache = {};
-        var refs = pathValueMerge(cache, pV);
-        expect(refs).is.deep.equals([{
-            path: ['there', 'is'],
-            value: ['a']
-        }]);
+        var out = pathValueMerge(cache, pV);
+        expect(out).is.deep.equals({
+            references: [{
+                path: ['there', 'is'],
+                value: ['a']
+            }],
+            values: [],
+            invalidations: []
+        });
     });
 });

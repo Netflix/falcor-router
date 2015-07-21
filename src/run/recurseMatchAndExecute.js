@@ -48,6 +48,7 @@ function _recurseMatchAndExecute(
             // We have to return an Observable of error instead of just
             // throwing.
             var matchedResults;
+            debugger;
             try {
                 matchedResults = match(currentMethod, nextPaths);
             } catch (e) {
@@ -64,6 +65,7 @@ function _recurseMatchAndExecute(
                 // Generate from the combined results the next requestable paths
                 // and insert errors / values into the cache.
                 flatMap(function(results) {
+                    debugger
                     var value = results.value;
                     var suffix = results.match.suffix;
 

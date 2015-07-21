@@ -34,11 +34,13 @@ describe('Call', function() {
     });
 
     it('should pass the #30 base call test with only suffix.', function(done) {
-        var called = 0;
+        var onNext = sinon.spy();
         getExtendedRouter().
             call(['lolomo', 'pvAdd'], ['Thrillers'], [['name']]).
-            doAction(function(jsongEnv) {
-                expect(jsongEnv).to.deep.equals({
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
                         lolomo: $ref('lolomos[123]'),
                         lolomos: {
@@ -56,12 +58,8 @@ describe('Call', function() {
                         ['lolomo', 0, 'name']
                     ]
                 });
-                ++called;
             }).
-            subscribe(noOp, done, function() {
-                expect(called).to.equals(1);
-                done();
-            });
+            subscribe(noOp, done, done);
     });
 
     it('should pass the #30 base call test with only paths.', function(done) {
