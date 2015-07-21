@@ -8,21 +8,50 @@ var isArray = Array.isArray;
 /**
  * merges pathValue into a cache
  */
-module.exports = function pathValueMerge(cache, pathValue, requestedPath) {
-    var path = pathValue.path;
-    var curr = cache;
-    var next, key, cloned, outerKey, memo;
+module.exports = function pathValueMerge(cache, pathValue) {
     var refs = [];
     var values = [];
     var invalidations = [];
-    var recursiveValues = [];
 
-    /*eslint-disable no-func-assign, no-param-reassign*/
-    requestedPath = requestedPath || [];
-    /*eslint-enable no-func-assign, no-param-reassign*/
+    // The invalidation case.  Needed for reporting
+    // of call.
+    if (pathValue.value === undefined) {
+        invalidations.push({path: pathValue.path});
+    }
 
-    var startingLength = requestedPath.length;
+    // References.  Needed for evaluationg suffixes in
+    // both call and get/set.
+    else if (pathValue.value.$type === $ref) {
+        refs.push({
+            path: pathValue.path,
+            value: pathValue.value.value
+        });
+    }
+
+
+    // Values.  Needed for reporting for call.
+    else {
+        values.push(pathValue);
+    }
+
+    if (invalidations.length === 0) {
+        // Merges the values/refs/invs into the cache.
+        innerPathValueMerge(cache, pathValue);
+    }
+
+    return {
+        references: refs,
+        values: values,
+        invalidations: invalidations
+    };
+};
+
+function innerPathValueMerge(cache, pathValue) {
+    var path = pathValue.path;
+    var curr = cache;
+    var next, key, cloned, outerKey, memo;
     var i, len;
+    debugger
 
     for (i = 0, len = path.length - 1; i < len; ++i) {
         outerKey = path[i];
@@ -41,22 +70,19 @@ module.exports = function pathValueMerge(cache, pathValue, requestedPath) {
 
         do {
             next = curr[key];
-            requestedPath[startingLength + i] = key;
 
             if (!next) {
                 next = curr[key] = {};
             }
 
             if (memo) {
-                var recursiveValue = pathValueMerge(
+                innerPathValueMerge(
                     next, {
                         path: path.slice(i + 1),
                         value: pathValue.value
-                    }, requestedPath);
+                    });
 
-                recursiveValues.push(recursiveValue);
                 if (!memo.done) {
-                    requestedPath.legth = startingLength + i;
                     key = permuteKey(outerKey, memo);
                 }
             }
@@ -69,7 +95,7 @@ module.exports = function pathValueMerge(cache, pathValue, requestedPath) {
         // All memoized paths need to be stopped to avoid
         // extra key insertions.
         if (memo) {
-            return reduceRecursiveValues(recursiveValues);
+            return;
         }
     }
 
@@ -94,57 +120,9 @@ module.exports = function pathValueMerge(cache, pathValue, requestedPath) {
 
         cloned = clone(pathValue.value);
         curr[key] = cloned;
-        requestedPath[startingLength + i] = key;
-
-        // The invalidation case.  Needed for reporting
-        // of call.
-        if (pathValue.value === undefined) {
-            invalidations.push({
-                path: cloneArray(requestedPath),
-            });
-        }
-
-        // References.  Needed for evaluationg suffixes in
-        // both call and get/set.
-        else if (cloned.$type === $ref) {
-            refs[refs.length] = {
-                path: cloneArray(requestedPath),
-                value: cloned.value
-            };
-        }
-
-        // Values.  Needed for reporting for call.
-        else {
-            values.push({
-                path: cloneArray(requestedPath),
-                value: clone.value
-            });
-        }
 
         if (memo && !memo.done) {
-            requestedPath[startingLength + i] = key;
             key = permuteKey(outerKey, memo);
         }
     } while (memo && !memo.done);
-
-    return {
-        references: refs,
-        invalidations: invalidations,
-        values: values
-    };
-};
-
-
-function reduceRecursiveValues(recursiveValues) {
-    return recursiveValues.reduce(function(acc, value) {
-        acc.invalidations = acc.invalidations.concat(value.invalidations);
-        acc.references = acc.references.concat(value.references);
-        acc.values = acc.values.concat(value.values);
-
-        return acc;
-    }, {
-        invalidations: [],
-        references: [],
-        values: []
-    });
 }

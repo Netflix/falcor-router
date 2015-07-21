@@ -11,7 +11,7 @@ var expect = require('chai').expect;
  * figure out where bugs are without much clarity into where they
  * are.
  */
-describe('PathValue - Merge', function() {
+describe.only('PathValue - Merge', function() {
     it('should write a simple path to the cache with pathValue.', function() {
         var expected = {
             there: {
@@ -88,6 +88,64 @@ describe('PathValue - Merge', function() {
             }],
             values: [],
             invalidations: []
+        });
+    });
+
+    it('should get the set values.', function() {
+        var cache = {
+            jsonGraph: {
+                there: {
+                    is: $ref('a')
+                }
+            }
+        };
+        var pVs = {
+            path: ['there', 'was', 'value'],
+            value: 5
+        };
+        var out = pathValueMerge(cache, pVs);
+        expect(out).to.deep.equals({
+            values: [{
+                path: ['there', 'was', 'value'],
+                value: 5
+            }],
+            references: [],
+            invalidations: []
+        });
+    });
+
+    it('should get a pathSet of values.', function() {
+        var cache = {
+            jsonGraph: {
+                there: {
+                    is: $ref('a')
+                }
+            }
+        };
+        var pVs = {
+            path: ['there', 'was', ['value', 'v2', 'v3']],
+            value: 5
+        };
+        var out = pathValueMerge(cache.jsonGraph, pVs);
+        expect(out).to.deep.equals({
+            values: [{
+                path: ['there', 'was', ['value', 'v2', 'v3']],
+                value: 5
+            }],
+            references: [],
+            invalidations: []
+        });
+        expect(cache).to.deep.equals({
+            jsonGraph: {
+                there: {
+                    is: $ref('a'),
+                    was: {
+                        value: 5,
+                        v2: 5,
+                        v3: 5
+                    }
+                }
+            }
         });
     });
 });
