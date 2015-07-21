@@ -13,36 +13,53 @@ module.exports = mergeCacheAndGatherRefsAndInvalidations;
  *
  * @param {Object} cache
  * @param {Array} jsongOrPVs
- * @param {Boolean} hasSuffix
  */
-function mergeCacheAndGatherRefsAndInvalidations(cache, jsongOrPVs, hasSuffix) {
-    var nextPaths = [];
+function mergeCacheAndGatherRefsAndInvalidations(cache, jsongOrPVs) {
+    var references = [];
     var len = -1;
-    var invalidated = [];
+    var invalidations = [];
     var messages = [];
+    var values = [];
 
     jsongOrPVs.forEach(function(jsongOrPV) {
-        var refs = [];
+        var refsAndValues = [];
+
         if (isMessage(jsongOrPV)) {
             messages[messages.length] = jsongOrPV;
         }
 
         else if (isJSONG(jsongOrPV)) {
-            refs = jsongMerge(cache, jsongOrPV);
-        } else {
-            if (jsongOrPV.value === undefined) {
-                invalidated[invalidated.length] = jsongOrPV;
-            } else {
-                refs = pathValueMerge(cache, jsongOrPV);
-            }
+            refsAndValues = jsongMerge(cache, jsongOrPV);
         }
 
-        if (hasSuffix && refs.length) {
+        // Last option are path values.
+        else {
+            refsAndValues = pathValueMerge(cache, jsongOrPV);
+        }
+
+        var refs = refsAndValues.references;
+        var vals = refsAndValues.values;
+        var invs = refsAndValues.invalidations;
+
+        if (vals && vals.length) {
+            values = values.concat(vals);
+        }
+
+        if (invs && invs.length) {
+            invalidations = invalidations.concat(invs);
+        }
+
+        if (refs && refs.length) {
             refs.forEach(function(ref) {
-                nextPaths[++len] = ref;
+                references[++len] = ref;
             });
         }
     });
 
-    return [invalidated, nextPaths, messages];
+    return {
+        invalidations: invalidations,
+        references: references,
+        messages: messages,
+        values: values
+    };
 }

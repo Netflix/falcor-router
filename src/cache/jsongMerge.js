@@ -13,19 +13,36 @@ var catAndSlice = require('./../support/catAndSlice');
 module.exports = function jsongMerge(cache, jsongEnv) {
     var paths = jsongEnv.paths;
     var j = jsongEnv.jsonGraph;
-    var insertedReferences = [];
+    var references = [];
+    var values = [];
     paths.forEach(function(p) {
-        merge(cache, cache, j, j, p, 0, insertedReferences, []);
+        merge({
+            cacheRoot: cache,
+            messageRoot: j,
+            references: references,
+            values: values,
+            requestedPath: [],
+            requestIdx: -1,
+            ignoreCount: 0
+        },  cache, j, 0, p);
     });
-    return insertedReferences;
+    return {
+        references: references,
+        values: values
+    };
 };
 
-function merge(cache, cacheRoot, message,
-               messageRoot, path, depth,
-               insertedReferences, requestedPath, fromParent,
-               fromKey) {
-
+function merge(config, cache, message, depth, path, fromParent, fromKey) {
+    var cacheRoot = config.cacheRoot;
+    var messageRoot = config.messageRoot;
+    var requestedPath = config.requestedPath;
+    var ignoreCount = config.ignoreCount;
     var typeOfMessage = typeof message;
+    var requestIdx = config.requestIdx;
+    var updateRequestedPath = ignoreCount <= depth;
+    if (updateRequestedPath) {
+        requestIdx = ++config.requestIdx;
+    }
 
     // The message at this point should always be defined.
     if (message.$type || typeOfMessage !== 'object') {
@@ -35,10 +52,22 @@ function merge(cache, cacheRoot, message,
         // and we have resolved our path then add the reference to
         // the unfulfilledRefernces.
         if (message.$type === $ref) {
-            insertedReferences[insertedReferences.length] = {
+            var references = config.references;
+            references.push({
                 path: cloneArray(requestedPath),
                 value: message.value
-            };
+            });
+        }
+
+        // We are dealing with a value.  We need this for call
+        // Call needs to report all of its values into the jsongCache
+        // and paths.
+        else {
+            var values = config.values;
+            values.push({
+                path: cloneArray(requestedPath),
+                value: message.type ? message.value : message
+            });
         }
 
         return;
@@ -69,7 +98,9 @@ function merge(cache, cacheRoot, message,
         var messageRes = message[key];
         var nextPath = path;
         var nextDepth = depth + 1;
-        requestedPath[depth] = key;
+        if (updateRequestedPath) {
+            requestedPath[requestIdx] = key;
+        }
 
         // Cache does not exist but message does.
         if (!cacheRes) {
@@ -79,6 +110,7 @@ function merge(cache, cacheRoot, message,
         // TODO: Can we hit a leaf node in the cache when traversing?
 
         if (messageRes) {
+            var nextIgnoreCount = 0;
 
             // TODO: Potential performance gain since we know that
             // references are always pathSets of 1, they can be evaluated
@@ -92,15 +124,16 @@ function merge(cache, cacheRoot, message,
                 cache[key] = clone(messageRes);
 
                 // Reset position in message and cache.
+                nextIgnoreCount = messageRes.value.length;
                 messageRes = messageRoot;
                 cacheRes = cacheRoot;
             }
 
             // move forward down the path progression.
-            merge(cacheRes, cacheRoot,
-                  messageRes, messageRoot,
-                  nextPath, nextDepth, insertedReferences,
-                  requestedPath, cache, key);
+            config.ignoreCount = nextIgnoreCount;
+            merge(config, cacheRes, messageRes,
+                  nextDepth, nextPath, cache, key);
+            config.ignoreCount = ignoreCount;
         }
 
         // The second the incoming jsong must be fully qualified,
@@ -109,10 +142,7 @@ function merge(cache, cacheRoot, message,
 
             // do not materialize, continue down the cache.
             if (depth < path.length - 1) {
-                merge(cacheRes, cacheRoot,
-                      {}, messageRoot,
-                      nextPath, nextDepth, insertedReferences,
-                      requestedPath, cache, key);
+                merge(config, cacheRes, {}, nextDepth, nextPath, cache, key);
             }
 
             // materialize the node
@@ -121,7 +151,9 @@ function merge(cache, cacheRoot, message,
             }
         }
 
-        requestedPath.length = depth;
+        if (updateRequestedPath) {
+            requestedPath.length = requestIdx;
+        }
 
         // Are we done with the loop?
         if (memo) {

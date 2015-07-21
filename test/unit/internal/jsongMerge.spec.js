@@ -24,7 +24,14 @@ describe('JSONG - Merge', function() {
             paths: [['there', 'is']]
         };
 
-        mergeTest(jsong);
+        var out = mergeTest(jsong);
+        expect(out).to.deep.equals({
+            values: [{
+                path: ['there', 'is'],
+                value: $atom('a value')
+            }],
+            references: []
+        });
     });
     it('should write a path with a reference to a value.', function() {
         var jsong = {
@@ -80,11 +87,44 @@ describe('JSONG - Merge', function() {
             paths: [['there', 'is']]
         };
         var cache = {};
-        var refs = jsongMerge(cache, jsong);
-        expect(refs).to.deep.equals([{
-            path: ['there', 'is'],
-            value: ['a']
-        }]);
+        var out = jsongMerge(cache, jsong);
+        expect(out).to.deep.equals({
+            values: [],
+            references: [{
+                path: ['there', 'is'],
+                value: ['a']
+            }]
+        });
+    });
+
+    it('should get the set values and refs.', function() {
+        var jsong = {
+            jsonGraph: {
+                there: {
+                    is: $ref('a'),
+                    was: $ref('b')
+                },
+                a: {
+                    value: 5
+                }
+            },
+            paths: [
+                ['there', 'is', 'value'],
+                ['there', 'was']
+            ]
+        };
+        var cache = {};
+        var out = jsongMerge(cache, jsong);
+        expect(out).to.deep.equals({
+            values: [{
+                path: ['there', 'is', 'value'],
+                value: 5
+            }],
+            references: [{
+                path: ['there', 'was'],
+                value: ['b']
+            }]
+        });
     });
 });
 
@@ -94,7 +134,9 @@ function mergeTest(jsong) {
             was: $atom('a value')
         }
     };
-    var expected = _.merge(cache, jsong);
-    jsongMerge(cache, jsong);
+    var expected = _.merge(cache, jsong.jsonGraph);
+    var out = jsongMerge(cache, jsong);
     expect(cache).to.deep.equals(expected);
+
+    return out;
 }

@@ -80,10 +80,72 @@ describe('PathValue - Merge', function() {
             value: $ref('a')
         };
         var cache = {};
-        var refs = pathValueMerge(cache, pV);
-        expect(refs).is.deep.equals([{
-            path: ['there', 'is'],
-            value: ['a']
-        }]);
+        var out = pathValueMerge(cache, pV);
+        expect(out).is.deep.equals({
+            references: [{
+                path: ['there', 'is'],
+                value: ['a']
+            }],
+            values: [],
+            invalidations: []
+        });
+    });
+
+    it('should get the set values.', function() {
+        var cache = {
+            jsonGraph: {
+                there: {
+                    is: $ref('a')
+                }
+            }
+        };
+        var pVs = {
+            path: ['there', 'was', 'value'],
+            value: 5
+        };
+        var out = pathValueMerge(cache, pVs);
+        expect(out).to.deep.equals({
+            values: [{
+                path: ['there', 'was', 'value'],
+                value: 5
+            }],
+            references: [],
+            invalidations: []
+        });
+    });
+
+    it('should get a pathSet of values.', function() {
+        var cache = {
+            jsonGraph: {
+                there: {
+                    is: $ref('a')
+                }
+            }
+        };
+        var pVs = {
+            path: ['there', 'was', ['value', 'v2', 'v3']],
+            value: 5
+        };
+        var out = pathValueMerge(cache.jsonGraph, pVs);
+        expect(out).to.deep.equals({
+            values: [{
+                path: ['there', 'was', ['value', 'v2', 'v3']],
+                value: 5
+            }],
+            references: [],
+            invalidations: []
+        });
+        expect(cache).to.deep.equals({
+            jsonGraph: {
+                there: {
+                    is: $ref('a'),
+                    was: {
+                        value: 5,
+                        v2: 5,
+                        v3: 5
+                    }
+                }
+            }
+        });
     });
 });

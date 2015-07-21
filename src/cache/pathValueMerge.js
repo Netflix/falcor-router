@@ -1,5 +1,4 @@
 var clone = require('./../support/clone');
-var cloneArray = require('./../support/cloneArray');
 var types = require('./../support/types');
 var $ref = types.$ref;
 var permuteKey = require('./../support/permuteKey');
@@ -8,17 +7,48 @@ var isArray = Array.isArray;
 /**
  * merges pathValue into a cache
  */
-module.exports = function pathValueMerge(cache, pathValue, requestedPath) {
+module.exports = function pathValueMerge(cache, pathValue) {
+    var refs = [];
+    var values = [];
+    var invalidations = [];
+
+    // The invalidation case.  Needed for reporting
+    // of call.
+    if (pathValue.value === undefined) {
+        invalidations.push({path: pathValue.path});
+    }
+
+    // References.  Needed for evaluationg suffixes in
+    // both call and get/set.
+    else if (pathValue.value.$type === $ref) {
+        refs.push({
+            path: pathValue.path,
+            value: pathValue.value.value
+        });
+    }
+
+
+    // Values.  Needed for reporting for call.
+    else {
+        values.push(pathValue);
+    }
+
+    if (invalidations.length === 0) {
+        // Merges the values/refs/invs into the cache.
+        innerPathValueMerge(cache, pathValue);
+    }
+
+    return {
+        references: refs,
+        values: values,
+        invalidations: invalidations
+    };
+};
+
+function innerPathValueMerge(cache, pathValue) {
     var path = pathValue.path;
     var curr = cache;
     var next, key, cloned, outerKey, memo;
-    var refs = [];
-
-    /*eslint-disable no-func-assign, no-param-reassign*/
-    requestedPath = requestedPath || [];
-    /*eslint-enable no-func-assign, no-param-reassign*/
-
-    var startingLength = requestedPath.length;
     var i, len;
 
     for (i = 0, len = path.length - 1; i < len; ++i) {
@@ -38,20 +68,19 @@ module.exports = function pathValueMerge(cache, pathValue, requestedPath) {
 
         do {
             next = curr[key];
-            requestedPath[startingLength + i] = key;
 
             if (!next) {
                 next = curr[key] = {};
             }
 
             if (memo) {
-                pathValueMerge(
+                innerPathValueMerge(
                     next, {
                         path: path.slice(i + 1),
                         value: pathValue.value
-                    }, requestedPath);
+                    });
+
                 if (!memo.done) {
-                    requestedPath.legth = startingLength + i;
                     key = permuteKey(outerKey, memo);
                 }
             }
@@ -64,7 +93,7 @@ module.exports = function pathValueMerge(cache, pathValue, requestedPath) {
         // All memoized paths need to be stopped to avoid
         // extra key insertions.
         if (memo) {
-            return refs;
+            return;
         }
     }
 
@@ -86,24 +115,12 @@ module.exports = function pathValueMerge(cache, pathValue, requestedPath) {
     }
 
     do {
+
         cloned = clone(pathValue.value);
         curr[key] = cloned;
-        requestedPath[startingLength + i] = key;
-
-        if (cloned.$type === $ref) {
-            refs[refs.length] = {
-                path: cloneArray(requestedPath),
-                value: cloned.value
-            };
-        }
 
         if (memo && !memo.done) {
-            requestedPath[startingLength + i] = key;
             key = permuteKey(outerKey, memo);
         }
     } while (memo && !memo.done);
-
-    return refs;
-};
-
-
+}

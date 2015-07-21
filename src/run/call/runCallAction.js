@@ -3,8 +3,7 @@ var outputToObservable = require('./../conversion/outputToObservable');
 var noteToJsongOrPV = require('./../conversion/noteToJsongOrPV');
 var errors = require('./../../exceptions');
 var authorize = require('./../authorize');
-var jsongMerge = require('./../../cache/jsongMerge');
-var pathValueMerge = require('./../../cache/pathValueMerge');
+var mCGRI = require('./../mergeCacheAndGatherRefsAndInvalidations');
 
 module.exports =  outerRunCallAction;
 
@@ -33,14 +32,13 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
 
         // Required to get the references from the outputting jsong
         // and pathValues.
-        var tmpCache = {};
         out = outputToObservable(out).
             toArray().
             map(function(res) {
                 // checks call for isJSONG and if there is jsong without paths
                 // throw errors.
                 var refs = [];
-                var pathsFromCall = [];
+                var values = [];
 
                 // Will flatten any arrays of jsong/pathValues.
                 var callOutput = res.reduce(function(flattenedRes, next) {
@@ -48,8 +46,8 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
                 }, []);
 
                 var refLen = -1;
-                var mergedRefs;
                 callOutput.forEach(function(r) {
+
                     // its json graph.
                     if (isJSONG(r)) {
 
@@ -60,23 +58,17 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
                             err.throwToNext = true;
                             throw err;
                         }
-                        mergedRefs = jsongMerge(tmpCache, r);
-                        pathsFromCall = pathsFromCall.concat(r.paths);
                     }
 
-                    // Only merge if we have to.
-                    else {
-                        mergedRefs = pathValueMerge(tmpCache, r);
-                        pathsFromCall.push(r.path);
-                    }
+                });
 
-                    // Merges in the refs from the pV or jsong Merge.
-                    if (mergedRefs) {
-                        mergedRefs.forEach(function(nextRef) {
-                            refs[++refLen] = nextRef;
-                        });
-                        mergedRefs = null;
-                    }
+                var invsRefsAndValues = mCGRI(jsongCache, callOutput);
+                invsRefsAndValues.references.forEach(function(ref) {
+                    refs[++refLen] = ref;
+                });
+
+                values = invsRefsAndValues.values.map(function(pv) {
+                    return pv.path;
                 });
 
                 var callLength = callOutput.length;
@@ -144,14 +136,18 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
                 }
 
                 // If there are no suffixes but there are references, report
-                // the paths to the references.
-                else if (pathsFromCall.length) {
-                    pathsFromCall.forEach(function(path) {
-                        callOutput[++callLength] = {
-                            isMessage: true,
-                            additionalPath: path
-                        };
-                    });
+                // the paths to the references.  There may be values as well,
+                // add those to the output.
+                else if (refs.length || values.length) {
+                    refs.
+                        map(function(x) { return x.path; }).
+                        concat(values).
+                        forEach(function(path) {
+                            callOutput[++callLength] = {
+                                isMessage: true,
+                                additionalPath: path
+                            };
+                        });
                 }
 
                 return callOutput;

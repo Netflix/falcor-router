@@ -76,10 +76,30 @@ Router.prototype = {
                 var reportedPaths = jsongResult.reportedPaths;
                 var jsongEnv = materializeMissing(
                     router,
+                    callPaths,
+                    jsongResult, {
+                        $type: $atom,
+                        $expires: 0
+                    });
+                materializeMissing(
+                    router,
                     reportedPaths,
                     jsongResult);
 
-                jsongEnv.paths = toPaths(toTree(jsongResult.reportedPaths));
+
+                if (reportedPaths.length) {
+                    jsongEnv.paths = reportedPaths;
+                }
+                else {
+                    jsongEnv.paths = [];
+                }
+
+                jsongEnv.paths.push(callPath);
+                var invalidated = jsongResult.invalidated;
+                if (invalidated && invalidated.length) {
+                    jsongEnv.invalidations = invalidated;
+                }
+                jsongEnv.paths = toPaths(toTree(jsongEnv.paths));
                 return jsongEnv;
             });
     }

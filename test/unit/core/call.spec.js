@@ -7,15 +7,18 @@ var falcor = require('falcor');
 var $ref = falcor.Model.ref;
 var $atom = falcor.Model.atom;
 var errors = require('./../../../src/exceptions');
+var types = require('./../../../src/support/types');
 var sinon = require("sinon");
 
 describe('Call', function() {
     it('should perform a simple call.', function(done) {
-        var called = 0;
+        var onNext = sinon.spy();
         getRouter().
             call(['videos', 1234, 'rating'], [5]).
-            doAction(function(x) {
-                expect(x).to.deep.equals({
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
                         videos: {
                             1234: {
@@ -25,25 +28,27 @@ describe('Call', function() {
                     },
                     paths: [['videos', 1234, 'rating']]
                 });
-                ++called;
             }).
-            subscribe(noOp, done, function() {
-                expect(called).to.equals(1);
-                done();
-            });
+            subscribe(noOp, done, done);
     });
 
     it('should pass the #30 base call test with only suffix.', function(done) {
-        var called = 0;
+        var onNext = sinon.spy();
         getExtendedRouter().
             call(['lolomo', 'pvAdd'], ['Thrillers'], [['name']]).
-            doAction(function(jsongEnv) {
-                expect(jsongEnv).to.deep.equals({
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
                         lolomo: $ref('lolomos[123]'),
                         lolomos: {
                             123: {
-                                0: $ref('listsById[0]')
+                                0: $ref('listsById[0]'),
+                                pvAdd: {
+                                    $type: types.$atom,
+                                    $expires: 0
+                                }
                             }
                         },
                         listsById: {
@@ -53,15 +58,12 @@ describe('Call', function() {
                         }
                     },
                     paths: [
-                        ['lolomo', 0, 'name']
+                        ['lolomo', 0, 'name'],
+                        ['lolomo', 'pvAdd']
                     ]
                 });
-                ++called;
             }).
-            subscribe(noOp, done, function() {
-                expect(called).to.equals(1);
-                done();
-            });
+            subscribe(noOp, done, done);
     });
 
     it('should pass the #30 base call test with only paths.', function(done) {
@@ -75,12 +77,16 @@ describe('Call', function() {
                         lolomos: {
                             123: {
                                 0: $ref('listsById[0]'),
-                                length: 1
+                                length: 1,
+                                pvAdd: {
+                                    $type: types.$atom,
+                                    $expires: 0
+                                }
                             }
                         }
                     },
                     paths: [
-                        ['lolomo', 'length'],
+                        ['lolomo', ['length', 'pvAdd']],
                         ['lolomos', 123, 0]
                     ]
                 });
@@ -103,7 +109,11 @@ describe('Call', function() {
                         lolomos: {
                             123: {
                                 0: $ref('listsById[0]'),
-                                length: 1
+                                length: 1,
+                                pvAdd: {
+                                    $type: types.$atom,
+                                    $expires: 0
+                                }
                             }
                         },
                         listsById: {
@@ -114,7 +124,7 @@ describe('Call', function() {
                     },
                     paths: [
                         ['lolomo', 0, 'name'],
-                        ['lolomo', 'length']
+                        ['lolomo', ['length', 'pvAdd']]
                     ]
                 });
                 ++called;
@@ -180,12 +190,18 @@ describe('Call', function() {
                                     2: {
                                         $type: 'ref',
                                         value: ['titlesById', 1]
+                                    },
+                                    push: {
+                                        $type: types.$atom,
+                                        $expires: 0
                                     }
                                 }
                             }
                         }
                     },
-                    paths: [['genrelist', 0, 'titles', 2]]
+                    paths: [
+                        ['genrelist', 0, 'titles', [2, 'push']]
+                    ]
                 });
             }, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
@@ -211,6 +227,10 @@ describe('Call', function() {
                                     2: {
                                         $type: 'ref',
                                         value: ['titlesById', 1]
+                                    },
+                                    push: {
+                                        $type: types.$atom,
+                                        $expires: 0
                                     }
                                 }
                             }
@@ -222,7 +242,10 @@ describe('Call', function() {
                             }
                         }
                     },
-                    paths: [['genrelist', 0, 'titles', 2, ['name', 'rating']]]
+                    paths: [
+                        ['genrelist', 0, 'titles', 2, ['name', 'rating']],
+                        ['genrelist', 0, 'titles', 'push']
+                    ]
                 });
                 ++called;
             }).
@@ -275,6 +298,44 @@ describe('Call', function() {
                 }
                 return done(e);
             }, done);
+    });
+
+    it('should return path bound invalidations', function(done) {
+        var onNext = sinon.spy();
+        var baseIds = {0: 'Thriller'};
+        getExtendedRouter(baseIds).
+            call(['lolomo', 0, 'invalidate']).
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                var args = onNext.getCall(0).args;
+
+                expect(args[0]).to.deep.equals({
+                    invalidations: [{
+                        path: ['listsById', 0, 'name']
+                    }],
+                    jsonGraph: {
+                        lolomo: $ref('lolomos[123]'),
+                        lolomos: {
+                            123: {
+                                0: $ref('listsById[0]')
+                            }
+                        },
+                        listsById: {
+                            0: {
+                                invalidate: {
+                                    $type: types.$atom,
+                                    $expires: 0
+                                }
+                            }
+                        }
+                    },
+                    paths: [
+                        ['lolomo', 0, 'invalidate']
+                    ]
+                });
+            }).
+            subscribe(noOp, done, done);
     });
 
     function getCallRouter() {
@@ -340,8 +401,15 @@ describe('Call', function() {
         }]);
     }
 
-    function getExtendedRouter() {
+    function getExtendedRouter(initialIdsAndNames) {
         var listsById = {};
+        idsAndNames = initialIdsAndNames || {};
+        Object.keys(idsAndNames).reduce(function(acc, id) {
+            var name = idsAndNames[id];
+            listsById[id] = {name: name, rating: 3};
+            return acc;
+        }, listsById);
+
         function listsLength() {
             return Object.keys(listsById).length;
         }
@@ -366,7 +434,7 @@ describe('Call', function() {
         }, {
             route: 'lolomos[{keys:ids}][{integers:indices}]',
             get: function(alais) {
-                var id = alais[0];
+                var id = alais.ids[0];
                 return Observable.
                     from(alais.indices).
                     map(function(idx) {
@@ -392,10 +460,10 @@ describe('Call', function() {
                 };
             }
         }, {
-            route: 'listsById[{integers:idices}].name',
+            route: 'listsById[{integers:indices}].name',
             get: function(alais) {
                 return Observable.
-                    from(alais.idices).
+                    from(alais.indices).
                     map(function(idx) {
                         if (listsById[idx]) {
                             return {
@@ -410,10 +478,20 @@ describe('Call', function() {
                     });
             }
         }, {
-            route: 'listsById[{integers:idices}].rating',
+            route: 'listsById[{integers:indices}].invalidate',
+            call: function(alias, args) {
+                var indices = alias.indices;
+                return indices.map(function(idx) {
+                    return {
+                        path: ['listsById', idx, 'name']
+                    };
+                });
+            }
+        }, {
+            route: 'listsById[{integers:indices}].rating',
             get: function(alais) {
                 return Observable.
-                    from(alais.idices).
+                    from(alais.indices).
                     map(function(idx) {
                         if (listsById[idx]) {
                             return {
