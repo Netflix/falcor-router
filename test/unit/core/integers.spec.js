@@ -64,10 +64,9 @@ describe('Integers', function() {
             subscribe(noOp, done, done);
     });
 
-    it('should match ranges with integers pattern and coerce match into an array of integers.', function(done) {
+    it.only('should match ranges with integers pattern and coerce match into an array of integers.', function(done) {
         var onNext = sinon.spy();
-        var called = 0;
-        (new R([
+        var router = new R([
             {
                 route: 'titlesById[{integers}]["name", "rating"]',
                 get: function() {
@@ -79,15 +78,18 @@ describe('Integers', function() {
                         {
                             path: ['titlesById', 1, 'rating'],
                             value: 5
-                        }                    
-                    ]
+                        }
+                    ];
                 }
-            }            
-        ])).
+            }
+        ]);
+
+        debugger
+        router.
             get([['titlesById', {from: 1, to: 1}, ["name", "rating"]]]).
             doAction(onNext).
             doAction(noOp, noOp, function(x) {
-                expect(onNext.called).to.be.ok;
+                expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
                         titlesById: {
@@ -98,12 +100,8 @@ describe('Integers', function() {
                         }
                     }
                 });
-                ++called;
             }).
-            subscribe(noOp, done, function() {
-                expect(called).to.equals(1);
-                done();
-            });
+            subscribe(noOp, done, done);
     });
 
 });

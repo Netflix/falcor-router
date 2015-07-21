@@ -5,6 +5,7 @@ var specificMatcher = require('./specific');
 var pluckIntegers = require('./pluckIntergers');
 var toTree = require('./../collapse/toTree');
 var toPaths = require('./../collapse/toPaths');
+var isRoutedToken = require('./../../support/isRoutedToken');
 
 var intTypes = [{
         type: Keys.ranges,
@@ -74,8 +75,16 @@ module.exports = function matcher(rst) {
                     toTree(
                         reducedMatch.map(function(x) { return x.requested; })));
 
+                debugger
                 collapsedResults.forEach(function(path, i) {
-                    reducedMatch[i].virtual = path;
+                    var reducedVirtualPath = reducedMatch[i].virtual;
+                    path.forEach(function(atom, index) {
+
+                        // If its not a routed atom then wholesale replace
+                        if (!isRoutedToken(reducedVirtualPath[index])) {
+                            reducedVirtualPath[index] = atom;
+                        }
+                    });
                     collapsedMatched.push(reducedMatch[i]);
                 });
             });
