@@ -1,4 +1,4 @@
-var permuteKey = require('./../support/permuteKey');
+var iterateKeySet = require('falcor-path-utils').iterateKeySet;
 var cloneArray = require('./../support/cloneArray');
 var catAndSlice = require('./../support/catAndSlice');
 var isArray = Array.isArray;
@@ -52,19 +52,10 @@ function optimizePathSet(cache, cacheRoot, pathSet,
     var keySet = pathSet[depth];
     var nextDepth = depth + 1;
     var isKeySet = typeof keySet === 'object';
-    var memo, key, next, nextOptimized;
+    var iteratorNote = {};
+    var key, next, nextOptimized;
 
-    if (keySet && isKeySet) {
-        memo = {
-            arrOffset: 0,
-            isArray: isArray(keySet)
-        };
-        key = permuteKey(keySet, memo);
-    } else {
-        key = keySet;
-        memo = false;
-    }
-
+    key = iterateKeySet(keySet, iteratorNote);
     do {
         next = cache[key];
         var optimizedPathLength = optimizedPath.length;
@@ -87,9 +78,9 @@ function optimizePathSet(cache, cacheRoot, pathSet,
                         out, nextOptimized, maxRefFollow);
         optimizedPath.length = optimizedPathLength;
 
-        if (memo && !memo.done) {
-            key = permuteKey(keySet, memo);
+        if (!iteratorNote.done) {
+            key = iterateKeySet(keySet, iteratorNote);
         }
-    } while (memo && !memo.done);
+    } while (!iteratorNote.done);
 }
 

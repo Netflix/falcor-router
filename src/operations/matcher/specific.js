@@ -1,33 +1,25 @@
-var permuteKey = require('./../../support/permuteKey');
+var iterateKeySet = require('falcor-path-utils').iterateKeySet;
 var isArray = Array.isArray;
 
 module.exports = function specificMatcher(keySet, currentNode) {
     // --------------------------------------
     // Specific key
     // --------------------------------------
-    var key;
-    var memo = {arrOffset: 0, rangeOffset: 0};
+    var iteratorNote = {};
     var isKeySet = typeof keySet === 'object';
     var nexts = [];
 
-    if (isKeySet) {
-        memo.isArray = isArray(keySet);
-        key = permuteKey(keySet, memo);
-    } else {
-        key = keySet;
-        memo.done = true;
-    }
-
+    var key = iterateKeySet(keySet, iteratorNote);
     do {
 
         if (currentNode[key]) {
             nexts[nexts.length] = key;
         }
 
-        if (!memo.done) {
-            key = permuteKey(keySet, memo);
+        if (!iteratorNote.done) {
+            key = iterateKeySet(keySet, iteratorNote);
         }
-    } while (!memo.done);
+    } while (!iteratorNote.done);
 
     return nexts;
 };
