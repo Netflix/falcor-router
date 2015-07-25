@@ -1,4 +1,4 @@
-var permuteKey = require('./permuteKey');
+var iterateKeySet = require('falcor-path-utils').iterateKeySet;
 var cloneArray = require('./cloneArray');
 
 /**
@@ -34,14 +34,14 @@ function _spread(pathSet, depth, out, currentPath) {
     }
 
     // complex key.
-    var memo = {done: false, isArray: Array.isArray(key), arrOffset: 0};
-    var innerKey = permuteKey(key, memo);
+    var iteratorNote = {};
+    var innerKey = iterateKeySet(key, iteratorNote);
     do {
         // spreads the paths
         currentPath[depth] = innerKey;
         _spread(pathSet, depth + 1, out, currentPath);
         currentPath.length = depth;
 
-        innerKey = permuteKey(key, memo);
-    } while (!memo.done);
+        innerKey = iterateKeySet(key, iteratorNote);
+    } while (!iteratorNote.done);
 }

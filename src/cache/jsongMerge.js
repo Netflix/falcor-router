@@ -1,4 +1,4 @@
-var permuteKey = require('./../support/permuteKey');
+var iterateKeySet = require('falcor-path-utils').iterateKeySet;
 var isArray = Array.isArray;
 var types = require('./../support/types');
 var $ref = types.$ref;
@@ -74,19 +74,9 @@ function merge(config, cache, message, depth, path, fromParent, fromKey) {
     }
 
     var outerKey = path[depth];
-    var memo, key;
-
-    // Setup the memo and the key.
-    if (outerKey && typeof outerKey === 'object') {
-        memo = {
-            isArray: isArray(outerKey),
-            arrOffset: 0
-        };
-        key = permuteKey(outerKey, memo);
-    } else {
-        key = outerKey;
-        memo = false;
-    }
+    var iteratorNote = {};
+    var key;
+    key = iterateKeySet(outerKey, iteratorNote);
 
     // We always attempt this as a loop.  If the memo exists then
     // we assume that the permutation is needed.
@@ -156,8 +146,8 @@ function merge(config, cache, message, depth, path, fromParent, fromKey) {
         }
 
         // Are we done with the loop?
-        if (memo) {
-            key = permuteKey(outerKey, memo);
+        if (iteratorNote) {
+            key = iterateKeySet(outerKey, iteratorNote);
         }
-    } while (memo && !memo.done);
+    } while (iteratorNote && !iteratorNote.done);
 }

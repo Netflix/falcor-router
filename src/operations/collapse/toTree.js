@@ -1,8 +1,9 @@
-var permuteKey = require('./../../support/permuteKey');
+var iterateKeySet = require('falcor-path-utils').iterateKeySet;
 var isArray = Array.isArray;
 
 /**
- * @param {Array.<Number>} paths
+ * @param {Array} paths -
+ * @returns {Object} -
  */
 module.exports = function toTree(paths) {
     return paths.reduce(function(acc, path) {
@@ -14,19 +15,11 @@ module.exports = function toTree(paths) {
 function innerToTree(seed, path, depth) {
 
     var keySet = path[depth];
-    var memo, key;
+    var iteratorNote = {};
+    var key;
     var nextDepth = depth + 1;
 
-    if (typeof keySet === 'object') {
-        memo = {
-            isArray: isArray(keySet),
-            arrOffset: 0
-        };
-        key = permuteKey(keySet, memo);
-    } else {
-        key = keySet;
-        memo = false;
-    }
+    key = iterateKeySet(keySet, iteratorNote);
 
     do {
 
@@ -43,8 +36,8 @@ function innerToTree(seed, path, depth) {
             innerToTree(next, path, nextDepth);
         }
 
-        if (memo && !memo.done) {
-            key = permuteKey(keySet, memo);
+        if (!iteratorNote.done) {
+            key = iterateKeySet(keySet, iteratorNote);
         }
-    } while (memo && !memo.done);
+    } while (!iteratorNote.done);
 }

@@ -1,7 +1,7 @@
 var clone = require('./../support/clone');
 var types = require('./../support/types');
 var $ref = types.$ref;
-var permuteKey = require('./../support/permuteKey');
+var iterateKeySet = require('falcor-path-utils').iterateKeySet;
 var isArray = Array.isArray;
 
 /**
@@ -48,7 +48,7 @@ module.exports = function pathValueMerge(cache, pathValue) {
 function innerPathValueMerge(cache, pathValue) {
     var path = pathValue.path;
     var curr = cache;
-    var next, key, cloned, outerKey, memo;
+    var next, key, cloned, outerKey, iteratorNote;
     var i, len;
 
     for (i = 0, len = path.length - 1; i < len; ++i) {
@@ -56,14 +56,11 @@ function innerPathValueMerge(cache, pathValue) {
 
         // Setup the memo and the key.
         if (outerKey && typeof outerKey === 'object') {
-            memo = {
-                isArray: isArray(outerKey),
-                arrOffset: 0
-            };
-            key = permuteKey(outerKey, memo);
+            iteratorNote = {};
+            key = iterateKeySet(outerKey, iteratorNote);
         } else {
             key = outerKey;
-            memo = false;
+            iteratorNote = false;
         }
 
         do {
@@ -73,26 +70,26 @@ function innerPathValueMerge(cache, pathValue) {
                 next = curr[key] = {};
             }
 
-            if (memo) {
+            if (iteratorNote) {
                 innerPathValueMerge(
                     next, {
                         path: path.slice(i + 1),
                         value: pathValue.value
                     });
 
-                if (!memo.done) {
-                    key = permuteKey(outerKey, memo);
+                if (!iteratorNote.done) {
+                    key = iterateKeySet(outerKey, iteratorNote);
                 }
             }
 
             else {
                 curr = next;
             }
-        } while (memo && !memo.done);
+        } while (iteratorNote && !iteratorNote.done);
 
         // All memoized paths need to be stopped to avoid
         // extra key insertions.
-        if (memo) {
+        if (iteratorNote) {
             return;
         }
     }
@@ -102,25 +99,16 @@ function innerPathValueMerge(cache, pathValue) {
     // this to look.  Plus i want to measure performance.
     outerKey = path[i];
 
-    // Setup the memo and the key.
-    if (outerKey && typeof outerKey === 'object') {
-        memo = {
-            isArray: isArray(outerKey),
-            arrOffset: 0
-        };
-        key = permuteKey(outerKey, memo);
-    } else {
-        key = outerKey;
-        memo = false;
-    }
+    iteratorNote = {};
+    key = iterateKeySet(outerKey, iteratorNote);
 
     do {
 
         cloned = clone(pathValue.value);
         curr[key] = cloned;
 
-        if (memo && !memo.done) {
-            key = permuteKey(outerKey, memo);
+        if (!iteratorNote.done) {
+            key = iterateKeySet(outerKey, iteratorNote);
         }
-    } while (memo && !memo.done);
+    } while (!iteratorNote.done);
 }

@@ -17,9 +17,6 @@ var toPaths = require('./operations/collapse/toPaths');
 var toTree = require('./operations/collapse/toTree');
 var MAX_REF_FOLLOW = 50;
 
-// TODO: We should move this into the constructor.
-Rx.config.longStackSupport = true;
-
 var Router = function(routes, options) {
     var opts = options || {};
 
