@@ -146,7 +146,7 @@ function merge(config, cache, message, depth, path, fromParent, fromKey) {
 
         // Are we done with the loop?
         if (iteratorNote) {
-            key = iterateKeySetouterKey, iteratorNote);
+            key = iterateKeySet(outerKey, iteratorNote);
         }
     } while (iteratorNote && !iteratorNote.done);
 }
