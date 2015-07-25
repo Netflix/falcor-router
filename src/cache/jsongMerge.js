@@ -75,7 +75,7 @@ function merge(config, cache, message, depth, path, fromParent, fromKey) {
     var outerKey = path[depth];
     var iteratorNote = {};
     var key;
-    key = iterateKeySetouterKey, iteratorNote);
+    key = iterateKeySet(outerKey, iteratorNote);
 
     // We always attempt this as a loop.  If the memo exists then
     // we assume that the permutation is needed.
