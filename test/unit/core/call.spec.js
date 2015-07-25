@@ -58,8 +58,8 @@ describe('Call', function() {
                         }
                     },
                     paths: [
-                        ['lolomo', 0, 'name'],
-                        ['lolomo', 'pvAdd']
+                        ['lolomo', 'pvAdd'],
+                        ['lolomo', 0, 'name']
                     ]
                 });
             }).
@@ -87,7 +87,7 @@ describe('Call', function() {
                     },
                     paths: [
                         ['lolomo', ['length', 'pvAdd']],
-                        ['lolomos', 123, 0]
+                        ['lolomos', 123, '0']
                     ]
                 });
                 ++called;
@@ -123,8 +123,8 @@ describe('Call', function() {
                         }
                     },
                     paths: [
-                        ['lolomo', 0, 'name'],
-                        ['lolomo', ['length', 'pvAdd']]
+                        ['lolomo', ['length', 'pvAdd']],
+                        ['lolomo', 0, 'name']
                     ]
                 });
                 ++called;
@@ -243,8 +243,8 @@ describe('Call', function() {
                         }
                     },
                     paths: [
-                        ['genrelist', 0, 'titles', 2, ['name', 'rating']],
-                        ['genrelist', 0, 'titles', 'push']
+                        ['genrelist', 0, 'titles', 'push'],
+                        ['genrelist', 0, 'titles', 2, ['name', 'rating']]
                     ]
                 });
                 ++called;
@@ -403,7 +403,7 @@ describe('Call', function() {
 
     function getExtendedRouter(initialIdsAndNames) {
         var listsById = {};
-        idsAndNames = initialIdsAndNames || {};
+        var idsAndNames = initialIdsAndNames || {};
         Object.keys(idsAndNames).reduce(function(acc, id) {
             var name = idsAndNames[id];
             listsById[id] = {name: name, rating: 3};

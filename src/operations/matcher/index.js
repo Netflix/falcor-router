@@ -3,8 +3,8 @@ var Precedence = require('./../../Precedence');
 var cloneArray = require('./../../support/cloneArray');
 var specificMatcher = require('./specific');
 var pluckIntegers = require('./pluckIntergers');
-var toTree = require('./../collapse/toTree');
-var toPaths = require('./../collapse/toPaths');
+var pathUtils = require('falcor-path-utils');
+var collapse = pathUtils.collapse;
 var isRoutedToken = require('./../../support/isRoutedToken');
 
 var intTypes = [{
@@ -74,9 +74,12 @@ module.exports = function matcher(rst) {
 
                 // Since there are more than 1 routes, we need to see if
                 // they can collapse and alter the amount of arrays.
-                var collapsedResults = toPaths(
-                    toTree(
-                        reducedMatch.map(function(x) { return x.requested; })));
+                var collapsedResults =
+                        collapse(
+                            reducedMatch.
+                                map(function(x) {
+                                    return x.requested;
+                                }));
 
                 collapsedResults.forEach(function(path, i) {
                     var reducedVirtualPath = reducedMatch[i].virtual;

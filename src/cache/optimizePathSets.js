@@ -1,7 +1,6 @@
 var iterateKeySet = require('falcor-path-utils').iterateKeySet;
 var cloneArray = require('./../support/cloneArray');
 var catAndSlice = require('./../support/catAndSlice');
-var isArray = Array.isArray;
 var $types = require('./../support/types');
 var $ref = $types.$ref;
 var followReference = require('./followReference');
@@ -51,7 +50,6 @@ function optimizePathSet(cache, cacheRoot, pathSet,
 
     var keySet = pathSet[depth];
     var nextDepth = depth + 1;
-    var isKeySet = typeof keySet === 'object';
     var iteratorNote = {};
     var key, next, nextOptimized;
 

@@ -1,8 +1,8 @@
 var Rx = require('rx');
 var Observable = Rx.Observable;
 var runByPrecedence = require('./precedence/runByPrecedence');
-var toPaths = require('./../operations/collapse/toPaths');
-var toTree = require('./../operations/collapse/toTree');
+var pathUtils = require('falcor-path-utils');
+var collapse = pathUtils.collapse;
 var optimizePathSets = require('./../cache/optimizePathSets');
 var mCGRI = require('./mergeCacheAndGatherRefsAndInvalidations');
 var isArray = Array.isArray;
@@ -119,7 +119,7 @@ function _recurseMatchAndExecute(
                         jsongCache, pathsToExpand, routerInstance.maxRefFollow);
 
                     if (pathsToExpand.length) {
-                        pathsToExpand = toPaths(toTree(pathsToExpand));
+                        pathsToExpand = collapse(pathsToExpand);
                     }
 
                     missing = missing.concat(matchedResults.missingPaths);

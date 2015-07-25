@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
-var toPaths = require('./../../operations/collapse/toPaths');
-var toTree = require('./../../operations/collapse/toTree');
+var pathUtils = require('falcor-path-utils');
+var collapse = pathUtils.collapse;
 var stripPath = require('./../../operations/strip/stripPath');
 var hasIntersection = require('./../../operations/matcher/intersection/hasIntersection');
 /* eslint-enable max-len */
@@ -19,7 +19,7 @@ module.exports = function getExecutableMatches(matches, pathSet) {
         remainingPaths = [];
 
         if (i > 0) {
-            availablePaths = toPaths(toTree(availablePaths));
+            availablePaths = collapse(availablePaths);
         }
 
         // For every available path attempt to intersect.  If there
