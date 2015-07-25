@@ -13,8 +13,8 @@ var $atom = require('./support/types').$atom;
 var get = 'get';
 var set = 'set';
 var call = 'call';
-var toPaths = require('./operations/collapse/toPaths');
-var toTree = require('./operations/collapse/toTree');
+var pathUtils = require('falcor-path-utils');
+var collapse = pathUtils.collapse;
 var MAX_REF_FOLLOW = 50;
 
 var Router = function(routes, options) {
@@ -96,7 +96,7 @@ Router.prototype = {
                 if (invalidated && invalidated.length) {
                     jsongEnv.invalidations = invalidated;
                 }
-                jsongEnv.paths = toPaths(toTree(jsongEnv.paths));
+                jsongEnv.paths = collapse(jsongEnv.paths);
                 return jsongEnv;
             });
     }
