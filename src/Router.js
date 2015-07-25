@@ -1,7 +1,6 @@
 var Keys = require('./Keys');
 var parseTree = require('./parse-tree');
 var matcher = require('./operations/matcher');
-var Rx = require('rx');
 var normalizePathSets = require('./operations/ranges/normalizePathSets');
 var recurseMatchAndExecute = require('./run/recurseMatchAndExecute');
 var optimizePathSets = require('./cache/optimizePathSets');

@@ -1,12 +1,10 @@
 var iterateKeySet = require('falcor-path-utils').iterateKeySet;
-var isArray = Array.isArray;
 
 module.exports = function specificMatcher(keySet, currentNode) {
     // --------------------------------------
     // Specific key
     // --------------------------------------
     var iteratorNote = {};
-    var isKeySet = typeof keySet === 'object';
     var nexts = [];
 
     var key = iterateKeySet(keySet, iteratorNote);

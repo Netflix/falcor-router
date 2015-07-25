@@ -403,7 +403,7 @@ describe('Call', function() {
 
     function getExtendedRouter(initialIdsAndNames) {
         var listsById = {};
-        idsAndNames = initialIdsAndNames || {};
+        var idsAndNames = initialIdsAndNames || {};
         Object.keys(idsAndNames).reduce(function(acc, id) {
             var name = idsAndNames[id];
             listsById[id] = {name: name, rating: 3};

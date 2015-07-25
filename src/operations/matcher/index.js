@@ -5,7 +5,6 @@ var specificMatcher = require('./specific');
 var pluckIntegers = require('./pluckIntergers');
 var pathUtils = require('falcor-path-utils');
 var collapse = pathUtils.collapse;
-var toTree = pathUtils.toTree;
 var isRoutedToken = require('./../../support/isRoutedToken');
 
 var intTypes = [{
