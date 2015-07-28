@@ -9,6 +9,32 @@ var Promise = require('promise');
 
 describe('isAuthorized', function() {
 
+    it('should run authorize function before call function', function(done) {
+        var order = []
+        
+        var routes = new R([{
+            route: 'list.push',
+            call: function(callPath, args) {
+                order.push("call")
+                return [
+                            { path: ['list', 0], value: args[0] },
+                            { path: ['list', 'length'], value: 1 }
+                        ];
+            },
+            authorize: function() { 
+                order.push("auth")
+                return true;
+            }
+        }]);
+        
+        routes.call(['list','push'], ["hello"]).
+            doAction(function(res) {
+                expect(order).to.deep.equals(["auth", "call"])
+            }, noOp, noOp).
+            subscribe(noOp, done, done);
+    });
+
+
     it('should return an error for the pathSet if unauthorized, sync', function(done) {
         var routes = [{
             route: 'lists[{keys:ids}]',
