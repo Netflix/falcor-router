@@ -4,6 +4,7 @@ var noteToJsongOrPV = require('./../conversion/noteToJsongOrPV');
 var errors = require('./../../exceptions');
 var authorize = require('./../authorize');
 var mCGRI = require('./../mergeCacheAndGatherRefsAndInvalidations');
+var Observable = require('rx').Observable;
 
 module.exports =  outerRunCallAction;
 
@@ -27,13 +28,22 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
     if (match.isCall) {
 
         // This is where things get interesting
-        out = match.
-            action.call(null, matchedPath, args, suffixes, paths);
+        out = Observable.
+            defer(function() {
+            var next;
+                try {
+                    next = match.
+                        action.call(null, matchedPath, args, suffixes, paths);
+                } catch (e) {
+                    e.throwToNext = true;
+                    throw e;
+                }
+                return outputToObservable(next).
+                    toArray();
+            }).
 
-        // Required to get the references from the outputting jsong
-        // and pathValues.
-        out = outputToObservable(out).
-            toArray().
+            // Required to get the references from the outputting jsong
+            // and pathValues.
             map(function(res) {
                 // checks call for isJSONG and if there is jsong without paths
                 // throw errors.
