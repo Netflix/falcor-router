@@ -28,7 +28,8 @@ var Router = function(routes, options) {
 
 Router.createClass = function(routes) {
   function C(options) {
-    this._debug = options.debug;
+    var opts = options || {};      
+    this._debug = opts.debug;
   }
 
   C.prototype = new Router(routes);
