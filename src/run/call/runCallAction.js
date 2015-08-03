@@ -33,7 +33,8 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
             var next;
                 try {
                     next = match.
-                        action.call(routerInstance, matchedPath, args, suffixes, paths);
+                        action.call(
+                            routerInstance, matchedPath, args, suffixes, paths);
                 } catch (e) {
                     e.throwToNext = true;
                     throw e;
