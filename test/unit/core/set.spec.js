@@ -6,8 +6,138 @@ var expect = chai.expect;
 var falcor = require('falcor');
 var $ref = falcor.Model.ref;
 var sinon = require("sinon");
+var Promise = require("promise");
 
 describe('Set', function() {
+
+    xit('should correctly handle promise rejection.', function(done) {
+        var did = false;
+        var called = 0;
+        var router = new R([{
+            route: 'videos[{integers:id}].rating',
+            set: function(json) {
+                return Promise.reject({
+                    message: "user not authorised",
+                    unauthorized: true
+                })
+            }
+        }]);
+        router.
+            set({
+                jsonGraph: {
+                    videos: {
+                        1234: {
+                            rating: 5
+                        },
+                        333: {
+                            rating: 5
+                        }
+                    }
+                },
+                paths: [
+                    ['videos', [1234, 333], 'rating']
+                ]
+            }).
+            doAction(function(result) {
+                expect(result).to.deep.equals({
+                    jsonGraph: {
+                        videos: {
+                            1234: {
+                                rating: {
+                                    $type: "error", 
+                                    value: {
+                                        message: "not authorized",
+                                        unauthorized: true
+                                    }
+                                }
+                            },
+                            333: {
+                                rating: {
+                                    $type: "error", 
+                                    value: {
+                                        message: "not authorized",
+                                        unauthorized: true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                called++;
+            }).
+            subscribe(noOp, done, function() {
+                if (!did) {
+                    expect(called).to.equals(1);
+                    done();
+                }
+            });
+    });
+
+    xit('should correctly handle synchronously thrown error.', function(done) {
+        var did = false;
+        var called = 0;
+        var router = new R([{
+            route: 'videos[{integers:id}].rating',
+            set: function(json) {
+                throw {
+                    message: "not authorized",
+                    unauthorized: true
+                }
+            }
+        }]);
+        router.
+            set({
+                jsonGraph: {
+                    videos: {
+                        1234: {
+                            rating: 5
+                        },
+                        333: {
+                            rating: 5
+                        }
+                    }
+                },
+                paths: [
+                    ['videos', [1234, 333], 'rating']
+                ]
+            }).
+            doAction(function(result) {
+                expect(result).to.deep.equals({
+                    jsonGraph: {
+                        videos: {
+                            1234: {
+                                rating: {
+                                    $type: "error", 
+                                    value: {
+                                        message: "not authorized",
+                                        unauthorized: true
+                                    }
+                                }
+                            },
+                            333: {
+                                rating: {
+                                    $type: "error", 
+                                    value: {
+                                        message: "not authorized",
+                                        unauthorized: true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                called++;
+            }).
+            subscribe(noOp, done, function() {
+                if (!did) {
+                    expect(called).to.equals(1);
+                    done();
+                }
+            });
+    });
+
+
+
     it('should perform a simple set.', function(done) {
         var did = false;
         var called = 0;
