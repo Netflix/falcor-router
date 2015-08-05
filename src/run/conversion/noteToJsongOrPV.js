@@ -1,5 +1,6 @@
 var isJSONG = require('./../../support/isJSONG');
 var errors = require('./../../exceptions');
+var JSONGraphError = require('./../../JSONGraphError');
 var onNext = 'N';
 
 module.exports = function noteToJsongOrPV(match) {
@@ -17,43 +18,33 @@ function convertNoteToJsongOrPV(matchAndPath, note) {
     }
 
     else {
-        var exception = errors.unknown;
+        var typeValue = {
+            $type: 'error',
+            value: {}
+        };
+        var exception = {};
+
+        // Rx3, what will this be called?
         if (note.exception) {
             exception = note.exception;
         }
+
         if (exception.throwToNext) {
             throw exception;
         }
-        var value = {
-            exception: true
-        };
 
-        // If the exception is an error, just append the message.
-        if (exception instanceof Error) {
-            value.message = exception.message;
+        // If it is a special JSONGraph error then pull all the data
+        if (exception instanceof JSONGraphError) {
+            typeValue = exception.typeValue;
         }
 
-        // If the error is an object, copy all the keys on the value.
-        else if (typeof exception === 'object') {
-            Object.
-                keys(exception).
-                forEach(function(k) {
-                    value[k] = exception[k];
-                });
-        }
-
-        // If the exception is some sort of primitive, then just make
-        // the value have an error key.
-        else {
-            value.error = exception;
+        else if (exception instanceof Error) {
+            typeValue.value.message = exception.message;
         }
 
         incomingJSONGOrPathValues = {
             path: matchAndPath.path,
-            value: {
-                $type: 'error',
-                value: value
-            }
+            value: typeValue
         };
     }
 
