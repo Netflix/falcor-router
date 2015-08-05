@@ -13,6 +13,64 @@ var Promise = require("promise");
 
 describe('Call', function() {
 
+    xit('should return paths in jsonGraphEnvelope if route returns a promise of jsonGraphEnvelope with paths.', function(done) {
+        var onNext = sinon.spy();
+
+        var router = new R([{
+            route: 'genrelist[{integers:indices}].titles.push',
+            call: function(callPath, args) {
+                return Promise.resolve({
+                    "jsonGraph": {
+                        "genrelist": {
+                            "0": {
+                                "titles": {
+                                    "18": {
+                                        "$type": "ref",
+                                        "value": ["titlesById", 1]
+                                    },
+                                    "length": 19
+                                }
+                            }
+                        }
+                    },
+                    "paths": [
+                        ["genrelist", 0, "titles", ["18", "length"]]
+                    ]
+                })
+            }
+        }]);
+
+        router.
+            call(['genrelist', 0, 'titles', 'push'], [{$type: "ref", value: ['titlesById', 1]}], [], []).
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    "jsonGraph": {
+                        "genrelist": {
+                            "0": {
+                                "titles": {
+                                    "18": {
+                                        "$type": "ref",
+                                        "value": ["titlesById", 1]
+                                    },
+                                    "length": 19,
+                                    "push": {
+                                        "$expires": 0,
+                                        "$type": "atom"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "paths": [
+                        ["genrelist", 0, "titles", ["push", "18", "length"]]
+                    ]
+                });
+            }).
+            subscribe(noOp, done, done);
+    });
+
     xit('should return paths in jsonGraphEnvelope if array of pathValues is returned from promise.', function(done) {
         var onNext = sinon.spy();
 
