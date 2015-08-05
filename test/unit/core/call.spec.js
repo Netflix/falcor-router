@@ -9,8 +9,65 @@ var $atom = falcor.Model.atom;
 var errors = require('./../../../src/exceptions');
 var types = require('./../../../src/support/types');
 var sinon = require("sinon");
+var Promise = require("promise");
 
 describe('Call', function() {
+
+    xit('should return paths in jsonGraphEnvelope if array of pathValues is returned from promise.', function(done) {
+        var onNext = sinon.spy();
+
+        var router = new R([{
+            route: 'genrelist[{integers:indices}].titles.push',
+            call: function(callPath, args) {
+                return Promise.resolve([
+                   {
+                      "path": ["genrelist", 0, "titles", 18],
+                      "value": {
+                         "$type": "ref",
+                         "value": ["titlesById", 1]
+                      }
+                   },
+                   {
+                      "path": ["genrelist", 0, "titles", "length"],
+                      "value": 19
+                   }
+                ])
+            }
+        }]);
+
+        router.
+            call(['genrelist', 0, 'titles', 'push'], [{$type: "ref", value: ['titlesById', 1]}], [], []).
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    "jsonGraph": {
+                        "genrelist": {
+                            "0": {
+                                "titles": {
+                                    "18": {
+                                        "$type": "ref",
+                                        "value": ["titlesById", 1]
+                                    },
+                                    "length": 19,
+                                    "push": {
+                                        "$expires": 0,
+                                        "$type": "atom"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "paths": [
+                        ["genrelist", 0, "titles", ["push", "18", "length"]]
+                    ]
+                });
+            }).
+            subscribe(noOp, done, done);
+    });
+
+
+
     it('should perform a simple call.', function(done) {
         var onNext = sinon.spy();
         getRouter().
