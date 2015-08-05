@@ -13,7 +13,7 @@ var Promise = require("promise");
 
 describe('Call', function() {
 
-    xit('should return paths in jsonGraphEnvelope if route returns a promise of jsonGraphEnvelope with paths.', function(done) {
+    it('should return paths in jsonGraphEnvelope if route returns a promise of jsonGraphEnvelope with paths.', function(done) {
         var onNext = sinon.spy();
 
         var router = new R([{
@@ -36,7 +36,7 @@ describe('Call', function() {
                     "paths": [
                         ["genrelist", 0, "titles", ["18", "length"]]
                     ]
-                })
+                });
             }
         }]);
 
@@ -64,14 +64,14 @@ describe('Call', function() {
                         }
                     },
                     "paths": [
-                        ["genrelist", 0, "titles", ["push", "18", "length"]]
+                        ["genrelist", 0, "titles", [18, "length", "push"]]
                     ]
                 });
             }).
             subscribe(noOp, done, done);
     });
 
-    xit('should return paths in jsonGraphEnvelope if array of pathValues is returned from promise.', function(done) {
+    it('should return paths in jsonGraphEnvelope if array of pathValues is returned from promise.', function(done) {
         var onNext = sinon.spy();
 
         var router = new R([{
@@ -89,7 +89,7 @@ describe('Call', function() {
                       "path": ["genrelist", 0, "titles", "length"],
                       "value": 19
                    }
-                ])
+                ]);
             }
         }]);
 
@@ -117,7 +117,7 @@ describe('Call', function() {
                         }
                     },
                     "paths": [
-                        ["genrelist", 0, "titles", ["push", "18", "length"]]
+                        ["genrelist", 0, "titles", [18, "length", "push"]]
                     ]
                 });
             }).

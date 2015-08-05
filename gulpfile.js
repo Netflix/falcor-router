@@ -32,6 +32,7 @@ gulp.task('lint-test', function() {
                 'require': false,
                 'module': false,
                 'it': false,
+                'xit': false,
                 'describe': false
             },
             reset: true, // dz: remove me after linting is finished, else i can't do one at the time

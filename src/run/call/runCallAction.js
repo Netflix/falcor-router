@@ -84,32 +84,29 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
 
                 var callLength = callOutput.length;
                 var callPathSave1 = callPath.slice(0, callPath.length - 1);
+                var hasSuffixes = suffixes && suffixes.length;
+                var hasPaths = paths && paths.length;
 
                 // We are going to use recurseMatchAndExecute to run
                 // the paths and suffixes for call.  For that to happen
                 // we must send a message to the outside to switch from
                 // call to get.
-                if (paths || suffixes) {
-                    callOutput[++callLength] = {isMessage: true, method: 'get'};
-                }
+                callOutput[++callLength] = {isMessage: true, method: 'get'};
 
                 // If there are paths to add then push them into the next
                 // paths through 'additionalPaths' message.
-                if (paths) {
-                    if (paths && (callLength + 1)) {
-                        paths.forEach(function(path) {
-                            callOutput[++callLength] = {
-                                isMessage: true,
-                                additionalPath: callPathSave1.concat(path)
-                            };
-                        });
-                    }
-
+                if (hasPaths && (callLength + 1)) {
+                    paths.forEach(function(path) {
+                        callOutput[++callLength] = {
+                            isMessage: true,
+                            additionalPath: callPathSave1.concat(path)
+                        };
+                    });
                 }
 
                 // Suffix is the same as paths except for how to calculate
                 // a path per reference found from the callPath.
-                if (suffixes) {
+                if (hasSuffixes) {
 
                     // matchedPath is the optimized path to call.
                     // e.g:
@@ -149,9 +146,13 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
                 // If there are no suffixes but there are references, report
                 // the paths to the references.  There may be values as well,
                 // add those to the output.
-                else if (refs.length || values.length) {
-                    refs.
-                        map(function(x) { return x.path; }).
+                if (refs.length && !hasSuffixes || values.length) {
+                    var additionalPaths = [];
+                    if (refs.length && !hasSuffixes) {
+                        additionalPaths = refs.
+                            map(function(x) { return x.path; });
+                    }
+                    additionalPaths.
                         concat(values).
                         forEach(function(path) {
                             callOutput[++callLength] = {
