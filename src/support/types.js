@@ -1,4 +1,5 @@
 module.exports = {
     $ref: 'ref',
-    $atom: 'atom'
+    $atom: 'atom',
+    $error: 'error'
 };

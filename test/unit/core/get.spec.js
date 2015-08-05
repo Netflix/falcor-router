@@ -1,7 +1,6 @@
 var R = require('../../../src/Router');
 var Routes = require('./../../data');
 var Expected = require('./../../data/expected');
-var circularReference = require('./../../../src/exceptions').circularReference;
 var noOp = function() {};
 var chai = require('chai');
 var expect = chai.expect;
@@ -10,7 +9,7 @@ var $ref = falcor.Model.ref;
 var Observable = require('rx').Observable;
 var sinon = require('sinon');
 
-describe('Specific', function() {
+describe('Get', function() {
     it('should execute a simple route matching.', function(done) {
         var router = new R(Routes().Videos.Summary());
         var obs = router.
@@ -24,53 +23,6 @@ describe('Specific', function() {
             done();
         });
     });
-
-    it('thrown non-Error should insert in the value property of $error object for all requested paths.', function(done) {
-        var router = new R([{
-            route: 'videos[{integers:id}].rating',
-            get: function(json) {
-                throw {
-                    message: "not authorized",
-                    unauthorized: true
-                };
-            }
-        }]);
-        var onNext = sinon.spy();
-        router.
-            get([['videos', [1234, 333], 'rating']]).
-            doAction(onNext).
-            doAction(noOp, noOp, function() {
-                expect(onNext.calledOnce).to.be.ok;
-                expect(onNext.getCall(0).args[0]).to.deep.equals({
-                    jsonGraph: {
-                        videos: {
-                            1234: {
-                                rating: {
-                                    $type: "error",
-                                    value: {
-                                        exception: true,
-                                        message: "not authorized",
-                                        unauthorized: true
-                                    }
-                                }
-                            },
-                            333: {
-                                rating: {
-                                    $type: "error",
-                                    value: {
-                                        exception: true,
-                                        message: "not authorized",
-                                        unauthorized: true
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-            }).
-            subscribe(noOp, done, done);
-    });
-
 
     it('should validate that optimizedPathSets strips out already found data.', function(done) {
         this.timeout(10000);
@@ -270,35 +222,6 @@ describe('Specific', function() {
             expect(called, 'expect onNext called 1 time.').to.equal(true);
             done();
         });
-    });
-
-    it('should throw an error when maxExpansion has been exceeded.', function(done) {
-        var router = new R([{
-            route: 'videos[{integers:ids}]',
-            get: function (alias) {
-                return {
-                    path: ['videos', 1],
-                    value: $ref('videos[1]')
-                };
-            }
-        }]);
-        var obs = router.get([["videos", 1, "title"]]);
-        var err = false;
-        obs.
-            doAction(
-                noOp,
-                function(e) {
-                    expect(e.message).to.equals(circularReference);
-                    err = true;
-                }).
-            subscribe(noOp, function(e) {
-                if (err) {
-                    return done();
-                }
-                return done(e);
-            }, function() {
-                done('should not of completed.');
-            });
     });
 
     function getPrecedenceRouter(onTitle, onRating) {

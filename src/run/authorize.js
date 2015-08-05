@@ -1,5 +1,7 @@
 var outputToObservable = require('./conversion/outputToObservable');
 var Observable = require('rx').Observable;
+var JSONGraphError = require('./../JSONGraphError');
+var $type = require('./../support/types');
 
 /**
  * Takes in the matches from the action runner and emits a
@@ -20,7 +22,13 @@ module.exports = function authorize(routerInstance, match, next) {
     return outputToObservable(out).
         doAction(function(isAuthorized) {
             if (!isAuthorized) {
-                throw new Error('unauthorized');
+                throw new JSONGraphError({
+                    $type: $type.$error,
+                    value: {
+                        unauthorized: true,
+                        message: 'unauthorized'
+                    }
+                });
             }
         }).
         flatMap(function() {

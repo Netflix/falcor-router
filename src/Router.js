@@ -14,6 +14,7 @@ var set = 'set';
 var call = 'call';
 var pathUtils = require('falcor-path-utils');
 var collapse = pathUtils.collapse;
+var JSONGraphError = require('./JSONGraphError');
 var MAX_REF_FOLLOW = 50;
 
 var Router = function(routes, options) {
@@ -28,7 +29,7 @@ var Router = function(routes, options) {
 
 Router.createClass = function(routes) {
   function C(options) {
-    var opts = options || {};      
+    var opts = options || {};
     this._debug = opts.debug;
   }
 
@@ -128,6 +129,7 @@ function materializeMissing(router, paths, jsongEnv, missingAtom) {
 Router.ranges = Keys.ranges;
 Router.integers = Keys.integers;
 Router.keys = Keys.keys;
+Router.JSONGraphError = JSONGraphError;
 module.exports = Router;
 
 

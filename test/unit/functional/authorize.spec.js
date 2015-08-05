@@ -10,23 +10,23 @@ var Promise = require('promise');
 describe('isAuthorized', function() {
 
     it('should run authorize function before call function', function(done) {
-        var order = []
-        
+        var order = [];
+
         var routes = new R([{
             route: 'list.push',
             call: function(callPath, args) {
-                order.push("call")
+                order.push("call");
                 return [
                             { path: ['list', 0], value: args[0] },
                             { path: ['list', 'length'], value: 1 }
                         ];
             },
-            authorize: function() { 
-                order.push("auth")
+            authorize: function() {
+                order.push("auth");
                 return true;
             }
         }]);
-        
+
         routes.call(['list','push'], ["hello"]).
             doAction(function(res) {
                 expect(order).to.deep.equals(["auth", "call"])
@@ -53,8 +53,8 @@ describe('isAuthorized', function() {
                 expect(res).to.deep.equals({
                     jsonGraph: {
                         lists: {
-                            0: $error({message: 'unauthorized', exception: true}),
-                            1: $error({message: 'unauthorized', exception: true})
+                            0: $error({message: 'unauthorized', unauthorized: true}),
+                            1: $error({message: 'unauthorized', unauthorized: true})
                         }
                     }
                 });
@@ -83,8 +83,8 @@ describe('isAuthorized', function() {
                 expect(res).to.deep.equals({
                     jsonGraph: {
                         lists: {
-                            0: $error({message: 'unauthorized', exception: true}),
-                            1: $error({message: 'unauthorized', exception: true})
+                            0: $error({message: 'unauthorized', unauthorized: true}),
+                            1: $error({message: 'unauthorized', unauthorized: true})
                         }
                     }
                 });
@@ -117,8 +117,8 @@ describe('isAuthorized', function() {
                 expect(res).to.deep.equals({
                     jsonGraph: {
                         lists: {
-                            0: $error({message: 'unauthorized', exception: true}),
-                            1: $error({message: 'unauthorized', exception: true})
+                            0: $error({message: 'unauthorized', unauthorized: true}),
+                            1: $error({message: 'unauthorized', unauthorized: true})
                         }
                     }
                 });

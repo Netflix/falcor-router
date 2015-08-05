@@ -71,6 +71,45 @@ describe('Call', function() {
             subscribe(noOp, done, done);
     });
 
+    it('should completely onError when an error is thrown from call.', function(done) {
+        getRouter(true, true).
+            call(['videos', 1234, 'rating'], [5]).
+            doAction(function() {
+                throw new Error('Should not be called.  onNext');
+            }, function(x) {
+                expect(x.message).to.equal('Oops?');
+            }, function() {
+                throw new Error('Should not be called.  onCompleted');
+            }).
+            subscribe(noOp, function(e) {
+                if (e.message === 'Oops?') {
+                    done();
+                    return;
+                }
+                done(e);
+            });
+    });
+
+    it('should cause the router to on error only.', function(done) {
+        getRouter(true).
+            call(['videos', 1234, 'rating'], [5]).
+            doAction(function() {
+                throw new Error('Should not be called.  onNext');
+            }, function(x) {
+                expect(x.message).to.equal(errors.callJSONGraphWithouPaths);
+            }, function() {
+                throw new Error('Should not be called.  onCompleted');
+            }).
+            subscribe(noOp, function(e) {
+                if (e.message === errors.callJSONGraphWithouPaths) {
+                    done();
+                    return;
+                }
+                done(e);
+            });
+    });
+
+
     it('should return paths in jsonGraphEnvelope if array of pathValues is returned from promise.', function(done) {
         var onNext = sinon.spy();
 
@@ -247,45 +286,6 @@ describe('Call', function() {
             subscribe(noOp, done, function() {
                 expect(called).to.equals(1);
                 done();
-            });
-    });
-
-
-    it('should completely onError when an error is thrown from call.', function(done) {
-        getRouter(true, true).
-            call(['videos', 1234, 'rating'], [5]).
-            doAction(function() {
-                throw new Error('Should not be called.  onNext');
-            }, function(x) {
-                expect(x.message).to.equal('Oops?');
-            }, function() {
-                throw new Error('Should not be called.  onCompleted');
-            }).
-            subscribe(noOp, function(e) {
-                if (e.message === 'Oops?') {
-                    done();
-                    return;
-                }
-                done(e);
-            });
-    });
-
-    it('should cause the router to on error only.', function(done) {
-        getRouter(true).
-            call(['videos', 1234, 'rating'], [5]).
-            doAction(function() {
-                throw new Error('Should not be called.  onNext');
-            }, function(x) {
-                expect(x.message).to.equal(errors.callJSONGraphWithouPaths);
-            }, function() {
-                throw new Error('Should not be called.  onCompleted');
-            }).
-            subscribe(noOp, function(e) {
-                if (e.message === errors.callJSONGraphWithouPaths) {
-                    done();
-                    return;
-                }
-                done(e);
             });
     });
 
