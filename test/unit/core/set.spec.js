@@ -10,18 +10,17 @@ var Promise = require("promise");
 
 describe('Set', function() {
 
-    xit('promise rejection of non Error should insert object as the value property within an error for all requested paths (either being set or get).', function(done) {        
-        var did = false;
-        var called = 0;
+    it('promise rejection of non Error should insert object as the value property within an error for all requested paths (either being set or get).', function(done) {
         var router = new R([{
             route: 'videos[{integers:id}].rating',
             set: function(json) {
                 return Promise.reject({
-                    message: "user not authorised",
+                    message: "user not authorized",
                     unauthorized: true
-                })
+                });
             }
         }]);
+        var onNext = sinon.spy();
         router.
             set({
                 jsonGraph: {
@@ -38,24 +37,28 @@ describe('Set', function() {
                     ['videos', [1234, 333], 'rating']
                 ]
             }).
-            doAction(function(result) {
-                expect(result).to.deep.equals({
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
                         videos: {
                             1234: {
                                 rating: {
-                                    $type: "error", 
+                                    $type: "error",
                                     value: {
-                                        message: "not authorized",
+                                        exception: true,
+                                        message: "user not authorized",
                                         unauthorized: true
                                     }
                                 }
                             },
                             333: {
                                 rating: {
-                                    $type: "error", 
+                                    $type: "error",
                                     value: {
-                                        message: "not authorized",
+                                        exception: true,
+                                        message: "user not authorized",
                                         unauthorized: true
                                     }
                                 }
@@ -63,28 +66,21 @@ describe('Set', function() {
                         }
                     }
                 });
-                called++;
             }).
-            subscribe(noOp, done, function() {
-                if (!did) {
-                    expect(called).to.equals(1);
-                    done();
-                }
-            });
+            subscribe(noOp, done, done);
     });
 
-    xit('thrown non-Error should insert in the value property of $error object for all requested paths (either being set or get).', function(done) {
-        var did = false;
-        var called = 0;
+    it('thrown non-Error should insert in the value property of $error object for all requested paths (either being set or get).', function(done) {
         var router = new R([{
             route: 'videos[{integers:id}].rating',
             set: function(json) {
                 throw {
                     message: "not authorized",
                     unauthorized: true
-                }
+                };
             }
         }]);
+        var onNext = sinon.spy();
         router.
             set({
                 jsonGraph: {
@@ -101,14 +97,17 @@ describe('Set', function() {
                     ['videos', [1234, 333], 'rating']
                 ]
             }).
-            doAction(function(result) {
-                expect(result).to.deep.equals({
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
                         videos: {
                             1234: {
                                 rating: {
-                                    $type: "error", 
+                                    $type: "error",
                                     value: {
+                                        exception: true,
                                         message: "not authorized",
                                         unauthorized: true
                                     }
@@ -116,8 +115,9 @@ describe('Set', function() {
                             },
                             333: {
                                 rating: {
-                                    $type: "error", 
+                                    $type: "error",
                                     value: {
+                                        exception: true,
                                         message: "not authorized",
                                         unauthorized: true
                                     }
@@ -126,14 +126,8 @@ describe('Set', function() {
                         }
                     }
                 });
-                called++;
             }).
-            subscribe(noOp, done, function() {
-                if (!did) {
-                    expect(called).to.equals(1);
-                    done();
-                }
-            });
+            subscribe(noOp, done, done);
     });
 
 
