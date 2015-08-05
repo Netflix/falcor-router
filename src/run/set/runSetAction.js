@@ -7,6 +7,7 @@ var getValue = require('./../../cache/getValue');
 var optimizePathSets = require('./../../cache/optimizePathSets');
 var hasIntersection = require('./../../operations/matcher/intersection/hasIntersection');
 var pathValueMerge = require('./../../cache/pathValueMerge');
+var Observable = require('rx').Observable;
 /* eslint-enable max-len */
 
 module.exports = function outerRunSetAction(routerInstance, modelContext,
@@ -52,8 +53,12 @@ function runSetAction(routerInstance, jsongMessage, matchAndPath, jsongCache) {
                 return json;
             }, {});
     }
-    out = match.action.call(routerInstance, arg);
-    out = outputToObservable(out);
+    try {
+        out = match.action.call(routerInstance, arg);
+        out = outputToObservable(out);
+    } catch (e) {
+        out = Observable.throw(e);
+    }
 
     return authorize(routerInstance, match, out).
         materialize().

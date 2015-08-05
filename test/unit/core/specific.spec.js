@@ -25,6 +25,53 @@ describe('Specific', function() {
         });
     });
 
+    it('thrown non-Error should insert in the value property of $error object for all requested paths.', function(done) {
+        var router = new R([{
+            route: 'videos[{integers:id}].rating',
+            get: function(json) {
+                throw {
+                    message: "not authorized",
+                    unauthorized: true
+                };
+            }
+        }]);
+        var onNext = sinon.spy();
+        router.
+            get([['videos', [1234, 333], 'rating']]).
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    jsonGraph: {
+                        videos: {
+                            1234: {
+                                rating: {
+                                    $type: "error",
+                                    value: {
+                                        exception: true,
+                                        message: "not authorized",
+                                        unauthorized: true
+                                    }
+                                }
+                            },
+                            333: {
+                                rating: {
+                                    $type: "error",
+                                    value: {
+                                        exception: true,
+                                        message: "not authorized",
+                                        unauthorized: true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }).
+            subscribe(noOp, done, done);
+    });
+
+
     it('should validate that optimizedPathSets strips out already found data.', function(done) {
         this.timeout(10000);
         var serviceCalls = 0;

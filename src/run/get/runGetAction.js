@@ -1,6 +1,7 @@
 var outputToObservable = require('../conversion/outputToObservable');
 var noteToJsongOrPV = require('../conversion/noteToJsongOrPV');
 var authorize = require('./../authorize');
+var Observable = require('rx').Observable;
 
 module.exports = function runGetAction(routerInstance, jsongCache) {
     return function innerGetAction(matchAndPath) {
@@ -10,8 +11,13 @@ module.exports = function runGetAction(routerInstance, jsongCache) {
 
 function getAction(routerInstance, matchAndPath, jsongCache) {
     var match = matchAndPath.match;
-    var matchAction = match.action.call(routerInstance, matchAndPath.path);
-    var out = outputToObservable(matchAction);
+    var out;
+    try {
+        out = match.action.call(routerInstance, matchAndPath.path);
+        out = outputToObservable(out);
+    } catch (e) {
+        out = Observable.throw(e);
+    }
 
     return authorize(routerInstance, match, out).
         materialize().
