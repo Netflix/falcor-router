@@ -10,7 +10,7 @@ var Promise = require("promise");
 
 describe('Set', function() {
 
-    xit('should correctly handle promise rejection.', function(done) {
+    xit('promise rejection of non Error should insert object as the value property within an error for all requested paths (either being set or get).', function(done) {        
         var did = false;
         var called = 0;
         var router = new R([{
@@ -73,7 +73,7 @@ describe('Set', function() {
             });
     });
 
-    xit('should correctly handle synchronously thrown error.', function(done) {
+    xit('thrown non-Error should insert in the value property of $error object for all requested paths (either being set or get).', function(done) {
         var did = false;
         var called = 0;
         var router = new R([{
