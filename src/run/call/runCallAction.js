@@ -163,6 +163,13 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
                 }
 
                 return callOutput;
+            }).
+
+            // When call has an error it needs to be propagated to the next
+            // level instead of onCompleted'ing
+            do(null, function(e) {
+                e.throwToNext = true;
+                throw e;
             });
     } else {
         out = match.action.call(null, matchAndPath.path);

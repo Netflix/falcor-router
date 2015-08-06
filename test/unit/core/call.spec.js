@@ -10,59 +10,49 @@ var errors = require('./../../../src/exceptions');
 var types = require('./../../../src/support/types');
 var sinon = require("sinon");
 var Promise = require("promise");
+var doneOnError = require('./../../doneOnError');
+var errorOnCompleted = require('./../../errorOnCompleted');
 
 describe('Call', function() {
 
-    xit('should onError when a Promise.reject of Error is returned from call.', function(done) {
+    it('should onError when a Promise.reject of Error is returned from call.', function(done) {
         var router = new R([{
             route: 'videos[{integers:id}].rating',
             call: function(callPath, args) {
-                return Promise.reject(new Error("Oops?"))
+                return Promise.reject(new Error("Oops?"));
             }
         }]);
 
+        var onError = sinon.spy();
+        var onNext = sinon.spy();
         router.
             call(['videos', 1234, 'rating'], [5]).
-            doAction(function() {
-                throw new Error('Should not be called.  onNext');
-            }, function(x) {
-                expect(x.message).to.equal('Oops?');
-            }, function() {
-                throw new Error('Should not be called.  onCompleted');
+            doAction(onNext, onError).
+            doAction(noOp, function() {
+                expect(onNext.callCount).to.equal(0);
+                expect(onError.getCall(0).args[0].message).to.equal('Oops?');
             }).
-            subscribe(noOp, function(e) {
-                if (e.message === 'Oops?') {
-                    done();
-                    return;
-                }
-                done(e);
-            });
+            subscribe(noOp, doneOnError(done), errorOnCompleted(done));
     });
 
-    xit('should onError when an Observable.throw of Error is returned from call.', function(done) {
+    it('should onError when an Observable.throw of Error is returned from call.', function(done) {
         var router = new R([{
             route: 'videos[{integers:id}].rating',
             call: function(callPath, args) {
-                return Observable.throw(new Error("Oops?"))
+                return Observable.throw(new Error("Oops?"));
             }
         }]);
 
+        var onError = sinon.spy();
+        var onNext = sinon.spy();
         router.
             call(['videos', 1234, 'rating'], [5]).
-            doAction(function() {
-                throw new Error('Should not be called.  onNext');
-            }, function(x) {
-                expect(x.message).to.equal('Oops?');
-            }, function() {
-                throw new Error('Should not be called.  onCompleted');
+            doAction(onNext, onError).
+            doAction(noOp, function() {
+                expect(onNext.callCount).to.equal(0);
+                expect(onError.getCall(0).args[0].message).to.equal('Oops?');
             }).
-            subscribe(noOp, function(e) {
-                if (e.message === 'Oops?') {
-                    done();
-                    return;
-                }
-                done(e);
-            });
+            subscribe(noOp, doneOnError(done), errorOnCompleted(done));
     });
 
 
