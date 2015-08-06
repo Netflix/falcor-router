@@ -75,10 +75,7 @@ Router.prototype = {
                 var jsongEnv = materializeMissing(
                     router,
                     callPaths,
-                    jsongResult, {
-                        $type: $atom,
-                        $expires: 0
-                    });
+                    jsongResult);
                 materializeMissing(
                     router,
                     reportedPaths,
