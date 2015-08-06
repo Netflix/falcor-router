@@ -56,7 +56,6 @@ describe('Call', function() {
                                     },
                                     "length": 19,
                                     "push": {
-                                        "$expires": 0,
                                         "$type": "atom"
                                     }
                                 }
@@ -148,7 +147,6 @@ describe('Call', function() {
                                     },
                                     "length": 19,
                                     "push": {
-                                        "$expires": 0,
                                         "$type": "atom"
                                     }
                                 }
@@ -200,8 +198,7 @@ describe('Call', function() {
                             123: {
                                 0: $ref('listsById[0]'),
                                 pvAdd: {
-                                    $type: types.$atom,
-                                    $expires: 0
+                                    $type: types.$atom
                                 }
                             }
                         },
@@ -233,8 +230,7 @@ describe('Call', function() {
                                 0: $ref('listsById[0]'),
                                 length: 1,
                                 pvAdd: {
-                                    $type: types.$atom,
-                                    $expires: 0
+                                    $type: types.$atom
                                 }
                             }
                         }
@@ -265,8 +261,7 @@ describe('Call', function() {
                                 0: $ref('listsById[0]'),
                                 length: 1,
                                 pvAdd: {
-                                    $type: types.$atom,
-                                    $expires: 0
+                                    $type: types.$atom
                                 }
                             }
                         },
@@ -307,8 +302,7 @@ describe('Call', function() {
                                         value: ['titlesById', 1]
                                     },
                                     push: {
-                                        $type: types.$atom,
-                                        $expires: 0
+                                        $type: types.$atom
                                     }
                                 }
                             }
@@ -344,8 +338,7 @@ describe('Call', function() {
                                         value: ['titlesById', 1]
                                     },
                                     push: {
-                                        $type: types.$atom,
-                                        $expires: 0
+                                        $type: types.$atom
                                     }
                                 }
                             }
@@ -440,7 +433,6 @@ describe('Call', function() {
                             0: {
                                 invalidate: {
                                     $type: types.$atom,
-                                    $expires: 0
                                 }
                             }
                         }
