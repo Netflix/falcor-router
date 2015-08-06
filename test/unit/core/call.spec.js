@@ -426,7 +426,7 @@ describe('Call', function() {
                 var args = onNext.getCall(0).args;
 
                 expect(args[0]).to.deep.equals({
-                    invalidations: [{
+                    invalidated: [{
                         path: ['listsById', 0, 'name']
                     }],
                     jsonGraph: {
