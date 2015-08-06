@@ -39,7 +39,6 @@ function buildParseTree(node, routeObject, depth) {
     var get = routeObject.get;
     var set = routeObject.set;
     var call = routeObject.call;
-    var authorize = routeObject.authorize;
     var el = route[depth];
 
     el = !isNaN(+el) && +el || el;
@@ -82,7 +81,7 @@ function buildParseTree(node, routeObject, depth) {
         if (depth + 1 === route.length) {
 
             // Insert match into routeSyntaxTree
-            var matchObject = next[Keys.match] || {authorize: authorize};
+            var matchObject = next[Keys.match] || {};
             if (!next[Keys.match]) {
                 next[Keys.match] = matchObject;
             }

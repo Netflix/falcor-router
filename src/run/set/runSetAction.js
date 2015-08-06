@@ -1,7 +1,6 @@
 /* eslint-disable max-len */
 var outputToObservable = require('../conversion/outputToObservable');
 var noteToJsongOrPV = require('../conversion/noteToJsongOrPV');
-var authorize = require('./../authorize');
 var spreadPaths = require('./../../support/spreadPaths');
 var getValue = require('./../../cache/getValue');
 var optimizePathSets = require('./../../cache/optimizePathSets');
@@ -60,7 +59,7 @@ function runSetAction(routerInstance, jsongMessage, matchAndPath, jsongCache) {
         out = Observable.throw(e);
     }
 
-    return authorize(routerInstance, match, out).
+    return out.
         materialize().
         filter(function(note) {
             return note.kind !== 'C';

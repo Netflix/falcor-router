@@ -2,7 +2,6 @@ var isJSONG = require('./../../support/isJSONG');
 var outputToObservable = require('./../conversion/outputToObservable');
 var noteToJsongOrPV = require('./../conversion/noteToJsongOrPV');
 var errors = require('./../../exceptions');
-var authorize = require('./../authorize');
 var mCGRI = require('./../mergeCacheAndGatherRefsAndInvalidations');
 var Observable = require('rx').Observable;
 
@@ -176,7 +175,7 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
         out = outputToObservable(out);
     }
 
-    return authorize(routerInstance, match, out).
+    return out.
         materialize().
         filter(function(note) {
             return note.kind !== 'C';
