@@ -1,6 +1,5 @@
 var outputToObservable = require('../conversion/outputToObservable');
 var noteToJsongOrPV = require('../conversion/noteToJsongOrPV');
-var authorize = require('./../authorize');
 var Observable = require('rx').Observable;
 
 module.exports = function runGetAction(routerInstance, jsongCache) {
@@ -19,7 +18,7 @@ function getAction(routerInstance, matchAndPath, jsongCache) {
         out = Observable.throw(e);
     }
 
-    return authorize(routerInstance, match, out).
+    return out.
         materialize().
         filter(function(note) {
             return note.kind !== 'C';
