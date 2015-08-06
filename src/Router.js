@@ -95,7 +95,7 @@ Router.prototype = {
                 jsongEnv.paths.push(callPath);
                 var invalidated = jsongResult.invalidated;
                 if (invalidated && invalidated.length) {
-                    jsongEnv.invalidations = invalidated;
+                    jsongEnv.invalidated = invalidated;
                 }
                 jsongEnv.paths = collapse(jsongEnv.paths);
                 return jsongEnv;
