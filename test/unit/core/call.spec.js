@@ -13,6 +13,59 @@ var Promise = require("promise");
 
 describe('Call', function() {
 
+    xit('should onError when a Promise.reject of Error is returned from call.', function(done) {
+        var router = new R([{
+            route: 'videos[{integers:id}].rating',
+            call: function(callPath, args) {
+                return Promise.reject(new Error("Oops?"))
+            }
+        }]);
+
+        router.
+            call(['videos', 1234, 'rating'], [5]).
+            doAction(function() {
+                throw new Error('Should not be called.  onNext');
+            }, function(x) {
+                expect(x.message).to.equal('Oops?');
+            }, function() {
+                throw new Error('Should not be called.  onCompleted');
+            }).
+            subscribe(noOp, function(e) {
+                if (e.message === 'Oops?') {
+                    done();
+                    return;
+                }
+                done(e);
+            });
+    });
+
+    xit('should onError when an Observable.throw of Error is returned from call.', function(done) {
+        var router = new R([{
+            route: 'videos[{integers:id}].rating',
+            call: function(callPath, args) {
+                return Observable.throw(new Error("Oops?"))
+            }
+        }]);
+
+        router.
+            call(['videos', 1234, 'rating'], [5]).
+            doAction(function() {
+                throw new Error('Should not be called.  onNext');
+            }, function(x) {
+                expect(x.message).to.equal('Oops?');
+            }, function() {
+                throw new Error('Should not be called.  onCompleted');
+            }).
+            subscribe(noOp, function(e) {
+                if (e.message === 'Oops?') {
+                    done();
+                    return;
+                }
+                done(e);
+            });
+    });
+
+
     it('should return paths in jsonGraphEnvelope if route returns a promise of jsonGraphEnvelope with paths.', function(done) {
         var onNext = sinon.spy();
 
