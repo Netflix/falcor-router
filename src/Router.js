@@ -74,13 +74,6 @@ Router.prototype = {
                 var reportedPaths = jsongResult.reportedPaths;
                 var jsongEnv = materializeMissing(
                     router,
-                    callPaths,
-                    jsongResult, {
-                        $type: $atom,
-                        $expires: 0
-                    });
-                materializeMissing(
-                    router,
                     reportedPaths,
                     jsongResult);
 
@@ -90,9 +83,9 @@ Router.prototype = {
                 }
                 else {
                     jsongEnv.paths = [];
+                    jsongEnv.jsonGraph = {};
                 }
 
-                jsongEnv.paths.push(callPath);
                 var invalidated = jsongResult.invalidated;
                 if (invalidated && invalidated.length) {
                     jsongEnv.invalidated = invalidated;

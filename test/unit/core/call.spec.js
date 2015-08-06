@@ -107,17 +107,13 @@ describe('Call', function() {
                                         "$type": "ref",
                                         "value": ["titlesById", 1]
                                     },
-                                    "length": 19,
-                                    "push": {
-                                        "$expires": 0,
-                                        "$type": "atom"
-                                    }
+                                    "length": 19
                                 }
                             }
                         }
                     },
                     "paths": [
-                        ["genrelist", 0, "titles", [18, "length", "push"]]
+                        ["genrelist", 0, "titles", [18, "length"]]
                     ]
                 });
             }).
@@ -199,17 +195,13 @@ describe('Call', function() {
                                         "$type": "ref",
                                         "value": ["titlesById", 1]
                                     },
-                                    "length": 19,
-                                    "push": {
-                                        "$expires": 0,
-                                        "$type": "atom"
-                                    }
+                                    "length": 19
                                 }
                             }
                         }
                     },
                     "paths": [
-                        ["genrelist", 0, "titles", [18, "length", "push"]]
+                        ["genrelist", 0, "titles", [18, "length"]]
                     ]
                 });
             }).
@@ -251,11 +243,7 @@ describe('Call', function() {
                         lolomo: $ref('lolomos[123]'),
                         lolomos: {
                             123: {
-                                0: $ref('listsById[0]'),
-                                pvAdd: {
-                                    $type: types.$atom,
-                                    $expires: 0
-                                }
+                                0: $ref('listsById[0]')
                             }
                         },
                         listsById: {
@@ -265,7 +253,6 @@ describe('Call', function() {
                         }
                     },
                     paths: [
-                        ['lolomo', 'pvAdd'],
                         ['lolomo', 0, 'name']
                     ]
                 });
@@ -284,16 +271,12 @@ describe('Call', function() {
                         lolomos: {
                             123: {
                                 0: $ref('listsById[0]'),
-                                length: 1,
-                                pvAdd: {
-                                    $type: types.$atom,
-                                    $expires: 0
-                                }
+                                length: 1
                             }
                         }
                     },
                     paths: [
-                        ['lolomo', ['length', 'pvAdd']],
+                        ['lolomo', 'length'],
                         ['lolomos', 123, '0']
                     ]
                 });
@@ -316,11 +299,7 @@ describe('Call', function() {
                         lolomos: {
                             123: {
                                 0: $ref('listsById[0]'),
-                                length: 1,
-                                pvAdd: {
-                                    $type: types.$atom,
-                                    $expires: 0
-                                }
+                                length: 1
                             }
                         },
                         listsById: {
@@ -330,7 +309,7 @@ describe('Call', function() {
                         }
                     },
                     paths: [
-                        ['lolomo', ['length', 'pvAdd']],
+                        ['lolomo', 'length'],
                         ['lolomo', 0, 'name']
                     ]
                 });
@@ -358,17 +337,13 @@ describe('Call', function() {
                                     2: {
                                         $type: 'ref',
                                         value: ['titlesById', 1]
-                                    },
-                                    push: {
-                                        $type: types.$atom,
-                                        $expires: 0
                                     }
                                 }
                             }
                         }
                     },
                     paths: [
-                        ['genrelist', 0, 'titles', [2, 'push']]
+                        ['genrelist', 0, 'titles', '2']
                     ]
                 });
             }, noOp, function() {
@@ -395,10 +370,6 @@ describe('Call', function() {
                                     2: {
                                         $type: 'ref',
                                         value: ['titlesById', 1]
-                                    },
-                                    push: {
-                                        $type: types.$atom,
-                                        $expires: 0
                                     }
                                 }
                             }
@@ -411,7 +382,6 @@ describe('Call', function() {
                         }
                     },
                     paths: [
-                        ['genrelist', 0, 'titles', 'push'],
                         ['genrelist', 0, 'titles', 2, ['name', 'rating']]
                     ]
                 });
@@ -482,25 +452,8 @@ describe('Call', function() {
                     invalidated: [{
                         path: ['listsById', 0, 'name']
                     }],
-                    jsonGraph: {
-                        lolomo: $ref('lolomos[123]'),
-                        lolomos: {
-                            123: {
-                                0: $ref('listsById[0]')
-                            }
-                        },
-                        listsById: {
-                            0: {
-                                invalidate: {
-                                    $type: types.$atom,
-                                    $expires: 0
-                                }
-                            }
-                        }
-                    },
-                    paths: [
-                        ['lolomo', 0, 'invalidate']
-                    ]
+                    jsonGraph: { },
+                    paths: [ ]
                 });
             }).
             subscribe(noOp, done, done);
