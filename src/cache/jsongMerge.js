@@ -1,4 +1,4 @@
-var iterateKeySet= require('falcor-path-utils').iterateKeySet;
+var iterateKeySet = require('falcor-path-utils').iterateKeySet;
 var types = require('./../support/types');
 var $ref = types.$ref;
 var $atom = types.$atom;
@@ -145,8 +145,6 @@ function merge(config, cache, message, depth, path, fromParent, fromKey) {
         }
 
         // Are we done with the loop?
-        if (iteratorNote) {
-            key = iterateKeySet(outerKey, iteratorNote);
-        }
-    } while (iteratorNote && !iteratorNote.done);
+        key = iterateKeySet(outerKey, iteratorNote);
+    } while (!iteratorNote.done);
 }

@@ -23,6 +23,7 @@ module.exports = function stripFromRange(argToStrip, range) {
     var ranges = [];
     var matches = [];
     var toStrip = argToStrip;
+    // TODO: More than likely a bug around numbers and stripping
     var toStripIsNumber = isNumber(toStrip);
     if (toStripIsNumber) {
         toStrip = +toStrip;
