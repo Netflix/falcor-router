@@ -6,7 +6,6 @@ var expect = chai.expect;
 var falcor = require('falcor');
 var $ref = falcor.Model.ref;
 var sinon = require("sinon");
-var Promise = require("promise");
 
 describe('Set', function() {
     it('should perform a simple set.', function(done) {
@@ -104,7 +103,7 @@ describe('Set', function() {
                         "10": {
                             "userRating": 10
                         }
-                    },
+                    }
                 },
                 "paths": [
                     ["genreLists", 9, "userRating"],
