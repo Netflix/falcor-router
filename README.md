@@ -65,7 +65,6 @@ app.use('/model.json', falcorExpress.dataSourceRoute(function (req, res) {
 app.use(express.static(__dirname + '/'));
 
 var server = app.listen(3000);
-
 ~~~
 
 Now we run the server, which will listen on port 3000 for requests for /model.json.
@@ -74,4 +73,6 @@ Now we run the server, which will listen on port 3000 for requests for /model.js
 node index.js
 ~~~
 
-```
+## More Information
+
+For in-depth information on the Falcor Router, see the Router Guide in the [Falcor Website](http://netflix.github.io/falcor).
