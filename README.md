@@ -2,7 +2,7 @@
 
 ## Developer Preview
 
-This release is a developer preview. We are looking for community help to track down and fix bugs. We are also looking for help porting the Router to other platforms.
+**This release is a developer preview.** We are looking for community help to track down and fix bugs. We are also looking for help porting the Router to other platforms.
 
 ## Creating a Virtual JSON Resource with a Falcor Router
 
