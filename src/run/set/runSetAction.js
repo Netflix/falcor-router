@@ -3,6 +3,7 @@ var outputToObservable = require('../conversion/outputToObservable');
 var noteToJsongOrPV = require('../conversion/noteToJsongOrPV');
 var spreadPaths = require('./../../support/spreadPaths');
 var getValue = require('./../../cache/getValue');
+var jsongMerge = require('./../../cache/jsongMerge');
 var optimizePathSets = require('./../../cache/optimizePathSets');
 var hasIntersection = require('./../../operations/matcher/intersection/hasIntersection');
 var pathValueMerge = require('./../../cache/pathValueMerge');
@@ -29,21 +30,27 @@ function runSetAction(routerInstance, jsongMessage, matchAndPath, jsongCache) {
 
         // We have to ensure that the paths maps in order
         // to the optimized paths array.
-        var optimizedPaths =
+        var optimizedPathsAndPaths =
             paths.
                 // Optimizes each path.
                 map(function(path) {
-                    return optimizePathSets(
-                        jsongCache, [path], routerInstance.maxRefFollow)[0];
+                    return [optimizePathSets(
+                        jsongCache, [path], routerInstance.maxRefFollow)[0],
+                        path];
                 }).
                 // only includes the paths from the set that intersect
                 // the virtual path
-                filter(function(path) {
-                    return hasIntersection(path, match.virtual);
+                filter(function(optimizedAndPath) {
+                    return optimizedAndPath[0] &&
+                        hasIntersection(optimizedAndPath[0], match.virtual);
                 });
-
-        // Constructs the json that is the set request virtual path.
-        arg = paths.
+        var optimizedPaths = optimizedPathsAndPaths.map(function(opp) {
+            return opp[0];
+        });
+        var subSetPaths = optimizedPathsAndPaths.map(function(opp) {
+            return opp[1];
+        });
+        var tmpJsonGraph = subSetPaths.
             reduce(function(json, path, i) {
                 pathValueMerge(json, {
                     path: optimizedPaths[i],
@@ -51,6 +58,16 @@ function runSetAction(routerInstance, jsongMessage, matchAndPath, jsongCache) {
                 });
                 return json;
             }, {});
+
+        // Takes the temporary JSONGraph, attaches only the matched paths
+        // then creates the subset json and assigns it to the argument to
+        // the set function.
+        var subJsonGraphEnv = {
+            jsonGraph: tmpJsonGraph,
+            paths: [match.requested]
+        };
+        arg = {};
+        jsongMerge(arg, subJsonGraphEnv);
     }
     try {
         out = match.action.call(routerInstance, arg);

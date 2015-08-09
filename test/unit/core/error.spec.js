@@ -2,9 +2,7 @@ var R = require('../../../src/Router');
 var noOp = function() {};
 var chai = require('chai');
 var expect = chai.expect;
-var Observable = require('rx').Observable;
 var sinon = require('sinon');
-var isAssertionError = require('../../isAssertionError');
 var falcor = require('falcor');
 var $ref = falcor.Model.ref;
 var circularReference = require('./../../../src/exceptions').circularReference;
@@ -15,7 +13,9 @@ describe('Error', function() {
         var router = new R([{
             route: 'videos[{integers:ids}]',
             get: function (alias) {
+                /* eslint-disable no-throw-literal */
                 throw 'hello world';
+                /* eslint-enable no-throw-literal */
             }
         }]);
         var onNext = sinon.spy();

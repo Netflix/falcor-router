@@ -6,7 +6,6 @@ var expect = chai.expect;
 var falcor = require('falcor');
 var $ref = falcor.Model.ref;
 var sinon = require("sinon");
-var Promise = require("promise");
 
 describe('Set', function() {
     it('should perform a simple set.', function(done) {
@@ -72,6 +71,81 @@ describe('Set', function() {
                     done();
                 }
             });
+    });
+
+    it('should ensure that set gets called with only the data it needs.', function(done) {
+        var routerSet = sinon.spy(function (jsonGraph) {
+            return {jsonGraph: jsonGraph};
+        });
+        var router = new R([{
+            route: "titlesById[{integers:titleIds}].userRating",
+            set: routerSet
+        }, {
+            route: "genreLists[{integers:titleIds}]",
+            get: function(p) {
+                var id = p.titleIds[0];
+                return {
+                    path: ['genreLists', id],
+                    value: $ref(['titlesById', id])
+                };
+            }
+        }]);
+
+
+        var onNext = sinon.spy();
+        router.
+            set({
+                "jsonGraph": {
+                    "genreLists": {
+                        "9": {
+                            "userRating": 9
+                        },
+                        "10": {
+                            "userRating": 10
+                        }
+                    }
+                },
+                "paths": [
+                    ["genreLists", 9, "userRating"],
+                    ["genreLists", 10, "userRating"]
+                ]
+            }).
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                expect(onNext.calledOnce, 'onNext calledOnce').to.be.ok;
+                expect(routerSet.calledTwice, 'routerSet calledTwice').to.be.ok;
+                expect(routerSet.getCall(0).args[0]).to.deep.equals({
+                    "titlesById": {
+                        "9": {
+                            "userRating": 9
+                        }
+                    }
+                });
+                expect(routerSet.getCall(1).args[0]).to.deep.equals({
+                    "titlesById": {
+                        "10": {
+                            "userRating": 10
+                        }
+                    }
+                });
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    "jsonGraph": {
+                        "genreLists": {
+                            9: $ref('titlesById[9]'),
+                            10: $ref('titlesById[10]')
+                        },
+                        "titlesById": {
+                            "10": {
+                                "userRating": 10
+                            },
+                            "9": {
+                                "userRating": 9
+                            }
+                        }
+                    }
+                });
+            }).
+            subscribe(noOp, done, done);
     });
 
     it('should perform a set with get reference following.', function(done) {

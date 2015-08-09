@@ -7,7 +7,6 @@ var falcor = require('falcor');
 var $ref = falcor.Model.ref;
 var $atom = falcor.Model.atom;
 var errors = require('./../../../src/exceptions');
-var types = require('./../../../src/support/types');
 var sinon = require("sinon");
 var Promise = require("promise");
 var doneOnError = require('./../../doneOnError');

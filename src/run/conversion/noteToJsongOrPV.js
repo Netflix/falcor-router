@@ -1,5 +1,4 @@
 var isJSONG = require('./../../support/isJSONG');
-var errors = require('./../../exceptions');
 var JSONGraphError = require('./../../JSONGraphError');
 var onNext = 'N';
 
