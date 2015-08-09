@@ -4,9 +4,9 @@
 
 **This release is a developer preview.** We are looking for community help to track down and fix bugs. We are also looking for help porting the Router to other platforms.
 
-## Creating a Virtual JSON Resource with a Falcor Router
+## Getting Started
 
-In this example we will use the falcor Router to build a Virtual JSON resource on an app server and host it at /model.json. The JSON resource will contain the following contents:
+Let's use the Falcor Router to build a Virtual JSON resource on an app server and host it at /model.json. The JSON resource will contain the following contents:
 
 ~~~js
 {
@@ -16,6 +16,8 @@ In this example we will use the falcor Router to build a Virtual JSON resource o
 
 Normally Routers retrieve the data for their Virtual JSON resource from backend data stores or other web services on-demand. However in this simple tutorial the Router will simply return static data for a single key.
 
+### Creating a Virtual JSON Resource with a Falcor Router
+
 First we create a folder for our application server.
 
 ~~~bash
@@ -24,7 +26,7 @@ cd falcor-app-server
 npm init
 ~~~
 
-Now we install the falcor Router.
+Now we install the Falcor Router.
 
 ~~~bash
 npm install falcor-router --save
@@ -72,6 +74,38 @@ Now we run the server, which will listen on port 3000 for requests for /model.js
 ~~~sh
 node index.js
 ~~~
+
+### Retrieving Data from the Virtual JSON resource
+
+Now that we've built a simple virtual JSON document with a single read-only key "greeting", we will create a test web page and retrieve this key from the server.
+
+Now create an index.html file with the following contents:
+
+~~~html
+<!-- index.html -->
+<html>
+  <head>
+    <!-- Do _not_  rely on this URL in production. Use only during development.  -->
+    <script src="https://cdn.rawgit.com/Netflix/falcor/master/dist/falcor.browser.js"></script>
+    <script>
+      var model = new falcor.Model({source: new falcor.HttpDataSource('/model.json') });
+      
+      // retrieve the "greeting" key from the root of the Virtual JSON resource
+      model.
+        get("greeting").
+        then(function(response) {
+          document.write(response.json.greeting);
+        });
+    </script>
+  </head>
+  <body>
+  </body>
+</html>
+~~~
+
+Now visit http://localhost:3000/index.html and you should see the message retrieved from the server:
+
+Hello World
 
 ## More Information
 
