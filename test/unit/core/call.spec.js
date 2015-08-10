@@ -13,7 +13,7 @@ var doneOnError = require('./../../doneOnError');
 var errorOnCompleted = require('./../../errorOnCompleted');
 
 describe('Call', function() {
-    it.only('should return invalidations.', function(done) {
+    it('should return invalidations.', function(done) {
         var router = new R([{
             route: 'genrelist[{integers:indices}].titles.remove',
             call: function(callPath, args) {
@@ -485,27 +485,6 @@ describe('Call', function() {
                 }
                 return done(e);
             }, done);
-    });
-
-    it('should return path bound invalidations', function(done) {
-        var onNext = sinon.spy();
-        var baseIds = {0: 'Thriller'};
-        getExtendedRouter(baseIds).
-            call(['lolomo', 0, 'invalidate']).
-            doAction(onNext).
-            doAction(noOp, noOp, function() {
-                expect(onNext.calledOnce).to.be.ok;
-                var args = onNext.getCall(0).args;
-
-                expect(args[0]).to.deep.equals({
-                    invalidated: [{
-                        path: ['listsById', 0, 'name']
-                    }],
-                    jsonGraph: { },
-                    paths: [ ]
-                });
-            }).
-            subscribe(noOp, done, done);
     });
 
     function getCallRouter() {
