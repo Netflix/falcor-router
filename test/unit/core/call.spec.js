@@ -13,6 +13,66 @@ var doneOnError = require('./../../doneOnError');
 var errorOnCompleted = require('./../../errorOnCompleted');
 
 describe('Call', function() {
+    it.only('should return invalidations.', function(done) {
+        var router = new R([{
+            route: 'genrelist[{integers:indices}].titles.remove',
+            call: function(callPath, args) {
+                return callPath.indices.reduce(function(acc, genreIndex) {
+                    return acc.concat([
+                        {
+                            path: ['genrelist', genreIndex, 'titles',
+                                {from: 2, to: 2}
+                            ],
+                            invalidated: true
+                        },
+                        {
+                            path: ['genrelist', genreIndex, 'titles', 'length'],
+                            value: 2
+                        }
+                    ]);
+                }, []);
+            }
+        }]);
+
+        var onNext = sinon.spy();
+        router.
+            call(['genrelist', 0, 'titles', 'remove'], [1]).
+            doAction(onNext, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    "invalidated": [
+                        [
+                            "genrelist",
+                            0,
+                            "titles",
+                            {
+                                "from": 2,
+                                "to": 2
+                            }
+                        ]
+                    ],
+                    "jsonGraph": {
+                        "genrelist": {
+                            "0": {
+                                "titles": {
+                                    "length": 2
+                                }
+                            }
+                        }
+                    },
+                    "paths": [
+                        [
+                            "genrelist",
+                            0,
+                            "titles",
+                            "length"
+                        ]
+                    ]
+                });
+            }).
+            subscribe(noOp, done, done);
+
+    });
 
     it('should onError when a Promise.reject of Error is returned from call.', function(done) {
         var router = new R([{
