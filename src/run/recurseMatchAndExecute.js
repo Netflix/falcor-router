@@ -80,7 +80,7 @@ function _recurseMatchAndExecute(
                     }
 
                     invalidations.forEach(function(invalidation) {
-                        invalidated[invalidated.length] = invalidation;
+                        invalidated[invalidated.length] = invalidation.path;
                     });
 
                     // Merges the remaining suffix with remaining nextPaths
