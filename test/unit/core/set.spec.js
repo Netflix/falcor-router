@@ -8,6 +8,142 @@ var $ref = falcor.Model.ref;
 var sinon = require("sinon");
 
 describe('Set', function() {
+
+    xit('should call get() with the same type of arguments when no route for set() found.', function(done) {
+        var router = new R([
+            {
+                route: "titlesById[{integers:titleIds}].rating",
+                get: function(json) {
+                
+                    var exception = false
+                    try {
+                        expect(json).to.deep.equals(
+                            [
+                               "titlesById",
+                               [
+                                  0
+                               ],
+                               "rating"
+                            ]
+                        )
+                    } catch (e) {
+                        exception = true
+                        done(e);
+                    }
+                    if (!exception) {
+                        done()
+                    }
+                }
+        
+            }
+        ]);
+
+        router.
+            set({
+                "jsonGraph": {
+                    "titlesById": {
+                        "0": {
+                            "rating": 5
+                        }
+                    }
+                },
+                "paths": [["titlesById", 0, "rating"]]
+            }).
+            subscribe(noOp, noOp, noOp);
+    });
+
+
+
+    xit('should not transform set values before passing them to route. (0)', function(done) {
+        var router = new R([{
+            route: 'titlesById[{integers:titleIds}].userRating',
+            set: function(json) {
+                var exception = false
+                try {
+                    expect(json).to.deep.equals({
+                        "titlesById": {
+                            "1": {
+                                "userRating": 0
+                            }
+                        }
+                    })
+                } catch (e) {
+                    exception = true
+                    done(e);
+                }
+                if (!exception) {
+                    done()
+                }
+
+            }
+        }]);
+
+        router.
+            set({
+                "jsonGraph": {
+                    "titlesById": {
+                        "1": {
+                            "userRating": 0
+                        }
+                    }
+                },
+                "paths": [
+                    [
+                        "titlesById",
+                        1,
+                        "userRating"
+                    ]
+                ]
+            }).
+            subscribe(noOp, noOp, noOp);
+    });
+
+    
+    xit('should not transform set values before passing them to route.  ("")', function(done) {
+        var router = new R([{
+            route: 'titlesById[{integers:titleIds}].userRating',
+            set: function(json) {
+                var exception = false
+                try {
+                    expect(json).to.deep.equals({
+                        "titlesById": {
+                            "1": {
+                                "userRating": ""
+                            }
+                        }
+                    })
+                } catch (e) {
+                    exception = true
+                    done(e);
+                }
+                if (!exception) {
+                    done()
+                }
+
+            }
+        }]);
+
+        router.
+            set({
+                "jsonGraph": {
+                    "titlesById": {
+                        "1": {
+                            "userRating": ""
+                        }
+                    }
+                },
+                "paths": [
+                    [
+                        "titlesById",
+                        1,
+                        "userRating"
+                    ]
+                ]
+            }).
+            subscribe(noOp, noOp, noOp);
+    });
+
+
     it('should perform a simple set.', function(done) {
         var did = false;
         var called = 0;
