@@ -9,6 +9,93 @@ var sinon = require("sinon");
 
 describe('Set', function() {
 
+    xit('should not transform set values before passing them to route. (undefined)', function(done) {
+        var router = new R([{
+            route: 'titlesById[{integers:titleIds}].userRating',
+            set: function(json) {
+                var exception = false
+                try {
+                    expect("userRating" in json.titlesById[1]).to.equals(true)
+                    expect(json.titlesById[1]).to.equals(undefined)
+                } catch (e) {
+                    exception = true
+                    done(e);
+                }
+                if (!exception)
+                    done()
+
+            }
+        }]);
+
+        router.
+            set({
+                "jsonGraph": {
+                    "titlesById": {
+                        "1": {
+                            "userRating": undefined
+                        }
+                    }
+                },
+                "paths": [
+                    [
+                        "titlesById",
+                        1,
+                        "userRating"
+                    ]
+                ]
+            }).
+            subscribe(noOp, noOp, noOp);
+    });
+
+    xit('should call the route when setting a value to null', function(done) {
+        var called = false
+        var router = new R([{
+            route: 'titlesById[{integers:titleIds}].userRating',
+            set: function(json) {
+                called = true
+                var exception = false
+                try {
+                    expect(json).to.deep.equals({
+                        "titlesById": {
+                            "1": {
+                                "userRating": null
+                            }
+                        }
+                    })
+                } catch (e) {
+                    exception = true
+                    done(e);
+                }
+                if (!exception)
+                    done()
+
+            }
+        }]);
+
+        router.
+            set({
+                "jsonGraph": {
+                    "titlesById": {
+                        "1": {
+                            "userRating": null
+                        }
+                    }
+                },
+                "paths": [
+                    [
+                        "titlesById",
+                        1,
+                        "userRating"
+                    ]
+                ]
+            }).
+            subscribe(noOp, function() {
+                expect(called).to.equals(true)
+                done()
+            }, noOp);
+    });
+    
+
     xit('should call get() with the same type of arguments when no route for set() found.', function(done) {
         var router = new R([
             {
