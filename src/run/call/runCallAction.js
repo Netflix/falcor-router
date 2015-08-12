@@ -171,7 +171,7 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
                 throw e;
             });
     } else {
-        out = match.action.call(null, matchAndPath.path);
+        out = match.action.call(routerInstance, matchAndPath.path);
         out = outputToObservable(out);
     }
 

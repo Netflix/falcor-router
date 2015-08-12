@@ -14,22 +14,23 @@ var errorOnCompleted = require('./../../errorOnCompleted');
 
 describe('Call', function() {
 
-    xit('should bind "this" properly on a call that tranverses through a reference.', function(done) {
+    it('should bind "this" properly on a call that tranverses through a reference.', function(done) {
+        var values = [];
         var router = new R([
             {
                 route: "genrelist.myList",
                 get: function(pathSet) {
-                    expect(this.testValue).to.equals(1)
+                    values.push(this.testValue);
                     return [{
                         path: ['genrelist', 'myList'],
                         value: $ref(['genrelist', 10])
-                    }]
+                    }];
                 }
             },
             {
                 route: 'genrelist[10].titles.push',
                 call: function(callPath, args) {
-                    expect(this.testValue).to.equals(1)
+                    values.push(this.testValue);
                     return [
                         {
                             path: ['genrelist', 10, 'titles', 100],
@@ -42,12 +43,13 @@ describe('Call', function() {
                     ];
                 }
             }
-        ])
+        ]);
 
-        //router.call(['genrelist', 10, 'titles', 'push'], ["title100"]).
-        router.testValue = 1
+        router.testValue = 1;
         router.call(['genrelist', 'myList', 'titles', 'push'], ["title100"]).
-            doAction(noOp, noOp, noOp).
+            doAction(noOp, noOp, function() {
+                expect(values).to.deep.equals([1, 1]);
+            }).
             subscribe(noOp, done, done);
     });
 
