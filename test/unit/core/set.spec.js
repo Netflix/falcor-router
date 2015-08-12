@@ -21,8 +21,9 @@ describe('Set', function() {
                     exception = true
                     done(e);
                 }
-                if (!exception)
+                if (!exception) {
                     done()
+                }
 
             }
         }]);
@@ -66,8 +67,9 @@ describe('Set', function() {
                     exception = true
                     done(e);
                 }
-                if (!exception)
+                if (!exception) {
                     done()
+                }
 
             }
         }]);
