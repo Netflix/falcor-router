@@ -13,6 +13,45 @@ var doneOnError = require('./../../doneOnError');
 var errorOnCompleted = require('./../../errorOnCompleted');
 
 describe('Call', function() {
+
+    xit('should bind "this" properly on a call that tranverses through a reference.', function(done) {
+        var router = new R([
+            {
+                route: "genrelist.myList",
+                get: function(pathSet) {
+                    expect(this.testValue).to.equals(1)
+                    return [{
+                        path: ['genrelist', 'myList'],
+                        value: $ref(['genrelist', 10])
+                    }]
+                }
+            },
+            {
+                route: 'genrelist[10].titles.push',
+                call: function(callPath, args) {
+                    expect(this.testValue).to.equals(1)
+                    return [
+                        {
+                            path: ['genrelist', 10, 'titles', 100],
+                            value: "title100"
+                        },
+                        {
+                            path: ['genrelist',10, 'titles', 'length'],
+                            value: 101
+                        }
+                    ];
+                }
+            }
+        ])
+
+        //router.call(['genrelist', 10, 'titles', 'push'], ["title100"]).
+        router.testValue = 1
+        router.call(['genrelist', 'myList', 'titles', 'push'], ["title100"]).
+            doAction(noOp, noOp, noOp).
+            subscribe(noOp, done, done);
+    });
+
+
     it('should return invalidations.', function(done) {
         var router = new R([{
             route: 'genrelist[{integers:indices}].titles.remove',
