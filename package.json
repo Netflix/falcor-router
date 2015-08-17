@@ -50,7 +50,9 @@
   },
   "keywords": [
     "Falcor",
-    "Router"
+    "Router",
+    "Netflix",
+    "falcorjs"
   ],
   "license": "ALV2",
   "bugs": {
