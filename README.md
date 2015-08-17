@@ -4,6 +4,8 @@
 
 **This release is a developer preview.** We are looking for community help to track down and fix bugs. We are also looking for help porting the Router to other platforms.
 
+You can check out a working example server for a Netflix-like application [here](http://github.com/netflix/falcor-express-demo) right now. Alternately you can go through this short tutorial:
+
 ## Getting Started
 
 Let's use the Falcor Router to build a Virtual JSON resource on an app server and host it at /model.json. The JSON resource will contain the following contents:
@@ -112,3 +114,5 @@ Hello World
 For an example of a Router built for a Netflix-like application, see [this repository](http://github.com/netflix/falcor-router-demo).
 
 For in-depth information on the Falcor Router, see the Router Guide in the [Falcor Website](http://netflix.github.io/falcor).
+
+For discussion please use [Stack Overflow](http://stackoverflow.com/questions/tagged/falcor).
