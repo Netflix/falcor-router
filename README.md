@@ -109,4 +109,6 @@ Hello World
 
 ## More Information
 
+For an example of a Router built for a Netflix-like application, see [this repository](http://github.com/netflix/falcor-router-demo).
+
 For in-depth information on the Falcor Router, see the Router Guide in the [Falcor Website](http://netflix.github.io/falcor).
