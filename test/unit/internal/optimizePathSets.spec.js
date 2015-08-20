@@ -66,6 +66,33 @@ describe('optimizePathSets', function() {
         expect(out).to.deep.equal(expected);
     });
 
+    it('should short circuit on primitive string values', function() {
+        var cache = getCache();
+        var paths = [['videos', '6', 'summary']];
+
+        var out = optimizePathSets(cache, paths);
+        var expected = [];
+        expect(out).to.deep.equal(expected);
+    });
+
+    it('should short circuit on primitive number values', function() {
+        var cache = getCache();
+        var paths = [['videos', '7', 'summary']];
+
+        var out = optimizePathSets(cache, paths);
+        var expected = [];
+        expect(out).to.deep.equal(expected);
+    });
+
+    it('should short circuit on primitive boolean values', function() {
+        var cache = getCache();
+        var paths = [['videos', '8', 'summary']];
+
+        var out = optimizePathSets(cache, paths);
+        var expected = [];
+        expect(out).to.deep.equal(expected);
+    });
+
     it('should throw.', function() {
         var cache = getCache();
         var paths = [['videosList', 'inner', 'summary']];
@@ -79,6 +106,7 @@ describe('optimizePathSets', function() {
         }
         expect(caught).to.equals(true);
     });
+
 });
 
 function getCache() {
@@ -91,7 +119,18 @@ function getCache() {
             inner: $ref('videosList[3].inner')
         },
         videos: {
-            5: $atom('title')
+            5: $atom('title'),
+
+            // Short circuit on primitives
+            6: $atom('a'),
+            7: $atom(1),
+            8: $atom(true),
+
+            // Falsey edge cases
+            9: $atom(''),
+            10: $atom(0),
+            11: $atom(false),
+            12: $atom(null)
         }
     };
 }

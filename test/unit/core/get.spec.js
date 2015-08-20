@@ -6,10 +6,12 @@ var chai = require('chai');
 var expect = chai.expect;
 var falcor = require('falcor');
 var $ref = falcor.Model.ref;
+var $atom = require('./../../../src/support/types').$atom;
 var Observable = require('rx').Observable;
 var sinon = require('sinon');
 
 describe('Get', function() {
+
     it('should execute a simple route matching.', function(done) {
         var router = new R(Routes().Videos.Summary());
         var obs = router.
@@ -22,6 +24,102 @@ describe('Get', function() {
             expect(called, 'expect onNext called 1 time.').to.equal(true);
             done();
         });
+    });
+
+    it('should not return empty atoms for a null value', function(done) {
+        var router = new R(Routes().Videos.Falsey());
+        var onNext = sinon.spy();
+
+        router.get([['videos', 'falsey', 'null']]).
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    jsonGraph: {
+                        videos: {
+                            falsey: {
+                                'null': {
+                                    $type: $atom,
+                                    value: null
+                                }
+                            }
+                        }
+                    }
+                });
+            }).
+            subscribe(noOp, done, done);
+    });
+
+    it('should not return empty atoms for a zero value', function(done) {
+        var router = new R(Routes().Videos.Falsey());
+        var onNext = sinon.spy();
+
+        router.get([['videos', 'falsey', 'zero']]).
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    jsonGraph: {
+                        videos: {
+                            falsey: {
+                                zero: {
+                                    $type: $atom,
+                                    value: 0
+                                }
+                            }
+                        }
+                    }
+                });
+            }).
+            subscribe(noOp, done, done);
+    });
+
+    it('should not return empty atoms for an empty string value', function(done) {
+        var router = new R(Routes().Videos.Falsey());
+        var onNext = sinon.spy();
+
+        router.get([['videos', 'falsey', 'emptystring']]).
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    jsonGraph: {
+                        videos: {
+                            falsey: {
+                                emptystring: {
+                                    $type: $atom,
+                                    value: ''
+                                }
+                            }
+                        }
+                    }
+                });
+            }).
+            subscribe(noOp, done, done);
+    });
+
+    it('should not return empty atoms for a false value', function(done) {
+        var router = new R(Routes().Videos.Falsey());
+        var onNext = sinon.spy();
+
+        router.get([['videos', 'falsey', 'false']]).
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    jsonGraph: {
+                        videos: {
+                            falsey: {
+                                'false': {
+                                    $type: $atom,
+                                    value: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }).
+            subscribe(noOp, done, done);
     });
 
     it('should validate that optimizedPathSets strips out already found data.', function(done) {

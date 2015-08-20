@@ -31,20 +31,20 @@ function optimizePathSet(cache, cacheRoot, pathSet,
                          depth, out, optimizedPath, maxRefFollow) {
 
     // at missing, report optimized path.
-    if (!cache) {
+    if (cache === undefined) {
         out[out.length] = catAndSlice(optimizedPath, pathSet, depth);
+        return;
+    }
+
+    // all other sentinels are short circuited.
+    // Or we found a primitive (which includes null)
+    if (cache === null || (cache.$type && cache.$type !== $ref) || (typeof cache !== 'object')) {
         return;
     }
 
     // If the reference is the last item in the path then do not
     // continue to search it.
     if (cache.$type === $ref && depth === pathSet.length) {
-        return;
-    }
-
-    // all other sentinels are short circuited.
-    // Or we found a primitive.
-    if (cache.$type && cache.$type !== $ref || typeof cache !== 'object') {
         return;
     }
 
