@@ -93,6 +93,51 @@ describe('optimizePathSets', function() {
         expect(out).to.deep.equal(expected);
     });
 
+    it('should short circuit on primitive null value', function() {
+        var cache = getCache();
+        var paths = [['videos', '9', 'summary']];
+
+        var out = optimizePathSets(cache, paths);
+        var expected = [];
+        expect(out).to.deep.equal(expected);
+    });
+
+    it('should not treat falsey string as missing', function() {
+        var cache = getCache();
+        var paths = [['falsey', 'string']];
+
+        var out = optimizePathSets(cache, paths);
+        var expected = [];
+        expect(out).to.deep.equal(expected);
+    });
+
+    it('should not treat falsey number as missing', function() {
+        var cache = getCache();
+        var paths = [['falsey', 'number']];
+
+        var out = optimizePathSets(cache, paths);
+        var expected = [];
+        expect(out).to.deep.equal(expected);
+    });
+
+    it('should not treat falsey boolean as missing', function() {
+        var cache = getCache();
+        var paths = [['falsey', 'boolean']];
+
+        var out = optimizePathSets(cache, paths);
+        var expected = [];
+        expect(out).to.deep.equal(expected);
+    });
+
+    it('should not treat falsey null as missing', function() {
+        var cache = getCache();
+        var paths = [['falsey', 'null']];
+
+        var out = optimizePathSets(cache, paths);
+        var expected = [];
+        expect(out).to.deep.equal(expected);
+    });
+
     it('should throw.', function() {
         var cache = getCache();
         var paths = [['videosList', 'inner', 'summary']];
@@ -122,15 +167,16 @@ function getCache() {
             5: $atom('title'),
 
             // Short circuit on primitives
-            6: $atom('a'),
-            7: $atom(1),
-            8: $atom(true),
-
-            // Falsey edge cases
-            9: $atom(''),
-            10: $atom(0),
-            11: $atom(false),
-            12: $atom(null)
+            6: 'a',
+            7: 1,
+            8: true,
+            9: null
+        },
+        falsey: {
+            string: '',
+            number: 0,
+            boolean: false,
+            'null': null
         }
     };
 }
