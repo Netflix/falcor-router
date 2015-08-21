@@ -1,10 +1,10 @@
 module.exports = function onRange(range) {
-    var out = [];
-    var i = range.from;
+    var from = range.from;
     var to = range.to;
-    var outIdx = out.length;
-    for (; i <= to; ++i, ++outIdx) {
-        out[outIdx] = i;
+    var dec = to - from + 1;
+    var out = [];
+    while (dec--) {
+      out[dec] = to--;
     }
 
     return out;
