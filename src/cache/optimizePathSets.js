@@ -38,7 +38,8 @@ function optimizePathSet(cache, cacheRoot, pathSet,
 
     // all other sentinels are short circuited.
     // Or we found a primitive (which includes null)
-    if (cache === null || (cache.$type && cache.$type !== $ref) || (typeof cache !== 'object')) {
+    if (cache === null || (cache.$type && cache.$type !== $ref) ||
+            (typeof cache !== 'object')) {
         return;
     }
 

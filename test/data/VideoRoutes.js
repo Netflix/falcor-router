@@ -109,66 +109,7 @@ module.exports = function() {
                     }
                 }];
             }
-        },
-        Falsey: function () {
-            return [{
-                route: 'videos.falsey.zero',
-                get: function(path) {
-                    return Observable.return({
-                        jsonGraph: {
-                            videos: {
-                                falsey: {
-                                    zero: $atom(0)
-                                }
-                            }
-                        },
-                        paths: [['videos', 'falsey', 'zero']]
-                    });
-                }
-            }, {
-                route: 'videos.falsey.null',
-                get: function(path) {
-                    return Observable.return({
-                        jsonGraph: {
-                            videos: {
-                                falsey: {
-                                    'null': $atom(null)
-                                }
-                            }
-                        },
-                        paths: [['videos', 'falsey', 'null']]
-                    });
-                }
-            }, {
-                route: 'videos.falsey.emptystring',
-                get: function(path) {
-                    return Observable.return({
-                        jsonGraph: {
-                            videos: {
-                                falsey: {
-                                    'emptystring': $atom('')
-                                }
-                            }
-                        },
-                        paths: [['videos', 'falsey', 'emptystring']]
-                    });
-                }
-            }, {
-                route: 'videos.falsey.false',
-                get: function(path) {
-                    return Observable.return({
-                        jsonGraph: {
-                            videos: {
-                                falsey: {
-                                    'false': $atom(false)
-                                }
-                            }
-                        },
-                        paths: [['videos', 'falsey', 'false']]
-                    });
-                }
-            }];
-        },
+        }
     };
 };
 
