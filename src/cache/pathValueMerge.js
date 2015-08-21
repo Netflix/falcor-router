@@ -19,7 +19,7 @@ module.exports = function pathValueMerge(cache, pathValue) {
 
     // References.  Needed for evaluationg suffixes in
     // both call and get/set.
-    else if (pathValue.value.$type === $ref) {
+    else if ((pathValue.value !== null) && (pathValue.value.$type === $ref)) {
         refs.push({
             path: pathValue.path,
             value: pathValue.value.value

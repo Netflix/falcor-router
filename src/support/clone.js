@@ -1,5 +1,5 @@
 module.exports = function copy(valueType) {
-    if (typeof valueType !== 'object') {
+    if ((typeof valueType !== 'object') || (valueType === null)) {
         return valueType;
     }
 

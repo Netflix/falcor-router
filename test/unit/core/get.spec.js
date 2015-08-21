@@ -54,8 +54,7 @@ describe('Get', function() {
             subscribe(noOp, done, done);
     });
 
-    // Needs fix for https://github.com/Netflix/falcor-router/issues/120 in pathValueMerge.js
-    xit('should not return empty atoms for a null path value', function(done) {
+    it('should not return empty atoms for a null path value', function(done) {
 
         var router = new R([{
                 route: 'videos.falsey',
