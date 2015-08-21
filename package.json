@@ -42,7 +42,8 @@
   },
   "scripts": {
     "test": "node node_modules/gulp/bin/gulp.js test-coverage",
-    "dist": "node node_modules/gulp/bin/gulp.js dist"
+    "dist": "node node_modules/gulp/bin/gulp.js dist",
+    "lint": "node node_modules/gulp/bin/gulp.js lint"
   },
   "repository": {
     "type": "git",
