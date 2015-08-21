@@ -8,7 +8,7 @@ var clean = require('gulp-clean');
 var eslint = require('gulp-eslint');
 var istanbul = require('gulp-istanbul');
 
-gulp.task('lint', ['lint-src', 'lint-test']);
+gulp.task('lint', ['lint-src', 'lint-test', 'lint-root']);
 
 gulp.task('lint-src', function() {
     return gulp.src('src/**/*.js').
@@ -38,6 +38,19 @@ gulp.task('lint-test', function() {
                 'max-len': [2, 200],
                 'no-unused-expressions': 0
             },
+            useEslintrc: true,
+        })).
+        pipe(eslint.format());
+});
+
+gulp.task('lint-root', function() {
+    return gulp.src('*.js').
+        pipe(eslint({
+            globals: {
+                'require': false,
+                'module': false
+            },
+            reset: true, // dz: remove me after linting is finished, else i can't do one at the time
             useEslintrc: true,
         })).
         pipe(eslint.format());
