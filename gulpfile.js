@@ -1,10 +1,6 @@
 var gulp = require('gulp');
 var mocha = require('gulp-mocha');
-var rename = require('gulp-rename');
-var license = require('gulp-license');
-var concat = require('gulp-concat');
 var bump = require('gulp-bump');
-var clean = require('gulp-clean');
 var eslint = require('gulp-eslint');
 var istanbul = require('gulp-istanbul');
 
@@ -17,8 +13,8 @@ gulp.task('lint-src', function() {
                 'require': false,
                 'module': false
             },
-            reset: true, // dz: remove me after linting is finished, else i can't do one at the time
-            useEslintrc: true,
+            reset: true,
+            useEslintrc: true
         })).
         pipe(eslint.format());
 });
@@ -33,12 +29,12 @@ gulp.task('lint-test', function() {
                 'xit': false,
                 'describe': false
             },
-            reset: true, // dz: remove me after linting is finished, else i can't do one at the time
+            reset: true,
             rules: {
                 'max-len': [2, 200],
                 'no-unused-expressions': 0
             },
-            useEslintrc: true,
+            useEslintrc: true
         })).
         pipe(eslint.format());
 });
@@ -50,8 +46,8 @@ gulp.task('lint-root', function() {
                 'require': false,
                 'module': false
             },
-            reset: true, // dz: remove me after linting is finished, else i can't do one at the time
-            useEslintrc: true,
+            reset: true,
+            useEslintrc: true
         })).
         pipe(eslint.format());
 });
