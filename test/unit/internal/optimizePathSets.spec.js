@@ -66,6 +66,78 @@ describe('optimizePathSets', function() {
         expect(out).to.deep.equal(expected);
     });
 
+    it('should short circuit on primitive string values', function() {
+        var cache = getCache();
+        var paths = [['videos', '6', 'summary']];
+
+        var out = optimizePathSets(cache, paths);
+        var expected = [];
+        expect(out).to.deep.equal(expected);
+    });
+
+    it('should short circuit on primitive number values', function() {
+        var cache = getCache();
+        var paths = [['videos', '7', 'summary']];
+
+        var out = optimizePathSets(cache, paths);
+        var expected = [];
+        expect(out).to.deep.equal(expected);
+    });
+
+    it('should short circuit on primitive boolean values', function() {
+        var cache = getCache();
+        var paths = [['videos', '8', 'summary']];
+
+        var out = optimizePathSets(cache, paths);
+        var expected = [];
+        expect(out).to.deep.equal(expected);
+    });
+
+    it('should short circuit on primitive null value', function() {
+        var cache = getCache();
+        var paths = [['videos', '9', 'summary']];
+
+        var out = optimizePathSets(cache, paths);
+        var expected = [];
+        expect(out).to.deep.equal(expected);
+    });
+
+    it('should not treat falsey string as missing', function() {
+        var cache = getCache();
+        var paths = [['falsey', 'string']];
+
+        var out = optimizePathSets(cache, paths);
+        var expected = [];
+        expect(out).to.deep.equal(expected);
+    });
+
+    it('should not treat falsey number as missing', function() {
+        var cache = getCache();
+        var paths = [['falsey', 'number']];
+
+        var out = optimizePathSets(cache, paths);
+        var expected = [];
+        expect(out).to.deep.equal(expected);
+    });
+
+    it('should not treat falsey boolean as missing', function() {
+        var cache = getCache();
+        var paths = [['falsey', 'boolean']];
+
+        var out = optimizePathSets(cache, paths);
+        var expected = [];
+        expect(out).to.deep.equal(expected);
+    });
+
+    it('should not treat falsey null as missing', function() {
+        var cache = getCache();
+        var paths = [['falsey', 'null']];
+
+        var out = optimizePathSets(cache, paths);
+        var expected = [];
+        expect(out).to.deep.equal(expected);
+    });
+
     it('should throw.', function() {
         var cache = getCache();
         var paths = [['videosList', 'inner', 'summary']];
@@ -79,6 +151,7 @@ describe('optimizePathSets', function() {
         }
         expect(caught).to.equals(true);
     });
+
 });
 
 function getCache() {
@@ -91,7 +164,19 @@ function getCache() {
             inner: $ref('videosList[3].inner')
         },
         videos: {
-            5: $atom('title')
+            5: $atom('title'),
+
+            // Short circuit on primitives
+            6: 'a',
+            7: 1,
+            8: true,
+            9: null
+        },
+        falsey: {
+            string: '',
+            number: 0,
+            boolean: false,
+            'null': null
         }
     };
 }

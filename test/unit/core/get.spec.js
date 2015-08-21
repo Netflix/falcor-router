@@ -10,6 +10,7 @@ var Observable = require('rx').Observable;
 var sinon = require('sinon');
 
 describe('Get', function() {
+
     it('should execute a simple route matching.', function(done) {
         var router = new R(Routes().Videos.Summary());
         var obs = router.
@@ -22,6 +23,123 @@ describe('Get', function() {
             expect(called, 'expect onNext called 1 time.').to.equal(true);
             done();
         });
+    });
+
+    it('should not return empty atoms for a zero path value', function(done) {
+
+        var router = new R([{
+                route: 'videos.falsey',
+                get: function(path) {
+                    return Observable.return({
+                        value: 0,
+                        path: ['videos', 'falsey']
+                    });
+                }
+        }]);
+
+        var onNext = sinon.spy();
+
+        router.get([['videos', 'falsey']]).
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    jsonGraph: {
+                        videos: {
+                            falsey: 0
+                        }
+                    }
+                });
+            }).
+            subscribe(noOp, done, done);
+    });
+
+    // Needs fix for https://github.com/Netflix/falcor-router/issues/120 in pathValueMerge.js
+    xit('should not return empty atoms for a null path value', function(done) {
+
+        var router = new R([{
+                route: 'videos.falsey',
+                get: function(path) {
+                    return Observable.return({
+                        value: null,
+                        path: ['videos', 'falsey']
+                    });
+                }
+        }]);
+
+        var onNext = sinon.spy();
+
+        router.get([['videos', 'falsey']]).
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    jsonGraph: {
+                        videos: {
+                            falsey: null
+                        }
+                    }
+                });
+            }).
+            subscribe(noOp, done, done);
+    });
+
+    it('should not return empty atoms for a false path value', function(done) {
+
+        var router = new R([{
+                route: 'videos.falsey',
+                get: function(path) {
+                    return Observable.return({
+                        value: false,
+                        path: ['videos', 'falsey']
+                    });
+                }
+        }]);
+
+        var onNext = sinon.spy();
+
+        router.get([['videos', 'falsey']]).
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    jsonGraph: {
+                        videos: {
+                            falsey: false
+                        }
+                    }
+                });
+            }).
+            subscribe(noOp, done, done);
+    });
+
+    it('should not return empty atoms for a empty string path value', function(done) {
+
+        var router = new R([{
+                route: 'videos.falsey',
+                get: function(path) {
+                    return Observable.return({
+                        value: '',
+                        path: ['videos', 'falsey']
+                    });
+                }
+        }]);
+
+        var onNext = sinon.spy();
+
+        router.get([['videos', 'falsey']]).
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    jsonGraph: {
+                        videos: {
+                            falsey: ''
+                        }
+                    }
+                });
+            }).
+            subscribe(noOp, done, done);
     });
 
     it('should validate that optimizedPathSets strips out already found data.', function(done) {
