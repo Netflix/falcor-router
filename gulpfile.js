@@ -6,12 +6,10 @@ var concat = require('gulp-concat');
 var bump = require('gulp-bump');
 var clean = require('gulp-clean');
 var eslint = require('gulp-eslint');
-var gulp = require('gulp');
 var istanbul = require('gulp-istanbul');
-var mocha = require('gulp-mocha');
-
 
 gulp.task('lint', ['lint-src', 'lint-test']);
+
 gulp.task('lint-src', function() {
     return gulp.src('src/**/*.js').
         pipe(eslint({
@@ -44,7 +42,6 @@ gulp.task('lint-test', function() {
         })).
         pipe(eslint.format());
 });
-
 
 gulp.task('bump', function() {
     return gulp.
