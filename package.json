@@ -19,13 +19,13 @@
   },
   "dependencies": {
     "rx": "~2.5.3",
-    "falcor-path-syntax": "0.2.1",
+    "falcor-path-syntax": "0.2.2",
     "falcor-path-utils": "0.3.0"
   },
   "devDependencies": {
     "chai": "^2.3.0",
     "coveralls": "^2.11.2",
-    "falcor": "0.1.4",
+    "falcor": "0.1.12",
     "gulp": "~3.8.11",
     "gulp-bump": "~0.1.13",
     "gulp-clean": "~0.3.1",
