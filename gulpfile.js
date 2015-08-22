@@ -1,17 +1,11 @@
 var gulp = require('gulp');
 var mocha = require('gulp-mocha');
-var rename = require('gulp-rename');
-var license = require('gulp-license');
-var concat = require('gulp-concat');
 var bump = require('gulp-bump');
-var clean = require('gulp-clean');
 var eslint = require('gulp-eslint');
-var gulp = require('gulp');
 var istanbul = require('gulp-istanbul');
-var mocha = require('gulp-mocha');
 
+gulp.task('lint', ['lint-src', 'lint-test', 'lint-root']);
 
-gulp.task('lint', ['lint-src', 'lint-test']);
 gulp.task('lint-src', function() {
     return gulp.src('src/**/*.js').
         pipe(eslint({
@@ -19,8 +13,8 @@ gulp.task('lint-src', function() {
                 'require': false,
                 'module': false
             },
-            reset: true, // dz: remove me after linting is finished, else i can't do one at the time
-            useEslintrc: true,
+            reset: true,
+            useEslintrc: true
         })).
         pipe(eslint.format());
 });
@@ -35,16 +29,28 @@ gulp.task('lint-test', function() {
                 'xit': false,
                 'describe': false
             },
-            reset: true, // dz: remove me after linting is finished, else i can't do one at the time
+            reset: true,
             rules: {
                 'max-len': [2, 200],
                 'no-unused-expressions': 0
             },
-            useEslintrc: true,
+            useEslintrc: true
         })).
         pipe(eslint.format());
 });
 
+gulp.task('lint-root', function() {
+    return gulp.src('*.js').
+        pipe(eslint({
+            globals: {
+                'require': false,
+                'module': false
+            },
+            reset: true,
+            useEslintrc: true
+        })).
+        pipe(eslint.format());
+});
 
 gulp.task('bump', function() {
     return gulp.
