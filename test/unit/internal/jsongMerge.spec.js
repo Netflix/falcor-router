@@ -13,6 +13,7 @@ var _ = require('lodash');
  * are.
  */
 describe('JSONG - Merge', function() {
+
     it('should write a simple path to the cache.', function() {
 
         var jsong = {
@@ -33,6 +34,91 @@ describe('JSONG - Merge', function() {
             references: []
         });
     });
+
+    it('should write a falsey number to the cache.', function() {
+
+        var jsong = {
+            jsonGraph: {
+                there: {
+                    is: 0
+                }
+            },
+            paths: [['there', 'is']]
+        };
+
+        var out = mergeTest(jsong);
+        expect(out).to.deep.equals({
+            values: [{
+                path: ['there', 'is'],
+                value: 0
+            }],
+            references: []
+        });
+    });
+
+    it('should write a falsey string to the cache.', function() {
+
+        var jsong = {
+            jsonGraph: {
+                there: {
+                    is: ''
+                }
+            },
+            paths: [['there', 'is']]
+        };
+
+        var out = mergeTest(jsong);
+        expect(out).to.deep.equals({
+            values: [{
+                path: ['there', 'is'],
+                value: ''
+            }],
+            references: []
+        });
+    });
+
+    it('should write a false boolean to the cache.', function() {
+
+        var jsong = {
+            jsonGraph: {
+                there: {
+                    is: false
+                }
+            },
+            paths: [['there', 'is']]
+        };
+
+        var out = mergeTest(jsong);
+        expect(out).to.deep.equals({
+            values: [{
+                path: ['there', 'is'],
+                value: false
+            }],
+            references: []
+        });
+    });
+
+    it('should write a null to the cache.', function() {
+
+        var jsong = {
+            jsonGraph: {
+                there: {
+                    is: null
+                }
+            },
+            paths: [['there', 'is']]
+        };
+
+        var out = mergeTest(jsong);
+        expect(out).to.deep.equals({
+            values: [{
+                path: ['there', 'is'],
+                value: null
+            }],
+            references: []
+        });
+    });
+
     it('should write a path with a reference to a value.', function() {
         var jsong = {
             jsonGraph: {
@@ -47,6 +133,7 @@ describe('JSONG - Merge', function() {
         };
         mergeTest(jsong);
     });
+
     it('should write a path with a reference to a branch.', function() {
 
         var jsong = {
@@ -63,6 +150,7 @@ describe('JSONG - Merge', function() {
 
         mergeTest(jsong);
     });
+
     it('should write a path with a reference to a reference.', function() {
         var jsong = {
             jsonGraph: {
@@ -77,6 +165,7 @@ describe('JSONG - Merge', function() {
 
         mergeTest(jsong);
     });
+
     it('should get the set refs.', function() {
         var jsong = {
             jsonGraph: {
