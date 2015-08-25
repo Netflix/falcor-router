@@ -6,6 +6,7 @@ var chai = require('chai');
 var expect = chai.expect;
 var falcor = require('falcor');
 var $ref = falcor.Model.ref;
+var $atom = falcor.Model.atom;
 var Observable = require('rx').Observable;
 var sinon = require('sinon');
 
@@ -23,6 +24,138 @@ describe('Get', function() {
             expect(called, 'expect onNext called 1 time.').to.equal(true);
             done();
         });
+    });
+
+    it('should not return empty atoms for a null value in jsonGraph', function(done) {
+
+        var router = new R([{
+                route: 'videos.falsey',
+                get: function(path) {
+                    return Observable.return({
+                        jsonGraph: {
+                            videos: {
+                                falsey: null
+                            }
+                        },
+                        paths: [['videos', 'falsey']]
+                    });
+                }
+        }]);
+
+        var onNext = sinon.spy();
+
+        router.get([['videos', 'falsey']]).
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    jsonGraph: {
+                        videos: {
+                            falsey: null
+                        }
+                    }
+                });
+            }).
+            subscribe(noOp, done, done);
+    });
+
+    it('should not return empty atoms for a null value atom in jsonGraph', function(done) {
+
+        var router = new R([{
+                route: 'videos.falsey',
+                get: function(path) {
+                    return Observable.return({
+                        jsonGraph: {
+                            videos: {
+                                falsey: $atom(null)
+                            }
+                        },
+                        paths: [['videos', 'falsey']]
+                    });
+                }
+        }]);
+
+        var onNext = sinon.spy();
+
+        router.get([['videos', 'falsey']]).
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    jsonGraph: {
+                        videos: {
+                            falsey: $atom(null)
+                        }
+                    }
+                });
+            }).
+            subscribe(noOp, done, done);
+    });
+
+    it('should not return empty atoms for a zero value in jsonGraph', function(done) {
+
+        var router = new R([{
+                route: 'videos.falsey',
+                get: function(path) {
+                    return Observable.return({
+                        jsonGraph: {
+                            videos: {
+                                falsey: 0
+                            }
+                        },
+                        paths: [['videos', 'falsey']]
+                    });
+                }
+        }]);
+
+        var onNext = sinon.spy();
+
+        router.get([['videos', 'falsey']]).
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    jsonGraph: {
+                        videos: {
+                            falsey: 0
+                        }
+                    }
+                });
+            }).
+            subscribe(noOp, done, done);
+    });
+
+    it('should not return empty atoms for a zero value atom in jsonGraph', function(done) {
+
+        var router = new R([{
+                route: 'videos.falsey',
+                get: function(path) {
+                    return Observable.return({
+                        jsonGraph: {
+                            videos: {
+                                falsey: $atom(0)
+                            }
+                        },
+                        paths: [['videos', 'falsey']]
+                    });
+                }
+        }]);
+
+        var onNext = sinon.spy();
+
+        router.get([['videos', 'falsey']]).
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    jsonGraph: {
+                        videos: {
+                            falsey: $atom(0)
+                        }
+                    }
+                });
+            }).
+            subscribe(noOp, done, done);
     });
 
     it('should not return empty atoms for a zero path value', function(done) {
