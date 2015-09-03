@@ -101,7 +101,7 @@ function merge(config, cache, message, depth, path, fromParent, fromKey) {
         // TODO: Can we hit a leaf node in the cache when traversing?
 
         if (messageRes !== undefined) {
-            var nextIgnoreCount = 0;
+            var nextIgnoreCount = ignoreCount;
 
             // TODO: Potential performance gain since we know that
             // references are always pathSets of 1, they can be evaluated
