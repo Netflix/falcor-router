@@ -34,7 +34,7 @@ module.exports = function pathValueMerge(cache, pathValue) {
 
     if (invalidations.length === 0) {
         // Merges the values/refs/invs into the cache.
-        innerPathValueMerge(cache, pathValue);
+        innerPathValueMerge(cache, cache, pathValue.value, pathValue.path, 0);
     }
 
     return {
@@ -44,70 +44,49 @@ module.exports = function pathValueMerge(cache, pathValue) {
     };
 };
 
-function innerPathValueMerge(cache, pathValue) {
-    var path = pathValue.path;
-    var curr = cache;
-    var next, key, cloned, outerKey, iteratorNote;
-    var i, len;
+/* eslint-disable no-constant-condition */
+function innerPathValueMerge(root, node, value, path, depth, reference) {
 
-    for (i = 0, len = path.length - 1; i < len; ++i) {
-        outerKey = path[i];
-
-        // Setup the memo and the key.
-        if (outerKey && typeof outerKey === 'object') {
-            iteratorNote = {};
-            key = iterateKeySet(outerKey, iteratorNote);
-        } else {
-            key = outerKey;
-            iteratorNote = false;
-        }
-
-        do {
-            next = curr[key];
-
-            if (!next) {
-                next = curr[key] = {};
-            }
-
-            if (iteratorNote) {
-                innerPathValueMerge(
-                    next, {
-                        path: path.slice(i + 1),
-                        value: pathValue.value
-                    });
-
-                if (!iteratorNote.done) {
-                    key = iterateKeySet(outerKey, iteratorNote);
-                }
-            }
-
-            else {
-                curr = next;
-            }
-        } while (iteratorNote && !iteratorNote.done);
-
-        // All memoized paths need to be stopped to avoid
-        // extra key insertions.
-        if (iteratorNote) {
-            return;
-        }
-    }
-
-
-    // TODO: This clearly needs a re-write.  I am just unsure of how i want
-    // this to look.  Plus i want to measure performance.
-    outerKey = path[i];
-
-    iteratorNote = {};
-    key = iterateKeySet(outerKey, iteratorNote);
+    var note = {};
+    var branch = depth < path.length - 1;
+    var keySet = path[depth];
+    var key = iterateKeySet(keySet, note);
 
     do {
+        var curr = node;
+        var type = curr.$type;
 
-        cloned = clone(pathValue.value);
-        curr[key] = cloned;
-
-        if (!iteratorNote.done) {
-            key = iterateKeySet(outerKey, iteratorNote);
+        while (type === $ref) {
+            curr = innerPathValueMerge(root, root, value, curr.value, 0, true);
+            type = curr.$type;
         }
-    } while (!iteratorNote.done);
+
+        if (type === void 0) {
+
+            var prev = curr;
+
+            curr = prev[key];
+
+            if (branch) {
+                if (!curr) {
+                    curr = prev[key] = {};
+                }
+                curr = innerPathValueMerge(root, curr, value, path, depth + 1, reference);
+            } else if (reference) {
+                if (!curr) {
+                    curr = prev[key] = {};
+                }
+            } else if (!curr) {
+                curr = prev[key] = clone(value);
+            }
+        }
+
+        key = iterateKeySet(keySet, note);
+        if (note.done) {
+            break;
+        }
+    } while (true);
+
+    return curr;
 }
+/* eslint-enable */

@@ -6,6 +6,7 @@ var expect = chai.expect;
 var falcor = require('falcor');
 var $ref = falcor.Model.ref;
 var $atom = falcor.Model.atom;
+var $pathValue = falcor.Model.pathValue;
 var errors = require('./../../../src/exceptions');
 var sinon = require("sinon");
 var Promise = require("promise");
@@ -298,7 +299,97 @@ describe('Call', function() {
             subscribe(noOp, done, done);
     });
 
+    it('should merge a reference then traverse that reference for subsequent returned pathValues.', function(done) {
+        var router = new R([{
+            route: ['getUser'],
+            call: function(callPath, args, suffixes) {
+                return Observable.return({
+                    'userName': 'ptaylor',
+                    'email': 'ptaylor@netflix.com',
+                    'telephone': '888-123-4567',
+                    'userID': 'xxx-yyy-zzz'
+                })
+                .flatMap(function(data) {
+                    return [
+                        $pathValue('user', $ref(['users', data.userID])),
+                        $pathValue('user.id', data.userID),
+                        $pathValue('user.email', data.email),
+                        $pathValue('user.username', data.userName),
+                    ];
+                });
+            }
+        }]);
 
+        router.call(
+            ['getUser'], [],
+            [['id'], ['email'], ['username']]
+        )
+        .subscribe(function(envelope) {
+            expect(envelope).to.deep.equal({
+                paths: [
+                    ['user', ['email', 'id', 'username']]
+                ],
+                jsonGraph: {
+                    'user': $ref(['users', 'xxx-yyy-zzz']),
+                    'users': {
+                        'xxx-yyy-zzz': {
+                            'id': 'xxx-yyy-zzz',
+                            'email': 'ptaylor@netflix.com',
+                            'username': 'ptaylor'
+                        }
+                    }
+                }
+            });
+            done();
+        });
+    });
+
+    it('should merge a reference under a branch then traverse that reference for subsequent returned pathValues.', function(done) {
+        var router = new R([{
+            route: ['operations', 'getUser'],
+            call: function(callPath, args, suffixes) {
+                return Observable.return({
+                    'userName': 'ptaylor',
+                    'email': 'ptaylor@netflix.com',
+                    'telephone': '888-123-4567',
+                    'userID': 'xxx-yyy-zzz'
+                })
+                .flatMap(function(data) {
+                    return [
+                        $pathValue(['operations', 'user'], $ref(['users', data.userID])),
+                        $pathValue(['operations', 'user', 'id'], data.userID),
+                        $pathValue(['operations', 'user', 'email'], data.email),
+                        $pathValue(['operations', 'user', 'username'], data.userName)
+                    ];
+                });
+            }
+        }]);
+
+        router.call(
+            ['operations', 'getUser'], [],
+            [['id'], ['email'], ['username']]
+        )
+        .subscribe(function(envelope) {
+            expect(envelope).to.deep.equal({
+                paths: [
+                    ['operations', 'user', ['email', 'id', 'username']]
+                ],
+                jsonGraph: {
+                    'operations': {
+                        'user': $ref(['users', 'xxx-yyy-zzz']),
+                    },
+                    'users': {
+                        'xxx-yyy-zzz': {
+                            'id': 'xxx-yyy-zzz',
+                            'email': 'ptaylor@netflix.com',
+                            'username': 'ptaylor'
+                        }
+                    }
+                }
+            });
+            done();
+        });
+    });
 
     it('should perform a simple call.', function(done) {
         var onNext = sinon.spy();
