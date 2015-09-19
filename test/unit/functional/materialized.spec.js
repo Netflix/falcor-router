@@ -13,7 +13,7 @@ describe('Materialized Paths.', function() {
             route: 'one[{integers:ids}]',
             get: function(aliasMap) {
                 return Observable.
-                    returnValue({
+                    return({
                         path: ['one', 0],
                         value: $ref('two.be[956]')
                     });
