@@ -44,13 +44,14 @@ function merge(config, cache, message, depth, path, fromParent, fromKey) {
     }
 
     // The message at this point should always be defined.
-    if (message.$type || typeOfMessage !== 'object') {
+    // Reached the end of the JSONG message path
+    if (message === null || typeOfMessage !== 'object' || message.$type) {
         fromParent[fromKey] = clone(message);
 
         // NOTE: If we have found a reference at our cloning position
         // and we have resolved our path then add the reference to
         // the unfulfilledRefernces.
-        if (message.$type === $ref) {
+        if (message && message.$type === $ref) {
             var references = config.references;
             references.push({
                 path: cloneArray(requestedPath),
@@ -65,7 +66,7 @@ function merge(config, cache, message, depth, path, fromParent, fromKey) {
             var values = config.values;
             values.push({
                 path: cloneArray(requestedPath),
-                value: message.type ? message.value : message
+                value: (message && message.type) ? message.value : message
             });
         }
 
@@ -85,6 +86,7 @@ function merge(config, cache, message, depth, path, fromParent, fromKey) {
         // just follow cache, else attempt to follow message.
         var cacheRes = cache[key];
         var messageRes = message[key];
+
         var nextPath = path;
         var nextDepth = depth + 1;
         if (updateRequestedPath) {
@@ -92,14 +94,14 @@ function merge(config, cache, message, depth, path, fromParent, fromKey) {
         }
 
         // Cache does not exist but message does.
-        if (!cacheRes) {
+        if (cacheRes === undefined) {
             cacheRes = cache[key] = {};
         }
 
         // TODO: Can we hit a leaf node in the cache when traversing?
 
-        if (messageRes) {
-            var nextIgnoreCount = 0;
+        if (messageRes !== undefined) {
+            var nextIgnoreCount = ignoreCount;
 
             // TODO: Potential performance gain since we know that
             // references are always pathSets of 1, they can be evaluated
@@ -107,7 +109,7 @@ function merge(config, cache, message, depth, path, fromParent, fromKey) {
 
             // There is only a need to consider message references since the
             // merge is only for the path that is provided.
-            if (messageRes.$type === $ref && depth < path.length - 1) {
+            if (messageRes && messageRes.$type === $ref && depth < path.length - 1) {
                 nextDepth = 0;
                 nextPath = catAndSlice(messageRes.value, path, depth + 1);
                 cache[key] = clone(messageRes);
