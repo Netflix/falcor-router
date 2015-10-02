@@ -57,13 +57,13 @@ describe('Get', function() {
     it('should not return empty atoms for a null path value', function(done) {
 
         var router = new R([{
-                route: 'videos.falsey',
-                get: function(path) {
-                    return Observable.return({
-                        value: null,
-                        path: ['videos', 'falsey']
-                    });
-                }
+            route: 'videos.falsey',
+            get: function(path) {
+                return Observable.return({
+                    value: null,
+                    path: ['videos', 'falsey']
+                });
+            }
         }]);
 
         var onNext = sinon.spy();
@@ -242,6 +242,38 @@ describe('Get', function() {
                 expect(title).to.equals(1);
                 expect(rating).to.equals(1);
                 expect(called).to.equals(1);
+            }).
+            subscribe(noOp, done, done);
+    });
+
+    it.only('should do precedence matching.', function(done) {
+        var getSpecific = sinon.spy(function() {
+            return {
+                path: ['a', 'specific'],
+                value: 'hello world'
+            };
+        });
+        var getKeys = sinon.spy(function(aliasMap) {
+            return {
+                path: ['a', 'specific'],
+                value: 'hello world'
+            };
+        });
+        var router = new R([{
+            route: 'a.specific',
+            get: getSpecific
+        }, {
+            route: 'a[{keys:keys}]',
+            get: getKeys
+        }]);
+
+        router.
+            get([
+                ['a', 'specific']
+            ]).
+            doAction(noOp, noOp, function() {
+                expect(getSpecific.calledOnce, 'getSpecific').to.be.ok;
+                expect(getKeys.calledOnce, 'getKeys').to.be.not.ok;
             }).
             subscribe(noOp, done, done);
     });
