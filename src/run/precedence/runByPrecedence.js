@@ -9,9 +9,9 @@ module.exports = function runByPrecedence(pathSet, matches, actionRunner) {
     // Precendence matching
     var sortedMatches = matches.
         sort(function(a, b) {
-            if (a.precedence > b.precedence) {
+            if (a.precedence < b.precedence) {
                 return 1;
-            } else if (a.precedence < b.precedence) {
+            } else if (a.precedence > b.precedence) {
                 return -1;
             }
 
