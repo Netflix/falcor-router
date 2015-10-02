@@ -379,7 +379,7 @@ describe('Get', function() {
             subscribe(noOp, done, done);
     });
 
-    it.only('should do precedence matching.', function(done) {
+    it('should do precedence matching.', function(done) {
         var getSpecific = sinon.spy(function() {
             return {
                 path: ['a', 'specific'],
