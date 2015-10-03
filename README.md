@@ -23,23 +23,22 @@ Normally Routers retrieve the data for their Virtual JSON resource from backend 
 First we create a folder for our application server.
 
 ~~~bash
-mkdir falcor-app-server
-cd falcor-app-server
+mkdir falcor-app-server && cd !$
 npm init
 ~~~
 
 Now we install the Falcor Router.
 
 ~~~bash
-npm install falcor-router --save
+npm i falcor-router -S
 ~~~
 
-Then install express and falcor-express.  Support for restify is also available, as is support for hapi via a [third-party implementation](https://github.com/dzannotti/falcor-hapi).
+Then install [express](http://expressjs.com/) and [falcor-express](https://github.com/Netflix/falcor-express).
 
 ~~~bash
-npm install express --save
-npm install falcor-express --save
+npm i express falcor-express -S
 ~~~
+> Support for [Restify is also available](https://github.com/Netflix/falcor-restify.git) (including a [demo](https://github.com/Netflix/falcor-restify-demo.git)): `npm i restify falcor-restify -S`—as is [support for Hapi](https://github.com/Netflix/falcor-router.git): `npm i hapi falcor-hapi -S`.
 
 Now we create an index.js file with the following contents:
 
