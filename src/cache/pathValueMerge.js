@@ -61,7 +61,7 @@ function innerPathValueMerge(root, node, value, path, depth, reference) {
             type = curr.$type;
         }
 
-        if (type === void 0) {
+        if (type === undefined) {
 
             var prev = curr;
 
@@ -71,7 +71,8 @@ function innerPathValueMerge(root, node, value, path, depth, reference) {
                 if (!curr) {
                     curr = prev[key] = {};
                 }
-                curr = innerPathValueMerge(root, curr, value, path, depth + 1, reference);
+                curr = innerPathValueMerge(
+                    root, curr, value, path, depth + 1, reference);
             } else if (reference) {
                 if (!curr) {
                     curr = prev[key] = {};
