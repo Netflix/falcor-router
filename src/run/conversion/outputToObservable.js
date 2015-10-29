@@ -7,10 +7,21 @@ var isArray = Array.isArray;
  * json graph) or an async type (observable or a thenable).
  */
 module.exports = function outputToObservable(valueOrObservable) {
-    var value = valueOrObservable;
+    var value = valueOrObservable,
+        oldObservable;
 
     // place holder.  Observables have highest precedence.
-    if (value.subscribe) { }
+    if (value.subscribe) {
+        if (!(value instanceof Observable)) {
+            oldObservable = value;
+            value = Observable.create(function(observer) {
+                var sub = oldObservable.subscribe(observer);
+                return function() {
+                    sub.dispose();
+                }
+            });
+        }
+    }
 
     // promise
     else if (value.then) {
