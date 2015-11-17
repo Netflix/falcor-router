@@ -6,9 +6,11 @@ var expect = chai.expect;
 var falcor = require('falcor');
 var $ref = falcor.Model.ref;
 var Observable = require('rx').Observable;
+var sinon = require('sinon');
 
+// TODO: Determine if we will still materialized paths.
 describe('Materialized Paths.', function() {
-    it('should validate routes that do not return all the paths asked for.', function(done) {
+    xit('should validate routes that do not return all the paths asked for.', function(done) {
         var routes = [{
             route: 'one[{integers:ids}]',
             get: function(aliasMap) {
@@ -53,7 +55,7 @@ describe('Materialized Paths.', function() {
             subscribe(noOp, done, done);
     });
 
-    it('should validate when no route is matched', function(done) {
+    xit('should validate when no route is matched', function(done) {
         var routes = [];
         var router = new R(routes);
         var obs = router.
@@ -80,6 +82,61 @@ describe('Materialized Paths.', function() {
                 count++;
             }, noOp, function() {
                 expect(count, 'expect onNext called 1 time.').to.equal(1);
+            }).
+            subscribe(noOp, done, done);
+    });
+
+    it('should never materialize (get).', function(done) {
+        var routes = [{
+            route: 'one[{integers}].summary',
+            get: function() {
+                return Observable.empty();
+            }
+        }];
+        var router = new R(routes);
+        var obs = router.
+            get([['one', [0, 1], 'summary']]);
+        var onNext = sinon.spy();
+
+        obs.
+            doAction(onNext, noOp, function() {
+                expect(onNext.calledOnce, 'expect onNext called 1 time.').to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    jsonGraph: { }
+                });
+            }).
+            subscribe(noOp, done, done);
+    });
+
+    it('should never materialize (set).', function(done) {
+        var routes = [{
+            route: 'one[{integers}].summary',
+            set: function() {
+                return Observable.empty();
+            }
+        }];
+        var router = new R(routes);
+        var obs = router.
+            set({
+                jsonGraph: {
+                    one: {
+                        0: {
+                            summary: 'yeah!'
+                        }
+                    }
+                },
+                paths: [
+                    ['one', 0, 'summary']
+                ]
+            });
+        var onNext = sinon.spy();
+
+        obs.
+            doAction(onNext, noOp, function() {
+                expect(onNext.calledOnce, 'expect onNext called 1 time.').to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    jsonGraph: { }
+                });
             }).
             subscribe(noOp, done, done);
     });

@@ -109,7 +109,9 @@ function merge(config, cache, message, depth, path, fromParent, fromKey) {
 
             // There is only a need to consider message references since the
             // merge is only for the path that is provided.
-            if (messageRes && messageRes.$type === $ref && depth < path.length - 1) {
+            if (messageRes && messageRes.$type === $ref &&
+                depth < path.length - 1) {
+
                 nextDepth = 0;
                 nextPath = catAndSlice(messageRes.value, path, depth + 1);
                 cache[key] = clone(messageRes);
