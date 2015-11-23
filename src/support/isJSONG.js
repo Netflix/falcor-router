@@ -1,3 +1,3 @@
 module.exports = function isJSONG(x) {
-    return x.jsonGraph;
+    return Boolean(x.jsonGraph);
 };
