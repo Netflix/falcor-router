@@ -17,13 +17,14 @@ describe('Get', function() {
         var obs = router.
             get([['videos', 'summary']]);
         var called = false;
-        obs.subscribe(function(res) {
-            expect(res).to.deep.equals(Expected().Videos.Summary);
-            called = true;
-        }, done, function() {
-            expect(called, 'expect onNext called 1 time.').to.equal(true);
-            done();
-        });
+        obs.
+            subscribe(function(res) {
+                expect(res).to.deep.equals(Expected().Videos.Summary);
+                called = true;
+            }, done, function() {
+                expect(called, 'expect onNext called 1 time.').to.equal(true);
+                done();
+            });
     });
 
     it('should not return empty atoms for a null value in jsonGraph', function(done) {
@@ -486,7 +487,7 @@ describe('Get', function() {
             subscribe(noOp, done, done);
     });
 
-    it('should tolerate routes which return an empty observable', function (done) {
+    xit('should tolerate routes which return an empty observable', function (done) {
         var router = new R([{
             route: 'videos[{integers:ids}].title',
             get: function (alias) {

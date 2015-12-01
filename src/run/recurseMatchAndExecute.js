@@ -29,7 +29,7 @@ module.exports = function recurseMatchAndExecute(
 function _recurseMatchAndExecute(
         match, actionRunner, paths,
         method, routerInstance, jsongCache) {
-    var missing = [];
+    var unhandledPaths = [];
     var invalidated = [];
     var reportedPaths = [];
     var currentMethod = method;
@@ -54,7 +54,10 @@ function _recurseMatchAndExecute(
                 return Observable.throw(e);
             }
 
+            // When there is explicitly not a match then we need to handle
+            // the unhandled paths.
             if (!matchedResults.length) {
+                unhandledPaths.push(nextPaths);
                 return Observable.empty();
             }
 
@@ -65,6 +68,11 @@ function _recurseMatchAndExecute(
                 flatMap(function(results) {
                     var value = results.value;
                     var suffix = results.match.suffix;
+
+                    // TODO: MaterializedPaths, use result.path to build up a
+                    // "foundPaths" array.  This could be used to materialize
+                    // if that is the case.  I don't think this is a
+                    // requirement, but it could be.
 
                     if (!isArray(value)) {
                         value = [value];
@@ -109,6 +117,13 @@ function _recurseMatchAndExecute(
                                     invalidated.push(invalidation);
                                 });
                         }
+
+                        // We need to add the unhandledPaths to the jsonGraph
+                        // response.
+                        else if (message.unhandledPaths) {
+                            unhandledPaths = unhandledPaths.
+                                concat(message.unhandledPaths);
+                        }
                     });
 
                     // Explodes and collapse the tree to remove
@@ -132,7 +147,7 @@ function _recurseMatchAndExecute(
         }, null).
         map(function() {
             return {
-                missing: missing,
+                unhandledPaths: unhandledPaths,
                 invalidated: invalidated,
                 jsonGraph: jsongCache,
                 reportedPaths: reportedPaths

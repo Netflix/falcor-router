@@ -16,7 +16,8 @@ gulp.task('lint-src', function() {
             reset: true,
             useEslintrc: true
         })).
-        pipe(eslint.format());
+        pipe(eslint.format()).
+        pipe(eslint.failAfterError());
 });
 
 gulp.task('lint-test', function() {
@@ -36,7 +37,8 @@ gulp.task('lint-test', function() {
             },
             useEslintrc: true
         })).
-        pipe(eslint.format());
+        pipe(eslint.format()).
+        pipe(eslint.failAfterError());
 });
 
 gulp.task('lint-root', function() {
@@ -49,7 +51,8 @@ gulp.task('lint-root', function() {
             reset: true,
             useEslintrc: true
         })).
-        pipe(eslint.format());
+        pipe(eslint.format()).
+        pipe(eslint.failAfterError());
 });
 
 gulp.task('bump', function() {

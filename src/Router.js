@@ -3,12 +3,9 @@ var parseTree = require('./parse-tree');
 var matcher = require('./operations/matcher');
 var normalizePathSets = require('./operations/ranges/normalizePathSets');
 var recurseMatchAndExecute = require('./run/recurseMatchAndExecute');
-var optimizePathSets = require('./cache/optimizePathSets');
-var pathValueMerge = require('./cache/pathValueMerge');
 var runGetAction = require('./run/get/runGetAction');
 var runSetAction = require('./run/set/runSetAction');
 var runCallAction = require('./run/call/runCallAction');
-var $atom = require('./support/types').$atom;
 var get = 'get';
 var set = 'set';
 var call = 'call';
@@ -43,23 +40,32 @@ Router.prototype = {
     get: function(paths) {
         var jsongCache = {};
         var action = runGetAction(this, jsongCache);
-        var router = this;
         var normPS = normalizePathSets(paths);
         return run(this._matcher, action, normPS, get, this, jsongCache).
-            map(function(jsongEnv) {
-                return materializeMissing(router, paths, jsongEnv);
+            map(function(details) {
+                var out = {
+                    jsonGraph: details.jsonGraph
+                };
+
+                if (details.unhandledPaths.length) {
+                    out.unhandledPaths = details.unhandledPaths;
+                }
+
+                return out;
             });
     },
 
     set: function(jsong) {
-        // TODO: Remove the modelContext and replace with just jsongEnv
-        // when http://github.com/Netflix/falcor-router/issues/24 is addressed
+
         var jsongCache = {};
         var action = runSetAction(this, jsong, jsongCache);
-        var router = this;
         return run(this._matcher, action, jsong.paths, set, this, jsongCache).
-            map(function(jsongEnv) {
-                return materializeMissing(router, jsong.paths, jsongEnv);
+            map(function(details) {
+                // Set does not have unhandled paths.  There is no cascading
+                // a set from one source to another.
+                return {
+                    jsonGraph: details.jsonGraph
+                };
             });
     },
 
@@ -68,29 +74,29 @@ Router.prototype = {
         var action = runCallAction(this, callPath, args,
                                    suffixes, paths, jsongCache);
         var callPaths = [callPath];
-        var router = this;
         return run(this._matcher, action, callPaths, call, this, jsongCache).
             map(function(jsongResult) {
                 var reportedPaths = jsongResult.reportedPaths;
-                var jsongEnv = materializeMissing(
-                    router,
-                    reportedPaths,
-                    jsongResult);
+                var jsongEnv = {
+                    jsonGraph: jsongResult.jsonGraph
+                };
 
-
+                // We call should report any paths or not.
                 if (reportedPaths.length) {
-                    jsongEnv.paths = reportedPaths;
+                    // Collapse the reported paths as they may be inefficient
+                    // to send across the wire.
+                    jsongEnv.paths = collapse(reportedPaths);
                 }
                 else {
                     jsongEnv.paths = [];
                     jsongEnv.jsonGraph = {};
                 }
 
+                // add the invalidated paths to the jsonGraph Envelope
                 var invalidated = jsongResult.invalidated;
                 if (invalidated && invalidated.length) {
                     jsongEnv.invalidated = invalidated;
                 }
-                jsongEnv.paths = collapse(jsongEnv.paths);
                 return jsongEnv;
             });
     }
@@ -100,23 +106,6 @@ function run(matcherFn, actionRunner, paths, method,
              routerInstance, jsongCache) {
     return recurseMatchAndExecute(
             matcherFn, actionRunner, paths, method, routerInstance, jsongCache);
-}
-
-function materializeMissing(router, paths, jsongEnv, missingAtom) {
-    var jsonGraph = jsongEnv.jsonGraph;
-    var materializedAtom = missingAtom || {$type: $atom};
-
-    // Optimizes the pathSets from the jsong then
-    // inserts atoms of undefined.
-    optimizePathSets(jsonGraph, paths, router.maxRefFollow).
-        forEach(function(optMissingPath) {
-            pathValueMerge(jsonGraph, {
-                path: optMissingPath,
-                value: materializedAtom
-            });
-        });
-
-    return {jsonGraph: jsonGraph};
 }
 
 Router.ranges = Keys.ranges;
