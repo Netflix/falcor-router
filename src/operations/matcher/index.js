@@ -51,6 +51,9 @@ module.exports = function matcher(rst) {
             throw err;
         }
 
+        // Reduce into groups multiple matched routes into route sets where
+        // each match matches the same route endpoint.  From here we can reduce
+        // the matched paths into the most optimal pathSet with collapse.
         var reducedMatched = matched.reduce(function(acc, matchedRoute) {
             if (!acc[matchedRoute.id]) {
                 acc[matchedRoute.id] = [];
@@ -61,15 +64,20 @@ module.exports = function matcher(rst) {
         }, {});
 
         var collapsedMatched = [];
+
+        // For every set of matched routes, collapse and reduce its matched set
+        // down to the minimal amount of collapsed sets.
         Object.
             keys(reducedMatched).
             forEach(function(k) {
                 var reducedMatch = reducedMatched[k];
 
-                // This one has no issues with collapsing, its ok to
-                // merge it back into the collapsedMatched array
+                // If the reduced match is of length one then there is no
+                // need to perform collapsing, as there is nothing to collapse
+                // over.
                 if (reducedMatch.length === 1) {
-                    return collapsedMatched.push(reducedMatch[0]);
+                    collapsedMatched.push(reducedMatch[0]);
+                    return;
                 }
 
                 // Since there are more than 1 routes, we need to see if
@@ -81,8 +89,12 @@ module.exports = function matcher(rst) {
                                     return x.requested;
                                 }));
 
+                // For every collapsed result we use the previously match result
+                // and update its requested and virtual path.  Then add that
+                // match to the collapsedMatched set.
                 collapsedResults.forEach(function(path, i) {
-                    var reducedVirtualPath = reducedMatch[i].virtual;
+                    var collapsedMatch = reducedMatch[i];
+                    var reducedVirtualPath = collapsedMatch.virtual;
                     path.forEach(function(atom, index) {
 
                         // If its not a routed atom then wholesale replace
@@ -90,13 +102,11 @@ module.exports = function matcher(rst) {
                             reducedVirtualPath[index] = atom;
                         }
                     });
+                    collapsedMatch.requested = path;
                     collapsedMatched.push(reducedMatch[i]);
                 });
             });
-        return {
-            matched: collapsedMatched,
-            missingPaths: missing
-        };
+        return collapsedMatched;
     };
 };
 
