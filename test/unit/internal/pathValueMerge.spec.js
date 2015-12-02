@@ -87,7 +87,8 @@ describe('PathValue - Merge', function() {
                 value: ['a']
             }],
             values: [],
-            invalidations: []
+            invalidations: [],
+            unhandledPaths: []
         });
     });
 
@@ -110,7 +111,8 @@ describe('PathValue - Merge', function() {
                 value: 5
             }],
             references: [],
-            invalidations: []
+            invalidations: [],
+            unhandledPaths: []
         });
     });
 
@@ -133,7 +135,8 @@ describe('PathValue - Merge', function() {
                 value: 5
             }],
             references: [],
-            invalidations: []
+            invalidations: [],
+            unhandledPaths: []
         });
         expect(cache).to.deep.equals({
             jsonGraph: {

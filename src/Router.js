@@ -49,6 +49,9 @@ Router.prototype = {
 
                 if (details.unhandledPaths.length) {
                     out.unhandledPaths = details.unhandledPaths;
+                    if (out.unhandledPaths.length > 1) {
+                        out.unhandledPaths = collapse(out.unhandledPaths);
+                    }
                 }
 
                 return out;

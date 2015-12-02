@@ -73,12 +73,13 @@ function _recurseMatchAndExecute(
                     // "foundPaths" array.  This could be used to materialize
                     // if that is the case.  I don't think this is a
                     // requirement, but it could be.
-
                     if (!isArray(value)) {
                         value = [value];
                     }
+
                     var invsRefsAndValues = mCGRI(jsongCache, value);
                     var invalidations = invsRefsAndValues.invalidations;
+                    var unhandled = invsRefsAndValues.unhandledPaths;
                     var messages = invsRefsAndValues.messages;
                     var pathsToExpand = [];
 
@@ -86,8 +87,13 @@ function _recurseMatchAndExecute(
                         pathsToExpand = invsRefsAndValues.references;
                     }
 
+                    // Merge the invalidations and unhandledPaths.
                     invalidations.forEach(function(invalidation) {
                         invalidated[invalidated.length] = invalidation.path;
+                    });
+
+                    unhandled.forEach(function(unhandledPath) {
+                        unhandledPaths[unhandledPaths.length] = unhandledPath;
                     });
 
                     // Merges the remaining suffix with remaining nextPaths

@@ -52,9 +52,12 @@ function convertNoteToJsongOrPV(matchAndPath, note) {
     if (isJSONG(incomingJSONGOrPathValues) &&
         !incomingJSONGOrPathValues.paths) {
 
+        // Copy the jsonGraphEnv except for use the matched paths
+        // as the paths.
         incomingJSONGOrPathValues = {
             jsonGraph: incomingJSONGOrPathValues.jsonGraph,
-            paths: [matchAndPath.path]
+            paths: [matchAndPath.path],
+            unhandledPaths: incomingJSONGOrPathValues.unhandledPaths
         };
     }
 

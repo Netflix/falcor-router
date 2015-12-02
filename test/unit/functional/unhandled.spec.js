@@ -4,7 +4,7 @@ var chai = require('chai');
 var expect = chai.expect;
 var sinon = require('sinon');
 
-describe.only('Unhandled Paths.', function() {
+describe('Unhandled Paths.', function() {
     it('should denote a route that does not exist as "unhandled paths" when the path is not matched.', function(done) {
         var router = new R([]);
         var onNext = sinon.spy();

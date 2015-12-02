@@ -18,9 +18,20 @@ function mergeCacheAndGatherRefsAndInvalidations(cache, jsongOrPVs) {
     var references = [];
     var len = -1;
     var invalidations = [];
+    var unhandledPaths = [];
     var messages = [];
     var values = [];
 
+    // Go through each of the outputs from the route end point and separate out
+    // each type of potential output.
+    //
+    // * There are values that need to be merged into the JSONGraphCache
+    // * There are references that need to be merged and potentially followed
+    // * There are messages that can alter the behavior of the
+    //   recurseMatchAndExecute cycle.
+    // * unhandledPaths, paths in which the route itself does not have the
+    //   ultimate answer to the path's existence. The route can only say that
+    //   it cannot handle this path.
     jsongOrPVs.forEach(function(jsongOrPV) {
         var refsAndValues = [];
 
@@ -40,6 +51,7 @@ function mergeCacheAndGatherRefsAndInvalidations(cache, jsongOrPVs) {
         var refs = refsAndValues.references;
         var vals = refsAndValues.values;
         var invs = refsAndValues.invalidations;
+        var unhandled = refsAndValues.unhandledPaths;
 
         if (vals && vals.length) {
             values = values.concat(vals);
@@ -47,6 +59,10 @@ function mergeCacheAndGatherRefsAndInvalidations(cache, jsongOrPVs) {
 
         if (invs && invs.length) {
             invalidations = invalidations.concat(invs);
+        }
+
+        if (unhandled && unhandled.length) {
+            unhandledPaths = unhandledPaths.concat(unhandled);
         }
 
         if (refs && refs.length) {
@@ -60,6 +76,7 @@ function mergeCacheAndGatherRefsAndInvalidations(cache, jsongOrPVs) {
         invalidations: invalidations,
         references: references,
         messages: messages,
-        values: values
+        values: values,
+        unhandledPaths: unhandledPaths
     };
 }
