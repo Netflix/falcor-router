@@ -411,6 +411,43 @@ describe('Call', function() {
             });
     });
 
+    it('should use suffixes and paths to produce unhandledPaths.', function(done) {
+        var called = 0;
+        getExtendedRouter().
+            call(['lolomo', 'pvAdd'], ['Thrillers'], [['name-unhandled']], [['length-unhandled']]).
+            doAction(function(jsongEnv) {
+                expect(jsongEnv).to.deep.equals({
+                    jsonGraph: {
+                        lolomo: $ref('lolomos[123]'),
+                        lolomos: {
+                            123: {
+                                0: $ref('listsById[0]'),
+                            }
+                        }
+                    },
+
+                    // The paths that were attempted must be added to the
+                    // envelope
+                    paths: [
+                        ['lolomo', 'length-unhandled'],
+                        ['lolomo', 0, 'name-unhandled']
+                    ],
+
+                    // The unhandledPaths should be optimized to the route that
+                    // it missed
+                    unhandledPaths: [
+                        ['listsById', 0, 'name-unhandled'],
+                        ['lolomos', 123, 'length-unhandled']
+                    ]
+                });
+                ++called;
+            }).
+            subscribe(noOp, done, function() {
+                expect(called).to.equals(1);
+                done();
+            });
+    });
+
 
     it('should allow item to be pushed onto collection.', function(done) {
         var onNext = sinon.spy();

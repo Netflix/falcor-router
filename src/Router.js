@@ -84,7 +84,7 @@ Router.prototype = {
                     jsonGraph: jsongResult.jsonGraph
                 };
 
-                // We call should report any paths or not.
+                // Call must report the paths that have been produced.
                 if (reportedPaths.length) {
                     // Collapse the reported paths as they may be inefficient
                     // to send across the wire.
@@ -100,6 +100,14 @@ Router.prototype = {
                 if (invalidated && invalidated.length) {
                     jsongEnv.invalidated = invalidated;
                 }
+
+                // Call can still produce unhandledPaths since the follow-up
+                // suffix and paths will produce the paths.
+                var unhandledPaths = jsongResult.unhandledPaths;
+                if (unhandledPaths && unhandledPaths.length) {
+                    jsongEnv.unhandledPaths = unhandledPaths;
+                }
+
                 return jsongEnv;
             });
     }
