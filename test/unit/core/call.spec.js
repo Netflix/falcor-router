@@ -421,7 +421,7 @@ describe('Call', function() {
                         lolomo: $ref('lolomos[123]'),
                         lolomos: {
                             123: {
-                                0: $ref('listsById[0]'),
+                                0: $ref('listsById[0]')
                             }
                         }
                     },
