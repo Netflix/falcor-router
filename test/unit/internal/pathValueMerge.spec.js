@@ -158,7 +158,7 @@ describe('PathValue - Merge', function() {
             values: [],
             references: [],
             invalidations: [{
-                path: ['there', 'was', 'value'],
+                path: ['there', 'was', 'value']
             }],
             unhandledPaths: []
         });
