@@ -116,6 +116,54 @@ describe('PathValue - Merge', function() {
         });
     });
 
+    it('should return a set of unhandledPaths', function() {
+        var cache = {
+            jsonGraph: {
+                there: {
+                    is: $ref('a')
+                }
+            }
+        };
+        var pVs = {
+            path: ['there', 'was', 'value'],
+            unhandled: true
+        };
+
+        var out = pathValueMerge(cache, pVs);
+        expect(out).to.deep.equals({
+            values: [],
+            references: [],
+            invalidations: [],
+            unhandledPaths: [
+                ['there', 'was', 'value']
+            ]
+        });
+    });
+
+    it('should return a set of invalidations', function() {
+        var cache = {
+            jsonGraph: {
+                there: {
+                    is: $ref('a')
+                }
+            }
+        };
+        var pVs = {
+            path: ['there', 'was', 'value'],
+            invalidated: true
+        };
+
+        var out = pathValueMerge(cache, pVs);
+        expect(out).to.deep.equals({
+            values: [],
+            references: [],
+            invalidations: [{
+                path: ['there', 'was', 'value'],
+            }],
+            unhandledPaths: []
+        });
+    });
+
     it('should get a pathSet of values.', function() {
         var cache = {
             jsonGraph: {
