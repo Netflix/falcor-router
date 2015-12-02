@@ -1,7 +1,6 @@
 var iterateKeySet = require('falcor-path-utils').iterateKeySet;
 var types = require('./../support/types');
 var $ref = types.$ref;
-var $atom = types.$atom;
 var clone = require('./../support/clone');
 var cloneArray = require('./../support/cloneArray');
 var catAndSlice = require('./../support/catAndSlice');
