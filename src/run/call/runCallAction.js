@@ -180,5 +180,8 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
         filter(function(note) {
             return note.kind !== 'C';
         }).
-        map(noteToJsongOrPV(matchAndPath));
+        map(noteToJsongOrPV(matchAndPath.path)).
+        map(function(jsonGraphOrPV) {
+            return [matchAndPath.match, jsonGraphOrPV];
+        });
 }
