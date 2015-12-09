@@ -250,7 +250,7 @@ describe('Set', function() {
                         to: {
                             a: 'aaa',
                             b: 'bbb',
-                            c: 'ccc',
+                            c: 'ccc'
                         }
                     }
                 },
@@ -266,7 +266,7 @@ describe('Set', function() {
                             to: {
                                 a: 'aaa',
                                 b: 'bbb',
-                                c: 'ccc',
+                                c: 'ccc'
                             }
                         }
                     }
