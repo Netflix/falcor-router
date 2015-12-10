@@ -96,14 +96,14 @@ describe('Set', function() {
                 done()
             }, noOp);
     });
-    
+
 
     xit('should call get() with the same type of arguments when no route for set() found.', function(done) {
         var router = new R([
             {
                 route: "titlesById[{integers:titleIds}].rating",
                 get: function(json) {
-                
+
                     var exception = false
                     try {
                         expect(json).to.deep.equals(
@@ -123,7 +123,7 @@ describe('Set', function() {
                         done()
                     }
                 }
-        
+
             }
         ]);
 
@@ -187,7 +187,7 @@ describe('Set', function() {
             subscribe(noOp, noOp, noOp);
     });
 
-    
+
     xit('should not transform set values before passing them to route.  ("")', function(done) {
         var router = new R([{
             route: 'titlesById[{integers:titleIds}].userRating',
@@ -230,6 +230,49 @@ describe('Set', function() {
                 ]
             }).
             subscribe(noOp, noOp, noOp);
+    });
+
+    it('should correctly collapse and pluck paths with jsonGraph and set.', function(done) {
+        var router = new R([{
+            route: ['path', 'to', ['a', 'b', 'c']],
+            set: function(jsonGraph) {
+                return {
+                    paths: [['path', 'to', ['a', 'b', 'c']]],
+                    jsonGraph: jsonGraph
+                };
+            }
+        }]);
+        var onNext = sinon.spy();
+        router.
+            set({
+                jsonGraph: {
+                    path: {
+                        to: {
+                            a: 'aaa',
+                            b: 'bbb',
+                            c: 'ccc'
+                        }
+                    }
+                },
+                paths: [
+                    ['path', 'to', ['a', 'b', 'c']]
+                ]
+            }).
+            doAction(onNext, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    jsonGraph: {
+                        path: {
+                            to: {
+                                a: 'aaa',
+                                b: 'bbb',
+                                c: 'ccc'
+                            }
+                        }
+                    }
+                });
+            }).
+            subscribe(noOp, done, done);
     });
 
 

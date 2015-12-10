@@ -54,12 +54,11 @@ function _recurseMatchAndExecute(
                 return Observable.throw(e);
             }
 
-            if (!matchedResults.matched.length) {
+            if (!matchedResults.length) {
                 return Observable.empty();
             }
 
-            var matchedResult = matchedResults.matched;
-            return runByPrecedence(nextPaths, matchedResult, actionRunner).
+            return runByPrecedence(nextPaths, matchedResults, actionRunner).
 
                 // Generate from the combined results the next requestable paths
                 // and insert errors / values into the cache.
@@ -122,7 +121,6 @@ function _recurseMatchAndExecute(
                         pathsToExpand = collapse(pathsToExpand);
                     }
 
-                    missing = missing.concat(matchedResults.missingPaths);
                     return Observable.
                         from(pathsToExpand);
                 }).
