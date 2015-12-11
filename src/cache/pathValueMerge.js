@@ -10,15 +10,16 @@ module.exports = function pathValueMerge(cache, pathValue) {
     var refs = [];
     var values = [];
     var invalidations = [];
+    var valueType = true;
 
-    // The invalidation case.  Needed for reporting
-    // of call.
-    if (pathValue.value === undefined) {
+    // The pathValue invalidation shape.
+    if (pathValue.invalidated === true) {
         invalidations.push({path: pathValue.path});
+        valueType = false;
     }
 
-    // References.  Needed for evaluationg suffixes in
-    // both call and get/set.
+    // References.  Needed for evaluationg suffixes in all three types, get,
+    // call and set.
     else if ((pathValue.value !== null) && (pathValue.value.$type === $ref)) {
         refs.push({
             path: pathValue.path,
@@ -26,14 +27,14 @@ module.exports = function pathValueMerge(cache, pathValue) {
         });
     }
 
-
     // Values.  Needed for reporting for call.
     else {
         values.push(pathValue);
     }
 
-    if (invalidations.length === 0) {
-        // Merges the values/refs/invs into the cache.
+    // If the type of pathValue is a valueType (reference or value) then merge
+    // it into the jsonGraph cache.
+    if (valueType) {
         innerPathValueMerge(cache, pathValue);
     }
 

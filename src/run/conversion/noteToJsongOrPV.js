@@ -1,50 +1,34 @@
 var isJSONG = require('./../../support/isJSONG');
-var JSONGraphError = require('./../../JSONGraphError');
 var onNext = 'N';
+var errorToPathValue = require('./errorToPathValue');
 
-module.exports = function noteToJsongOrPV(match) {
+/**
+ * Takes a path and for every onNext / onError it will attempt
+ * to pluck the value or error from the note and process it
+ * with the path object passed in.
+ * @param {PathSet|PathSet[]} pathOrPathSet -
+ * @param {Boolean} isPathSet -
+ */
+module.exports = function noteToJsongOrPV(pathOrPathSet, isPathSet) {
     return function(note) {
-        return convertNoteToJsongOrPV(match, note);
+        return convertNoteToJsongOrPV(pathOrPathSet, note, isPathSet);
     };
 };
 
-function convertNoteToJsongOrPV(matchAndPath, note) {
+function convertNoteToJsongOrPV(pathOrPathSet, note, isPathSet) {
     var incomingJSONGOrPathValues;
     var kind = note.kind;
 
+    // Take what comes out of the function and assume its either a pathValue or
+    // jsonGraph.
     if (kind === onNext) {
         incomingJSONGOrPathValues = note.value;
     }
 
+    // Convert the error to a pathValue.
     else {
-        var typeValue = {
-            $type: 'error',
-            value: {}
-        };
-        var exception = {};
-
-        // Rx3, what will this be called?
-        if (note.exception) {
-            exception = note.exception;
-        }
-
-        if (exception.throwToNext) {
-            throw exception;
-        }
-
-        // If it is a special JSONGraph error then pull all the data
-        if (exception instanceof JSONGraphError) {
-            typeValue = exception.typeValue;
-        }
-
-        else if (exception instanceof Error) {
-            typeValue.value.message = exception.message;
-        }
-
-        incomingJSONGOrPathValues = {
-            path: matchAndPath.path,
-            value: typeValue
-        };
+        incomingJSONGOrPathValues =
+            errorToPathValue(note.exception, pathOrPathSet);
     }
 
     // If its jsong we may need to optionally attach the
@@ -54,10 +38,10 @@ function convertNoteToJsongOrPV(matchAndPath, note) {
 
         incomingJSONGOrPathValues = {
             jsonGraph: incomingJSONGOrPathValues.jsonGraph,
-            paths: [matchAndPath.path]
+            paths: isPathSet && pathOrPathSet || [pathOrPathSet]
         };
     }
 
-    return [matchAndPath.match, incomingJSONGOrPathValues];
+    return incomingJSONGOrPathValues;
 }
 

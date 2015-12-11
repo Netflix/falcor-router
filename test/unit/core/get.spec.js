@@ -17,13 +17,14 @@ describe('Get', function() {
         var obs = router.
             get([['videos', 'summary']]);
         var called = false;
-        obs.subscribe(function(res) {
-            expect(res).to.deep.equals(Expected().Videos.Summary);
-            called = true;
-        }, done, function() {
-            expect(called, 'expect onNext called 1 time.').to.equal(true);
-            done();
-        });
+        obs.
+            subscribe(function(res) {
+                expect(res).to.deep.equals(Expected().Videos.Summary);
+                called = true;
+            }, done, function() {
+                expect(called, 'expect onNext called 1 time.').to.equal(true);
+                done();
+            });
     });
 
     it('should not return empty atoms for a null value in jsonGraph', function(done) {
@@ -494,16 +495,16 @@ describe('Get', function() {
             }
         }]);
         var obs = router.get([["videos", 1, "title"]]);
-        var called = false;
-        obs.subscribe(function (res) {
-            expect(res).to.deep.equals({
-                jsonGraph: {videos: {1: {title: {$type: 'atom'}}}}
-            });
-            called = true;
-        }, done, function () {
-            expect(called, 'expect onNext called 1 time.').to.equal(true);
-            done();
-        });
+        var onNext = sinon.spy();
+
+        obs.
+            doAction(onNext, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    jsonGraph: {videos: {1: {title: {$type: 'atom'}}}}
+                });
+            }).
+            subscribe(noOp, done, done);
     });
 
     function getPrecedenceRouter(onTitle, onRating) {
