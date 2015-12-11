@@ -2,7 +2,6 @@ var R = require('../../../src/Router');
 var noOp = function() {};
 var chai = require('chai');
 var expect = chai.expect;
-var falcor = require('falcor');
 var sinon = require('sinon');
 var pathValueMerge = require('./../../../src/cache/pathValueMerge');
 var Observable = require('rx').Observable;
