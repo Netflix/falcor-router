@@ -6,11 +6,13 @@ var expect = chai.expect;
 var falcor = require('falcor');
 var $ref = falcor.Model.ref;
 var $atom = falcor.Model.atom;
-var errors = require('./../../../src/exceptions');
 var sinon = require("sinon");
 var Promise = require("promise");
 var doneOnError = require('./../../doneOnError');
 var errorOnCompleted = require('./../../errorOnCompleted');
+var errorOnNext = require('./../../errorOnNext');
+var CallNotFoundError = require('./../../../src/errors/CallNotFoundError');
+var CallRequiresPathsError = require('./../../../src/errors/CallRequiresPathsError');
 
 describe('Call', function() {
 
@@ -232,20 +234,14 @@ describe('Call', function() {
     it('should cause the router to on error only.', function(done) {
         getRouter(true).
             call(['videos', 1234, 'rating'], [5]).
-            doAction(function() {
-                throw new Error('Should not be called.  onNext');
-            }, function(x) {
-                expect(x.message).to.equal(errors.callJSONGraphWithouPaths);
-            }, function() {
-                throw new Error('Should not be called.  onCompleted');
+            doAction(noOp, function(x) {
+                expect(x instanceof CallRequiresPathsError).to.be.ok;
             }).
-            subscribe(noOp, function(e) {
-                if (e.message === errors.callJSONGraphWithouPaths) {
-                    done();
-                    return;
-                }
-                done(e);
-            });
+            subscribe(
+                errorOnNext(done),
+                doneOnError(done),
+                errorOnCompleted(done)
+            );
     });
 
 
@@ -493,15 +489,13 @@ describe('Call', function() {
                 expect(onError.calledOnce).to.be.ok;
 
                 var args = onError.getCall(0).args;
-                expect(args[0] instanceof Error).to.be.ok;
-                expect(args[0].message).to.deep.equals('function does not exist');
+                expect(args[0] instanceof CallNotFoundError).to.be.ok;
             }).
-            subscribe(noOp, function(e) {
-                if (e.message === 'function does not exist') {
-                    return done();
-                }
-                return done(e);
-            }, done);
+            subscribe(
+                errorOnNext(done),
+                doneOnError(done),
+                errorOnCompleted(done)
+            );
     });
 
     it('should throw when calling a function that does not exist, but get handler does.', function(done) {
@@ -517,15 +511,13 @@ describe('Call', function() {
                 expect(onError.calledOnce).to.be.ok;
 
                 var args = onError.getCall(0).args;
-                expect(args[0] instanceof Error).to.be.ok;
-                expect(args[0].message).to.deep.equals('function does not exist');
+                expect(args[0] instanceof CallNotFoundError).to.be.ok;
             }).
-            subscribe(noOp, function(e) {
-                if (e.message === 'function does not exist') {
-                    return done();
-                }
-                return done(e);
-            }, done);
+            subscribe(
+                errorOnNext(done),
+                doneOnError(done),
+                errorOnCompleted(done)
+            );
     });
 
     function getCallRouter() {

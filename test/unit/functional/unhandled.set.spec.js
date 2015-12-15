@@ -14,7 +14,7 @@ describe('#set', function() {
         var onUnhandledPaths = sinon.spy(function convert(paths) {
             return Observable.empty();
         });
-        router.onUnhandledSet(onUnhandledPaths);
+        router.onUnhandledOperation({set: onUnhandledPaths});
 
         var obs = router.
             set({
@@ -52,18 +52,20 @@ describe('#set', function() {
             }).
             subscribe(noOp, done, done);
     });
-    it('should call the onUnhandledSet when the route completely misses a route.', function(done) {
+    it('should call the onUnhandledOperation when the route completely misses a route.', function(done) {
         var router = new R([]);
         var onUnhandledPaths = sinon.spy(function convert(jsonGraphEnv) {
-            return jsonGraphEnv.paths.reduce(function(jsonGraph, path) {
+            var returnValue = jsonGraphEnv.paths.reduce(function(jsonGraph, path) {
                 pathValueMerge(jsonGraph.jsonGraph, {
                     path: path,
                     value: 'missing'
                 });
                 return jsonGraph;
             }, {jsonGraph: {}});
+
+            return Observable.return(returnValue);
         });
-        router.onUnhandledSet(onUnhandledPaths);
+        router.onUnhandledOperation({set: onUnhandledPaths});
 
         var obs = router.
             set({
@@ -102,7 +104,7 @@ describe('#set', function() {
             subscribe(noOp, done, done);
     });
 
-    it('should call the onUnhandledSet when the route partially misses a route.', function(done) {
+    it('should call the onUnhandledOperation when the route partially misses a route.', function(done) {
         var router = new R([{
             route: 'videos.length',
             set: function() {
@@ -113,15 +115,16 @@ describe('#set', function() {
             }
         }]);
         var onUnhandledPaths = sinon.spy(function convert(jsonGraphEnv) {
-            return jsonGraphEnv.paths.reduce(function(jsonGraph, path) {
+            var returnValue = jsonGraphEnv.paths.reduce(function(jsonGraph, path) {
                 pathValueMerge(jsonGraph.jsonGraph, {
                     path: path,
                     value: 'missing'
                 });
                 return jsonGraph;
             }, {jsonGraph: {}});
+            return Observable.return(returnValue);
         });
-        router.onUnhandledSet(onUnhandledPaths);
+        router.onUnhandledOperation({set: onUnhandledPaths});
 
         var obs = router.
             set({
@@ -199,9 +202,9 @@ describe('#set', function() {
                 path: unicorn,
                 value: 'missing'
             });
-            return next;
+            return Observable.return(next);
         });
-        router.onUnhandledSet(onUnhandledPaths);
+        router.onUnhandledOperation({set: onUnhandledPaths});
 
         var obs = router.
             set({

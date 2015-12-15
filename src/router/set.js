@@ -12,6 +12,7 @@ var getValue = require('./../cache/getValue');
 var normalizePathSets = require('../operations/ranges/normalizePathSets');
 var pathUtils = require('falcor-path-utils');
 var collapse = pathUtils.collapse;
+var mCGRI = require('./../run/mergeCacheAndGatherRefsAndInvalidations');
 
 /**
  * @returns {Observable.<JSONGraph>}
@@ -36,7 +37,7 @@ module.exports = function routerSet(jsonGraph) {
             // If there is an unhandler then we should call that method and
             // provide the subset of jsonGraph that represents the missing
             // routes.
-            if (details.unhandledPaths.length && router._unhandled.set) {
+            if (details.unhandledPaths.length && router._unhandled) {
                 var unhandledPaths = details.unhandledPaths;
                 var jsonGraphFragment = {};
 
@@ -115,8 +116,18 @@ module.exports = function routerSet(jsonGraph) {
                         return pV.path;
                     }));
 
-                return router._unhandled.set(out, unhandledPaths,
-                                             jsonGraphEnvelope);
+                return router._unhandled.
+                    set(jsonGraphEnvelope).
+
+                    // Merge the solution back into the overall message.
+                    map(function(unhandledJsonGraphEnv) {
+                        mCGRI(out.jsonGraph, [{
+                            jsonGraph: unhandledJsonGraphEnv.jsonGraph,
+                            paths: unhandledPaths
+                        }]);
+                        return out;
+                    }).
+                    defaultIfEmpty(out);
             }
 
             return Observable.return(out);

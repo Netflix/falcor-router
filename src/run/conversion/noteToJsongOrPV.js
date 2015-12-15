@@ -28,7 +28,7 @@ function convertNoteToJsongOrPV(pathOrPathSet, note, isPathSet) {
     // Convert the error to a pathValue.
     else {
         incomingJSONGOrPathValues =
-            errorToPathValue(note.exception, pathOrPathSet);
+            errorToPathValue(note.error, pathOrPathSet);
     }
 
     // If its jsong we may need to optionally attach the

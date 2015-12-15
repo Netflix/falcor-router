@@ -13,14 +13,14 @@ describe('#get', function() {
         var onUnhandledPaths = sinon.spy(function convert(paths) {
             return Observable.empty();
         });
-        router.onUnhandledGet(onUnhandledPaths);
+        router.onUnhandledOperation({get: onUnhandledPaths});
 
         var obs = router.
             get([['videos', 'summary']]);
         var onNext = sinon.spy();
         obs.
             doAction(onNext, noOp, function() {
-                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.calledOnce, 'onNext should be called.').to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
                         videos: {
@@ -35,18 +35,19 @@ describe('#get', function() {
             }).
             subscribe(noOp, done, done);
     });
-    it('should call the onUnhandledGet when the route completely misses a route.', function(done) {
+    it('should call the onUnhandledOperation when the route completely misses a route.', function(done) {
         var router = new R([]);
         var onUnhandledPaths = sinon.spy(function convert(paths) {
-            return paths.reduce(function(jsonGraph, path) {
+            var returnValue = paths.reduce(function(jsonGraph, path) {
                 pathValueMerge(jsonGraph.jsonGraph, {
                     path: path,
                     value: 'missing'
                 });
                 return jsonGraph;
             }, {jsonGraph: {}});
+            return Observable.return(returnValue);
         });
-        router.onUnhandledGet(onUnhandledPaths);
+        router.onUnhandledOperation({get: onUnhandledPaths});
 
         var obs = router.
             get([['videos', 'summary']]);
@@ -69,7 +70,7 @@ describe('#get', function() {
             subscribe(noOp, done, done);
     });
 
-    it('should call the onUnhandledGet when the route partially misses a route.', function(done) {
+    it('should call the onUnhandledOperation when the route partially misses a route.', function(done) {
         var router = new R([{
             route: 'videos.length',
             get: function() {
@@ -80,15 +81,16 @@ describe('#get', function() {
             }
         }]);
         var onUnhandledPaths = sinon.spy(function convert(paths) {
-            return paths.reduce(function(jsonGraph, path) {
+            var returnValue = paths.reduce(function(jsonGraph, path) {
                 pathValueMerge(jsonGraph.jsonGraph, {
                     path: path,
                     value: 'missing'
                 });
                 return jsonGraph;
             }, {jsonGraph: {}});
+            return Observable.return(returnValue);
         });
-        router.onUnhandledGet(onUnhandledPaths);
+        router.onUnhandledOperation({get: onUnhandledPaths});
 
         var obs = router.
             get([['videos', ['length', 'summary']]]);
