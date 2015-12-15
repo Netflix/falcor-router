@@ -1,14 +1,8 @@
 var Keys = require('./Keys');
 var parseTree = require('./parse-tree');
 var matcher = require('./operations/matcher');
-var recurseMatchAndExecute = require('./run/recurseMatchAndExecute');
-var runCallAction = require('./run/call/runCallAction');
-var call = 'call';
-var pathUtils = require('falcor-path-utils');
-var collapse = pathUtils.collapse;
 var JSONGraphError = require('./errors/JSONGraphError');
 var MAX_REF_FOLLOW = 50;
-var unhandled = require('./run/unhandled');
 
 var Router = function(routes, options) {
     var opts = options || {};
@@ -18,7 +12,6 @@ var Router = function(routes, options) {
     this._matcher = matcher(this._rst);
     this._debug = opts.debug;
     this.maxRefFollow = opts.maxRefFollow || MAX_REF_FOLLOW;
-    this._unhandled = {};
 };
 
 Router.createClass = function(routes) {
@@ -42,17 +35,6 @@ Router.prototype = {
     get: require('./router/get'),
 
     /**
-     * Takes in a function to call that has the same return inteface as any
-     * route that will be called in the event of "unhandledPaths" on a get.
-     *
-     * @param {Function} unhandledHandler -
-     * @returns {undefined}
-     */
-    onUnhandledGet: function(unhandledHandler) {
-        this._unhandled.get = unhandled(this, unhandledHandler);
-    },
-
-    /**
      * Takes in a jsonGraph and outputs a Observable.<jsonGraph>.  The set
      * method will use get until it evaluates the last key of the path inside
      * of paths.  At that point it will produce an intermediate structure that
@@ -68,58 +50,26 @@ Router.prototype = {
     set: require('./router/set'),
 
     /**
-     * Takes in a function to call that has the same return inteface as any
-     * route that will be called in the event of "unhandledPaths" on a set.
+     * Invokes a function in the DataSource's JSONGraph object at the path
+     * provided in the callPath argument.  If there are references that are
+     * followed, a get will be performed to get to the call function.
      *
-     * What will come into the set function will be the subset of the jsonGraph
-     * that represents the unhandledPaths of set.
-     *
-     * @param {Function} unhandledHandler -
-     * @returns {undefined}
+     * @param {Path} callPath -
+     * @param {Array.<*>} args -
+     * @param {Array.<PathSet>} refPaths -
+     * @param {Array.<PathSet>} thisPaths -
      */
-    onUnhandledSet: function(unhandledHandler) {
-        this._unhandled.set = unhandled(this, unhandledHandler);
-    },
+    call: require('./router/call'),
 
-    call: function(callPath, args, suffixes, paths) {
-        var jsongCache = {};
-        var action = runCallAction(this, callPath, args,
-                                   suffixes, paths, jsongCache);
-        var callPaths = [callPath];
-        return run(this._matcher, action, callPaths, call, this, jsongCache).
-            map(function(jsongResult) {
-                var reportedPaths = jsongResult.reportedPaths;
-                var jsongEnv = {
-                    jsonGraph: jsongResult.jsonGraph
-                };
-
-                // Call must report the paths that have been produced.
-                if (reportedPaths.length) {
-                    // Collapse the reported paths as they may be inefficient
-                    // to send across the wire.
-                    jsongEnv.paths = collapse(reportedPaths);
-                }
-                else {
-                    jsongEnv.paths = [];
-                    jsongEnv.jsonGraph = {};
-                }
-
-                // add the invalidated paths to the jsonGraph Envelope
-                var invalidated = jsongResult.invalidated;
-                if (invalidated && invalidated.length) {
-                    jsongEnv.invalidated = invalidated;
-                }
-
-                return jsongEnv;
-            });
+    /**
+     * When a route misses on a call, get, or set the unhandledDataSource will
+     * have a chance to fulfill that request.
+     * @param {DataSource} dataSource -
+     */
+    onUnhandledOperation: function unhandledDataSource(dataSource) {
+        this._unhandled = dataSource;
     }
 };
-
-function run(matcherFn, actionRunner, paths, method,
-             routerInstance, jsongCache) {
-    return recurseMatchAndExecute(matcherFn, actionRunner, paths, method,
-                                  routerInstance, jsongCache);
-}
 
 Router.ranges = Keys.ranges;
 Router.integers = Keys.integers;

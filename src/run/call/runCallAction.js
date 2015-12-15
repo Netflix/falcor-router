@@ -1,7 +1,7 @@
 var isJSONG = require('./../../support/isJSONG');
 var outputToObservable = require('./../conversion/outputToObservable');
 var noteToJsongOrPV = require('./../conversion/noteToJsongOrPV');
-var errors = require('./../../exceptions');
+var CallRequiresPathsError = require('./../../errors/CallRequiresPathsError');
 var mCGRI = require('./../mergeCacheAndGatherRefsAndInvalidations');
 var Observable = require('rx').Observable;
 
@@ -64,7 +64,7 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
                         // This is a hard error and must fully stop the server
                         if (!r.paths) {
                             var err =
-                                new Error(errors.callJSONGraphWithouPaths);
+                                new CallRequiresPathsError();
                             err.throwToNext = true;
                             throw err;
                         }

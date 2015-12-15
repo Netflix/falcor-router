@@ -4,6 +4,7 @@ var recurseMatchAndExecute = require('../run/recurseMatchAndExecute');
 var normalizePathSets = require('../operations/ranges/normalizePathSets');
 var materialize = require('../run/materialize');
 var Observable = require('rx').Observable;
+var mCGRI = require('./../run/mergeCacheAndGatherRefsAndInvalidations');
 
 /**
  * The router get function
@@ -26,14 +27,23 @@ module.exports = function routerGet(paths) {
 
             // If the unhandledPaths are present then we need to
             // call the backup method for generating materialized.
-            if (details.unhandledPaths.length && router._unhandled.get) {
+            if (details.unhandledPaths.length && router._unhandled) {
                 var unhandledPaths = details.unhandledPaths;
 
                 // The 3rd argument is the beginning of the actions arguments,
                 // which for get is the same as the unhandledPaths.
-                return router._unhandled.get(out,
-                                             unhandledPaths,
-                                             unhandledPaths);
+                return router._unhandled.
+                    get(unhandledPaths).
+
+                    // Merge the solution back into the overall message.
+                    map(function(jsonGraphFragment) {
+                        mCGRI(out.jsonGraph, [{
+                            jsonGraph: jsonGraphFragment.jsonGraph,
+                            paths: unhandledPaths
+                        }]);
+                        return out;
+                    }).
+                    defaultIfEmpty(out);
             }
 
             return Observable.return(out);
