@@ -6,7 +6,8 @@ var Observable = require('rx').Observable;
 var spreadPaths = require('./../support/spreadPaths');
 var pathValueMerge = require('./../cache/pathValueMerge');
 var optimizePathSets = require('./../cache/optimizePathSets');
-var hasIntersectionWithTree = require('./../operations/matcher/intersection/hasIntersectionWithTree');
+var hasIntersectionWithTree =
+    require('./../operations/matcher/intersection/hasIntersectionWithTree');
 var getValue = require('./../cache/getValue');
 var normalizePathSets = require('../operations/ranges/normalizePathSets');
 var pathUtils = require('falcor-path-utils');
