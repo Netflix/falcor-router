@@ -2,9 +2,7 @@ var Keys = require('./Keys');
 var parseTree = require('./parse-tree');
 var matcher = require('./operations/matcher');
 var recurseMatchAndExecute = require('./run/recurseMatchAndExecute');
-var runSetAction = require('./run/set/runSetAction');
 var runCallAction = require('./run/call/runCallAction');
-var set = 'set';
 var call = 'call';
 var pathUtils = require('falcor-path-utils');
 var collapse = pathUtils.collapse;
@@ -39,7 +37,7 @@ Router.prototype = {
     /**
      * Performs the get algorithm on the router.
      * @param {PathSet[]} paths -
-     * @returns {JSONGraphEnvelope}
+     * @returns {Observable.<JSONGraphEnvelope>}
      */
     get: require('./router/get'),
 
@@ -54,19 +52,33 @@ Router.prototype = {
         this._unhandled.get = unhandled(this, unhandledHandler);
     },
 
-    set: function(jsong) {
+    /**
+     * Takes in a jsonGraph and outputs a Observable.<jsonGraph>.  The set
+     * method will use get until it evaluates the last key of the path inside
+     * of paths.  At that point it will produce an intermediate structure that
+     * matches the path and has the value that is found in the jsonGraph env.
+     *
+     * One of the requirements for interaction with a dataSource is that the
+     * set message must be optimized to the best of the incoming sources
+     * knowledge.
+     *
+     * @param {JSONGraphEnvelope} jsonGraph -
+     * @returns {Observable.<JSONGraphEnvelope>}
+     */
+    set: require('./router/set'),
 
-        var jsongCache = {};
-        var action = runSetAction(this, jsong, jsongCache);
-        return run(this._matcher, action, jsong.paths, set, this, jsongCache).
-
-            // Turn it(jsongGraph, invalidations, missing, etc.) into a
-            // jsonGraph envelope
-            map(function(details) {
-                return {
-                    jsonGraph: details.jsonGraph
-                };
-            });
+    /**
+     * Takes in a function to call that has the same return inteface as any
+     * route that will be called in the event of "unhandledPaths" on a set.
+     *
+     * What will come into the set function will be the subset of the jsonGraph
+     * that represents the unhandledPaths of set.
+     *
+     * @param {Function} unhandledHandler -
+     * @returns {undefined}
+     */
+    onUnhandledSet: function(unhandledHandler) {
+        this._unhandled.set = unhandled(this, unhandledHandler);
     },
 
     call: function(callPath, args, suffixes, paths) {
