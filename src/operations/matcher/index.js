@@ -175,6 +175,22 @@ function match(
         };
     }
 
+    // If the depth has reached the end then we need to stop recursing.  This
+    // can cause odd side effects with matching against {keys} as the last
+    // argument when a path has been exhausted (undefined is still a key value).
+    //
+    // Example:
+    // route1: [{keys}]
+    // route2: [{keys}][{keys}]
+    //
+    // path: ['('].
+    //
+    // This will match route1 and 2 since we do not bail out on length and there
+    // is a {keys} matcher which will match "undefined" value.
+    if (depth === path.length) {
+        return;
+    }
+
     var keySet = path[depth];
     var i, len, key, next;
 
