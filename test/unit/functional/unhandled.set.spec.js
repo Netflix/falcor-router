@@ -14,7 +14,7 @@ describe('#set', function() {
         var onUnhandledPaths = sinon.spy(function convert(paths) {
             return Observable.empty();
         });
-        router.onUnhandledOperation({set: onUnhandledPaths});
+        router.routeUnhandledPathsTo({set: onUnhandledPaths});
 
         var obs = router.
             set({
@@ -52,7 +52,7 @@ describe('#set', function() {
             }).
             subscribe(noOp, done, done);
     });
-    it('should call the onUnhandledOperation when the route completely misses a route.', function(done) {
+    it('should call the routeUnhandledPathsTo when the route completely misses a route.', function(done) {
         var router = new R([]);
         var onUnhandledPaths = sinon.spy(function convert(jsonGraphEnv) {
             var returnValue = jsonGraphEnv.paths.reduce(function(jsonGraph, path) {
@@ -65,7 +65,7 @@ describe('#set', function() {
 
             return Observable.return(returnValue);
         });
-        router.onUnhandledOperation({set: onUnhandledPaths});
+        router.routeUnhandledPathsTo({set: onUnhandledPaths});
 
         var obs = router.
             set({
@@ -104,7 +104,7 @@ describe('#set', function() {
             subscribe(noOp, done, done);
     });
 
-    it('should call the onUnhandledOperation when the route partially misses a route.', function(done) {
+    it('should call the routeUnhandledPathsTo when the route partially misses a route.', function(done) {
         var router = new R([{
             route: 'videos.length',
             set: function() {
@@ -124,7 +124,7 @@ describe('#set', function() {
             }, {jsonGraph: {}});
             return Observable.return(returnValue);
         });
-        router.onUnhandledOperation({set: onUnhandledPaths});
+        router.routeUnhandledPathsTo({set: onUnhandledPaths});
 
         var obs = router.
             set({
@@ -204,7 +204,7 @@ describe('#set', function() {
             });
             return Observable.return(next);
         });
-        router.onUnhandledOperation({set: onUnhandledPaths});
+        router.routeUnhandledPathsTo({set: onUnhandledPaths});
 
         var obs = router.
             set({

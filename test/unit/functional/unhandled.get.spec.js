@@ -13,7 +13,7 @@ describe('#get', function() {
         var onUnhandledPaths = sinon.spy(function convert(paths) {
             return Observable.empty();
         });
-        router.onUnhandledOperation({get: onUnhandledPaths});
+        router.routeUnhandledPathsTo({get: onUnhandledPaths});
 
         var obs = router.
             get([['videos', 'summary']]);
@@ -35,7 +35,7 @@ describe('#get', function() {
             }).
             subscribe(noOp, done, done);
     });
-    it('should call the onUnhandledOperation when the route completely misses a route.', function(done) {
+    it('should call the routeUnhandledPathsTo when the route completely misses a route.', function(done) {
         var router = new R([]);
         var onUnhandledPaths = sinon.spy(function convert(paths) {
             var returnValue = paths.reduce(function(jsonGraph, path) {
@@ -47,7 +47,7 @@ describe('#get', function() {
             }, {jsonGraph: {}});
             return Observable.return(returnValue);
         });
-        router.onUnhandledOperation({get: onUnhandledPaths});
+        router.routeUnhandledPathsTo({get: onUnhandledPaths});
 
         var obs = router.
             get([['videos', 'summary']]);
@@ -70,7 +70,7 @@ describe('#get', function() {
             subscribe(noOp, done, done);
     });
 
-    it('should call the onUnhandledOperation when the route partially misses a route.', function(done) {
+    it('should call the routeUnhandledPathsTo when the route partially misses a route.', function(done) {
         var router = new R([{
             route: 'videos.length',
             get: function() {
@@ -90,7 +90,7 @@ describe('#get', function() {
             }, {jsonGraph: {}});
             return Observable.return(returnValue);
         });
-        router.onUnhandledOperation({get: onUnhandledPaths});
+        router.routeUnhandledPathsTo({get: onUnhandledPaths});
 
         var obs = router.
             get([['videos', ['length', 'summary']]]);

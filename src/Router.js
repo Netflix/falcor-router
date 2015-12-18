@@ -66,7 +66,7 @@ Router.prototype = {
      * have a chance to fulfill that request.
      * @param {DataSource} dataSource -
      */
-    onUnhandledOperation: function unhandledDataSource(dataSource) {
+    routeUnhandledPathsTo: function routeUnhandledPathsTo(dataSource) {
         this._unhandled = dataSource;
     }
 };
