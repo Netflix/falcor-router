@@ -20,7 +20,7 @@ describe('#call', function() {
                 ]
             });
         });
-        router.onUnhandledOperation({
+        router.routeUnhandledPathsTo({
             call: onCall
         });
         var onNext = sinon.spy();
@@ -52,7 +52,7 @@ describe('#call', function() {
                 ]
             });
         });
-        router.onUnhandledOperation({
+        router.routeUnhandledPathsTo({
             call: onCall
         });
         var onNext = sinon.spy();
