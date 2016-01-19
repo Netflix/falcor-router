@@ -45,15 +45,27 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
             // Required to get the references from the outputting jsong
             // and pathValues.
             map(function(res) {
+
                 // checks call for isJSONG and if there is jsong without paths
                 // throw errors.
                 var refs = [];
                 var values = [];
 
                 // Will flatten any arrays of jsong/pathValues.
-                var callOutput = res.reduce(function(flattenedRes, next) {
-                    return flattenedRes.concat(next);
-                }, []);
+                var callOutput = res.
+
+                    // Filters out any falsy values
+                    filter(function(x) {
+                        return x;
+                    }).
+                    reduce(function(flattenedRes, next) {
+                        return flattenedRes.concat(next);
+                    }, []);
+
+                // An empty output from call
+                if (callOutput.length === 0) {
+                    return [];
+                }
 
                 var refLen = -1;
                 callOutput.forEach(function(r) {

@@ -15,6 +15,47 @@ var CallNotFoundError = require('./../../../src/errors/CallNotFoundError');
 var CallRequiresPathsError = require('./../../../src/errors/CallRequiresPathsError');
 
 describe('Call', function() {
+    it('should be able to return nothing from a call', function(done) {
+        var router = new R([{
+            route: 'a.b',
+            call: function(callPath, args) {
+                return undefined;
+            }
+        }]);
+
+        var onNext = sinon.spy();
+        router.
+            call(['a', 'b']).
+            doAction(onNext, noOp, function() {
+                expect(onNext.calledOnce, 'onNext called once').to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    jsonGraph: {},
+                    paths: []
+                });
+            }).
+            subscribe(noOp, done, done);
+    });
+
+    it('should be able to return empty array from a call', function(done) {
+        var router = new R([{
+            route: 'a.b',
+            call: function(callPath, args) {
+                return [];
+            }
+        }]);
+
+        var onNext = sinon.spy();
+        router.
+            call(['a', 'b']).
+            doAction(onNext, noOp, function() {
+                expect(onNext.calledOnce, 'onNext called once').to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    jsonGraph: {},
+                    paths: []
+                });
+            }).
+            subscribe(noOp, done, done);
+    });
 
     it('should bind "this" properly on a call that tranverses through a reference.', function(done) {
         var values = [];
