@@ -1,7 +1,6 @@
 var iterateKeySet = require('falcor-path-utils').iterateKeySet;
 var types = require('./../support/types');
 var $ref = types.$ref;
-var $atom = types.$atom;
 var clone = require('./../support/clone');
 var cloneArray = require('./../support/cloneArray');
 var catAndSlice = require('./../support/catAndSlice');
@@ -14,6 +13,7 @@ module.exports = function jsongMerge(cache, jsongEnv) {
     var j = jsongEnv.jsonGraph;
     var references = [];
     var values = [];
+
     paths.forEach(function(p) {
         merge({
             cacheRoot: cache,
@@ -25,6 +25,7 @@ module.exports = function jsongMerge(cache, jsongEnv) {
             ignoreCount: 0
         },  cache, j, 0, p);
     });
+
     return {
         references: references,
         values: values
@@ -87,20 +88,21 @@ function merge(config, cache, message, depth, path, fromParent, fromKey) {
         var cacheRes = cache[key];
         var messageRes = message[key];
 
-        var nextPath = path;
-        var nextDepth = depth + 1;
-        if (updateRequestedPath) {
-            requestedPath[requestIdx] = key;
-        }
-
-        // Cache does not exist but message does.
-        if (cacheRes === undefined) {
-            cacheRes = cache[key] = {};
-        }
-
-        // TODO: Can we hit a leaf node in the cache when traversing?
-
+        // We no longer materialize inside of jsonGraph merge.  Either the
+        // client should specify all of the paths
         if (messageRes !== undefined) {
+
+            var nextPath = path;
+            var nextDepth = depth + 1;
+            if (updateRequestedPath) {
+                requestedPath[requestIdx] = key;
+            }
+
+            // We do not continue with this branch since the cache
+            if (cacheRes === undefined) {
+                cacheRes = cache[key] = {};
+            }
+
             var nextIgnoreCount = ignoreCount;
 
             // TODO: Potential performance gain since we know that
@@ -127,21 +129,6 @@ function merge(config, cache, message, depth, path, fromParent, fromKey) {
             merge(config, cacheRes, messageRes,
                   nextDepth, nextPath, cache, key);
             config.ignoreCount = ignoreCount;
-        }
-
-        // The second the incoming jsong must be fully qualified,
-        // anything that is not will be materialized into the provided cache
-        else {
-
-            // do not materialize, continue down the cache.
-            if (depth < path.length - 1) {
-                merge(config, cacheRes, {}, nextDepth, nextPath, cache, key);
-            }
-
-            // materialize the node
-            else {
-                cache[key] = {$type: $atom};
-            }
         }
 
         if (updateRequestedPath) {

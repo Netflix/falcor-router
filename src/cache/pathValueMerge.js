@@ -10,15 +10,16 @@ module.exports = function pathValueMerge(cache, pathValue) {
     var refs = [];
     var values = [];
     var invalidations = [];
+    var valueType = true;
 
-    // The invalidation case.  Needed for reporting
-    // of call.
-    if (pathValue.value === undefined) {
+    // The pathValue invalidation shape.
+    if (pathValue.invalidated === true) {
         invalidations.push({path: pathValue.path});
+        valueType = false;
     }
 
-    // References.  Needed for evaluationg suffixes in
-    // both call and get/set.
+    // References.  Needed for evaluationg suffixes in all three types, get,
+    // call and set.
     else if ((pathValue.value !== null) && (pathValue.value.$type === $ref)) {
         refs.push({
             path: pathValue.path,
@@ -26,15 +27,15 @@ module.exports = function pathValueMerge(cache, pathValue) {
         });
     }
 
-
     // Values.  Needed for reporting for call.
     else {
         values.push(pathValue);
     }
 
-    if (invalidations.length === 0) {
-        // Merges the values/refs/invs into the cache.
-        innerPathValueMerge(cache, cache, pathValue.value, pathValue.path, 0);
+    // If the type of pathValue is a valueType (reference or value) then merge
+    // it into the jsonGraph cache.
+    if (valueType) {
+        innerPathValueMerge(cache, pathValue);
     }
 
     return {
@@ -44,50 +45,70 @@ module.exports = function pathValueMerge(cache, pathValue) {
     };
 };
 
-/* eslint-disable no-constant-condition */
-function innerPathValueMerge(root, node, value, path, depth, reference) {
+function innerPathValueMerge(cache, pathValue) {
+    var path = pathValue.path;
+    var curr = cache;
+    var next, key, cloned, outerKey, iteratorNote;
+    var i, len;
 
-    var note = {};
-    var branch = depth < path.length - 1;
-    var keySet = path[depth];
-    var key = iterateKeySet(keySet, note);
+    for (i = 0, len = path.length - 1; i < len; ++i) {
+        outerKey = path[i];
+
+        // Setup the memo and the key.
+        if (outerKey && typeof outerKey === 'object') {
+            iteratorNote = {};
+            key = iterateKeySet(outerKey, iteratorNote);
+        } else {
+            key = outerKey;
+            iteratorNote = false;
+        }
+
+        do {
+            next = curr[key];
+
+            if (!next) {
+                next = curr[key] = {};
+            }
+
+            if (iteratorNote) {
+                innerPathValueMerge(
+                    next, {
+                        path: path.slice(i + 1),
+                        value: pathValue.value
+                    });
+
+                if (!iteratorNote.done) {
+                    key = iterateKeySet(outerKey, iteratorNote);
+                }
+            }
+
+            else {
+                curr = next;
+            }
+        } while (iteratorNote && !iteratorNote.done);
+
+        // All memoized paths need to be stopped to avoid
+        // extra key insertions.
+        if (iteratorNote) {
+            return;
+        }
+    }
+
+
+    // TODO: This clearly needs a re-write.  I am just unsure of how i want
+    // this to look.  Plus i want to measure performance.
+    outerKey = path[i];
+
+    iteratorNote = {};
+    key = iterateKeySet(outerKey, iteratorNote);
 
     do {
-        var curr = node;
-        var type = curr.$type;
 
-        while (type === $ref) {
-            curr = innerPathValueMerge(root, root, value, curr.value, 0, true);
-            type = curr.$type;
+        cloned = clone(pathValue.value);
+        curr[key] = cloned;
+
+        if (!iteratorNote.done) {
+            key = iterateKeySet(outerKey, iteratorNote);
         }
-
-        if (type === undefined) {
-
-            var prev = curr;
-
-            curr = prev[key];
-
-            if (branch) {
-                if (!curr) {
-                    curr = prev[key] = {};
-                }
-                curr = innerPathValueMerge(
-                    root, curr, value, path, depth + 1, reference);
-            } else if (reference) {
-                if (!curr) {
-                    curr = prev[key] = {};
-                }
-            } else if (!curr) {
-                curr = prev[key] = clone(value);
-            }
-        }
-
-        key = iterateKeySet(keySet, note);
-        if (note.done) {
-            break;
-        }
-    } while (true);
-
-    return curr;
+    } while (!iteratorNote.done);
 }
-/* eslint-enable */

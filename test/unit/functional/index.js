@@ -3,4 +3,6 @@ describe('Functional', function() {
     require('./return-types.spec');
     require('./virtual-collision.spec');
     require('./materialized.spec');
+    require('./unhandled.spec');
+    require('./precedence.spec');
 });

@@ -18,9 +18,10 @@ module.exports = function runByPrecedence(pathSet, matches, actionRunner) {
             return 0;
         });
 
-    var matchesWithPaths = getExecutableMatches(sortedMatches, [pathSet]);
-    return Observable.
-        from(matchesWithPaths).
+    var execs = getExecutableMatches(sortedMatches, [pathSet]);
+
+    var setOfMatchedPaths = Observable.
+        from(execs.matchAndPaths).
         flatMap(actionRunner).
 
         // Note: We do not wait for each observable to finish,
@@ -32,4 +33,17 @@ module.exports = function runByPrecedence(pathSet, matches, actionRunner) {
                 value: actionTuple[1]
             };
         });
+
+    if (execs.unhandledPaths) {
+        setOfMatchedPaths = setOfMatchedPaths.
+            concat(Observable.return({
+                match: {suffix: []},
+                value: {
+                    isMessage: true,
+                    unhandledPaths: execs.unhandledPaths
+                }
+            }));
+    }
+
+    return setOfMatchedPaths;
 };

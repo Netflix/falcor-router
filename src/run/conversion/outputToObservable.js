@@ -10,15 +10,17 @@ module.exports = function outputToObservable(valueOrObservable) {
     var value = valueOrObservable,
         oldObservable;
 
+    // falsy value
+    if (!value) {
+        return Observable.return(value);
+    }
+
     // place holder.  Observables have highest precedence.
-    if (value.subscribe) {
+    else if (value.subscribe) {
         if (!(value instanceof Observable)) {
             oldObservable = value;
             value = Observable.create(function(observer) {
-                var sub = oldObservable.subscribe(observer);
-                return function() {
-                    sub.dispose();
-                }
+                return oldObservable.subscribe(observer);
             });
         }
     }

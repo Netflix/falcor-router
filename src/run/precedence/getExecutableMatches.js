@@ -12,6 +12,10 @@ var hasIntersection = require('./../../operations/matcher/intersection/hasInters
 module.exports = function getExecutableMatches(matches, pathSet) {
     var remainingPaths = pathSet;
     var matchAndPaths = [];
+    var out = {
+        matchAndPaths: matchAndPaths,
+        unhandledPaths: false
+    };
     for (var i = 0; i < matches.length && remainingPaths.length > 0; ++i) {
         var availablePaths = remainingPaths;
         var match = matches[i];
@@ -38,6 +42,13 @@ module.exports = function getExecutableMatches(matches, pathSet) {
         }
     }
 
-    return matchAndPaths;
+    // Adds the remaining paths to the unhandled paths section.
+    if (remainingPaths && remainingPaths.length) {
+        out.unhandledPaths = remainingPaths;
+    }
+
+    return out;
 };
+
+
 

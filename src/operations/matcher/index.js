@@ -6,6 +6,7 @@ var pluckIntegers = require('./pluckIntergers');
 var pathUtils = require('falcor-path-utils');
 var collapse = pathUtils.collapse;
 var isRoutedToken = require('./../../support/isRoutedToken');
+var CallNotFoundError = require('./../../errors/CallNotFoundError');
 
 var intTypes = [{
         type: Keys.ranges,
@@ -45,7 +46,7 @@ module.exports = function matcher(rst) {
         // We are at the end of the path but there is no match and its a
         // call.  Therefore we are going to throw an informative error.
         if (method === call && matched.length === 0) {
-            var err = new Error('function does not exist');
+            var err = new CallNotFoundError();
             err.throwToNext = true;
 
             throw err;
@@ -172,6 +173,22 @@ function match(
             isSet: atEndOfPath && isSet,
             isCall: atEndOfPath && isCall
         };
+    }
+
+    // If the depth has reached the end then we need to stop recursing.  This
+    // can cause odd side effects with matching against {keys} as the last
+    // argument when a path has been exhausted (undefined is still a key value).
+    //
+    // Example:
+    // route1: [{keys}]
+    // route2: [{keys}][{keys}]
+    //
+    // path: ['('].
+    //
+    // This will match route1 and 2 since we do not bail out on length and there
+    // is a {keys} matcher which will match "undefined" value.
+    if (depth === path.length) {
+        return;
     }
 
     var keySet = path[depth];

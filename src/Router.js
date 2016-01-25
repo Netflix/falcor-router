@@ -1,20 +1,7 @@
 var Keys = require('./Keys');
 var parseTree = require('./parse-tree');
 var matcher = require('./operations/matcher');
-var normalizePathSets = require('./operations/ranges/normalizePathSets');
-var recurseMatchAndExecute = require('./run/recurseMatchAndExecute');
-var optimizePathSets = require('./cache/optimizePathSets');
-var pathValueMerge = require('./cache/pathValueMerge');
-var runGetAction = require('./run/get/runGetAction');
-var runSetAction = require('./run/set/runSetAction');
-var runCallAction = require('./run/call/runCallAction');
-var $atom = require('./support/types').$atom;
-var get = 'get';
-var set = 'set';
-var call = 'call';
-var pathUtils = require('falcor-path-utils');
-var collapse = pathUtils.collapse;
-var JSONGraphError = require('./JSONGraphError');
+var JSONGraphError = require('./errors/JSONGraphError');
 var MAX_REF_FOLLOW = 50;
 
 var Router = function(routes, options) {
@@ -28,96 +15,61 @@ var Router = function(routes, options) {
 };
 
 Router.createClass = function(routes) {
-  function C(options) {
-    var opts = options || {};
-    this._debug = opts.debug;
-  }
+    function C(options) {
+        var opts = options || {};
+        this._debug = opts.debug;
+    }
 
-  C.prototype = new Router(routes);
-  C.prototype.constructor = C;
+    C.prototype = new Router(routes);
+    C.prototype.constructor = C;
 
-  return C;
+    return C;
 };
 
 Router.prototype = {
-    get: function(paths) {
-        var jsongCache = {};
-        var action = runGetAction(this, jsongCache);
-        var router = this;
-        var normPS = normalizePathSets(paths);
-        return run(this._matcher, action, normPS, get, this, jsongCache).
-            map(function(jsongEnv) {
-                return materializeMissing(router, paths, jsongEnv);
-            });
-    },
+    /**
+     * Performs the get algorithm on the router.
+     * @param {PathSet[]} paths -
+     * @returns {Observable.<JSONGraphEnvelope>}
+     */
+    get: require('./router/get'),
 
-    set: function(jsong) {
-        // TODO: Remove the modelContext and replace with just jsongEnv
-        // when http://github.com/Netflix/falcor-router/issues/24 is addressed
-        var jsongCache = {};
-        var action = runSetAction(this, jsong, jsongCache);
-        var router = this;
-        return run(this._matcher, action, jsong.paths, set, this, jsongCache).
-            map(function(jsongEnv) {
-                return materializeMissing(router, jsong.paths, jsongEnv);
-            });
-    },
+    /**
+     * Takes in a jsonGraph and outputs a Observable.<jsonGraph>.  The set
+     * method will use get until it evaluates the last key of the path inside
+     * of paths.  At that point it will produce an intermediate structure that
+     * matches the path and has the value that is found in the jsonGraph env.
+     *
+     * One of the requirements for interaction with a dataSource is that the
+     * set message must be optimized to the best of the incoming sources
+     * knowledge.
+     *
+     * @param {JSONGraphEnvelope} jsonGraph -
+     * @returns {Observable.<JSONGraphEnvelope>}
+     */
+    set: require('./router/set'),
 
-    call: function(callPath, args, suffixes, paths) {
-        var jsongCache = {};
-        var action = runCallAction(this, callPath, args,
-                                   suffixes, paths, jsongCache);
-        var callPaths = [callPath];
-        var router = this;
-        return run(this._matcher, action, callPaths, call, this, jsongCache).
-            map(function(jsongResult) {
-                var reportedPaths = jsongResult.reportedPaths;
-                var jsongEnv = materializeMissing(
-                    router,
-                    reportedPaths,
-                    jsongResult);
+    /**
+     * Invokes a function in the DataSource's JSONGraph object at the path
+     * provided in the callPath argument.  If there are references that are
+     * followed, a get will be performed to get to the call function.
+     *
+     * @param {Path} callPath -
+     * @param {Array.<*>} args -
+     * @param {Array.<PathSet>} refPaths -
+     * @param {Array.<PathSet>} thisPaths -
+     */
+    call: require('./router/call'),
 
-
-                if (reportedPaths.length) {
-                    jsongEnv.paths = reportedPaths;
-                }
-                else {
-                    jsongEnv.paths = [];
-                    jsongEnv.jsonGraph = {};
-                }
-
-                var invalidated = jsongResult.invalidated;
-                if (invalidated && invalidated.length) {
-                    jsongEnv.invalidated = invalidated;
-                }
-                jsongEnv.paths = collapse(jsongEnv.paths);
-                return jsongEnv;
-            });
+    /**
+     * When a route misses on a call, get, or set the unhandledDataSource will
+     * have a chance to fulfill that request.
+     * @param {DataSource} dataSource -
+     */
+    routeUnhandledPathsTo: function routeUnhandledPathsTo(dataSource) {
+        this._unhandled = dataSource;
     }
 };
-
-function run(matcherFn, actionRunner, paths, method,
-             routerInstance, jsongCache) {
-    return recurseMatchAndExecute(
-            matcherFn, actionRunner, paths, method, routerInstance, jsongCache);
-}
-
-function materializeMissing(router, paths, jsongEnv, missingAtom) {
-    var jsonGraph = jsongEnv.jsonGraph;
-    var materializedAtom = missingAtom || {$type: $atom};
-
-    // Optimizes the pathSets from the jsong then
-    // inserts atoms of undefined.
-    optimizePathSets(jsonGraph, paths, router.maxRefFollow).
-        forEach(function(optMissingPath) {
-            pathValueMerge(jsonGraph, {
-                path: optMissingPath,
-                value: materializedAtom
-            });
-        });
-
-    return {jsonGraph: jsonGraph};
-}
 
 Router.ranges = Keys.ranges;
 Router.integers = Keys.integers;

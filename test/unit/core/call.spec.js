@@ -6,14 +6,56 @@ var expect = chai.expect;
 var falcor = require('falcor');
 var $ref = falcor.Model.ref;
 var $atom = falcor.Model.atom;
-var $pathValue = falcor.Model.pathValue;
-var errors = require('./../../../src/exceptions');
 var sinon = require("sinon");
 var Promise = require("promise");
 var doneOnError = require('./../../doneOnError');
 var errorOnCompleted = require('./../../errorOnCompleted');
+var errorOnNext = require('./../../errorOnNext');
+var CallNotFoundError = require('./../../../src/errors/CallNotFoundError');
+var CallRequiresPathsError = require('./../../../src/errors/CallRequiresPathsError');
 
 describe('Call', function() {
+    it('should be able to return nothing from a call', function(done) {
+        var router = new R([{
+            route: 'a.b',
+            call: function(callPath, args) {
+                return undefined;
+            }
+        }]);
+
+        var onNext = sinon.spy();
+        router.
+            call(['a', 'b']).
+            doAction(onNext, noOp, function() {
+                expect(onNext.calledOnce, 'onNext called once').to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    jsonGraph: {},
+                    paths: []
+                });
+            }).
+            subscribe(noOp, done, done);
+    });
+
+    it('should be able to return empty array from a call', function(done) {
+        var router = new R([{
+            route: 'a.b',
+            call: function(callPath, args) {
+                return [];
+            }
+        }]);
+
+        var onNext = sinon.spy();
+        router.
+            call(['a', 'b']).
+            doAction(onNext, noOp, function() {
+                expect(onNext.calledOnce, 'onNext called once').to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    jsonGraph: {},
+                    paths: []
+                });
+            }).
+            subscribe(noOp, done, done);
+    });
 
     it('should bind "this" properly on a call that tranverses through a reference.', function(done) {
         var values = [];
@@ -233,20 +275,14 @@ describe('Call', function() {
     it('should cause the router to on error only.', function(done) {
         getRouter(true).
             call(['videos', 1234, 'rating'], [5]).
-            doAction(function() {
-                throw new Error('Should not be called.  onNext');
-            }, function(x) {
-                expect(x.message).to.equal(errors.callJSONGraphWithouPaths);
-            }, function() {
-                throw new Error('Should not be called.  onCompleted');
+            doAction(noOp, function(x) {
+                expect(x instanceof CallRequiresPathsError).to.be.ok;
             }).
-            subscribe(noOp, function(e) {
-                if (e.message === errors.callJSONGraphWithouPaths) {
-                    done();
-                    return;
-                }
-                done(e);
-            });
+            subscribe(
+                errorOnNext(done),
+                doneOnError(done),
+                errorOnCompleted(done)
+            );
     });
 
 
@@ -299,97 +335,7 @@ describe('Call', function() {
             subscribe(noOp, done, done);
     });
 
-    it('should merge a reference then traverse that reference for subsequent returned pathValues.', function(done) {
-        var router = new R([{
-            route: ['getUser'],
-            call: function(callPath, args, suffixes) {
-                return Observable.return({
-                    'userName': 'ptaylor',
-                    'email': 'ptaylor@netflix.com',
-                    'telephone': '888-123-4567',
-                    'userID': 'xxx-yyy-zzz'
-                })
-                .flatMap(function(data) {
-                    return [
-                        $pathValue('user', $ref(['users', data.userID])),
-                        $pathValue('user.id', data.userID),
-                        $pathValue('user.email', data.email),
-                        $pathValue('user.username', data.userName),
-                    ];
-                });
-            }
-        }]);
 
-        router.call(
-            ['getUser'], [],
-            [['id'], ['email'], ['username']]
-        )
-        .subscribe(function(envelope) {
-            expect(envelope).to.deep.equal({
-                paths: [
-                    ['user', ['email', 'id', 'username']]
-                ],
-                jsonGraph: {
-                    'user': $ref(['users', 'xxx-yyy-zzz']),
-                    'users': {
-                        'xxx-yyy-zzz': {
-                            'id': 'xxx-yyy-zzz',
-                            'email': 'ptaylor@netflix.com',
-                            'username': 'ptaylor'
-                        }
-                    }
-                }
-            });
-            done();
-        });
-    });
-
-    it('should merge a reference under a branch then traverse that reference for subsequent returned pathValues.', function(done) {
-        var router = new R([{
-            route: ['operations', 'getUser'],
-            call: function(callPath, args, suffixes) {
-                return Observable.return({
-                    'userName': 'ptaylor',
-                    'email': 'ptaylor@netflix.com',
-                    'telephone': '888-123-4567',
-                    'userID': 'xxx-yyy-zzz'
-                })
-                .flatMap(function(data) {
-                    return [
-                        $pathValue(['operations', 'user'], $ref(['users', data.userID])),
-                        $pathValue(['operations', 'user', 'id'], data.userID),
-                        $pathValue(['operations', 'user', 'email'], data.email),
-                        $pathValue(['operations', 'user', 'username'], data.userName)
-                    ];
-                });
-            }
-        }]);
-
-        router.call(
-            ['operations', 'getUser'], [],
-            [['id'], ['email'], ['username']]
-        )
-        .subscribe(function(envelope) {
-            expect(envelope).to.deep.equal({
-                paths: [
-                    ['operations', 'user', ['email', 'id', 'username']]
-                ],
-                jsonGraph: {
-                    'operations': {
-                        'user': $ref(['users', 'xxx-yyy-zzz']),
-                    },
-                    'users': {
-                        'xxx-yyy-zzz': {
-                            'id': 'xxx-yyy-zzz',
-                            'email': 'ptaylor@netflix.com',
-                            'username': 'ptaylor'
-                        }
-                    }
-                }
-            });
-            done();
-        });
-    });
 
     it('should perform a simple call.', function(done) {
         var onNext = sinon.spy();
@@ -584,15 +530,13 @@ describe('Call', function() {
                 expect(onError.calledOnce).to.be.ok;
 
                 var args = onError.getCall(0).args;
-                expect(args[0] instanceof Error).to.be.ok;
-                expect(args[0].message).to.deep.equals('function does not exist');
+                expect(args[0] instanceof CallNotFoundError).to.be.ok;
             }).
-            subscribe(noOp, function(e) {
-                if (e.message === 'function does not exist') {
-                    return done();
-                }
-                return done(e);
-            }, done);
+            subscribe(
+                errorOnNext(done),
+                doneOnError(done),
+                errorOnCompleted(done)
+            );
     });
 
     it('should throw when calling a function that does not exist, but get handler does.', function(done) {
@@ -608,15 +552,13 @@ describe('Call', function() {
                 expect(onError.calledOnce).to.be.ok;
 
                 var args = onError.getCall(0).args;
-                expect(args[0] instanceof Error).to.be.ok;
-                expect(args[0].message).to.deep.equals('function does not exist');
+                expect(args[0] instanceof CallNotFoundError).to.be.ok;
             }).
-            subscribe(noOp, function(e) {
-                if (e.message === 'function does not exist') {
-                    return done();
-                }
-                return done(e);
-            }, done);
+            subscribe(
+                errorOnNext(done),
+                doneOnError(done),
+                errorOnCompleted(done)
+            );
     });
 
     function getCallRouter() {

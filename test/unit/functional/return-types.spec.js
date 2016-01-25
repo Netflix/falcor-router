@@ -105,7 +105,7 @@ describe('return-types', function() {
 
     function observable(fn) {
         return function() {
-            return Observable.returnValue(fn());
+            return Observable.return(fn());
         };
     }
 
