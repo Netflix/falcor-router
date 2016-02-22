@@ -7,7 +7,7 @@ var jsongMerge = require('./../../cache/jsongMerge');
 var optimizePathSets = require('./../../cache/optimizePathSets');
 var hasIntersection = require('./../../operations/matcher/intersection/hasIntersection');
 var pathValueMerge = require('./../../cache/pathValueMerge');
-var Observable = require('rx').Observable;
+var Observable = require('../../rx').Observable;
 /* eslint-enable max-len */
 
 module.exports = function outerRunSetAction(routerInstance, modelContext,

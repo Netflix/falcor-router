@@ -3,7 +3,7 @@ var noOp = function() {};
 var chai = require('chai');
 var expect = chai.expect;
 var sinon = require('sinon');
-var Observable = require('rx').Observable;
+var Observable = require('rxjs').Observable;
 
 describe('#call', function() {
     it('should ensure a missing function gets chained.', function(done) {
@@ -26,7 +26,7 @@ describe('#call', function() {
         var onNext = sinon.spy();
         router.
             call(['test'], []).
-            doAction(onNext, noOp, function() {
+            do(onNext, noOp, function() {
                 expect(onNext.callCount).to.equals(1);
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -58,7 +58,7 @@ describe('#call', function() {
         var onNext = sinon.spy();
         router.
             call(['test'], []).
-            doAction(onNext, noOp, function() {
+            do(onNext, noOp, function() {
                 expect(onNext.callCount).to.equals(1);
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: { },

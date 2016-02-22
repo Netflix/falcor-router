@@ -6,7 +6,7 @@ var chai = require('chai');
 var expect = chai.expect;
 var falcor = require('falcor');
 var $ref = falcor.Model.ref;
-var Observable = require('rx').Observable;
+var Observable = require('rxjs').Observable;
 
 describe('Materialized Paths.', function() {
     function partialRouter() {
@@ -28,7 +28,7 @@ describe('Materialized Paths.', function() {
             var onNext = sinon.spy();
             router.
                 get([['one', [0, 1], 'summary']]).
-                doAction(onNext, noOp, function() {
+                do(onNext, noOp, function() {
                     expect(onNext.calledOnce).to.be.ok;
                     expect(onNext.getCall(0).args[0]).to.deep.equals({
                         jsonGraph: {
@@ -61,7 +61,7 @@ describe('Materialized Paths.', function() {
             var onNext = sinon.spy();
             router.
                 get([['one', [0, 1], 'summary']]).
-                doAction(onNext, noOp, function() {
+                do(onNext, noOp, function() {
                     expect(onNext.calledOnce).to.be.ok;
                     expect(onNext.getCall(0).args[0]).to.deep.equals({
                         jsonGraph: {

@@ -1,4 +1,4 @@
-var Rx = require('rx');
+var Rx = require('rxjs');
 var Observable = Rx.Observable;
 var R = require('../../src/Router');
 var TestRunner = require('./../TestRunner');

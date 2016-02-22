@@ -3,7 +3,7 @@ var get = 'get';
 var recurseMatchAndExecute = require('../run/recurseMatchAndExecute');
 var normalizePathSets = require('../operations/ranges/normalizePathSets');
 var materialize = require('../run/materialize');
-var Observable = require('rx').Observable;
+var Observable = require('../rx').Observable;
 var mCGRI = require('./../run/mergeCacheAndGatherRefsAndInvalidations');
 
 /**

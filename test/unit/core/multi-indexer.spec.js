@@ -23,8 +23,8 @@ describe('Multi-Indexer', function() {
 
         router.
             get([["test", ['one', 'two']]]).
-            doAction(onNext).
-            doAction(noOp, noOp, function() {
+            do(onNext).
+            do(noOp, noOp, function() {
                 expect(onNext.called).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -57,8 +57,8 @@ describe('Multi-Indexer', function() {
 
         router.
             get([['test', ['one', 'two'], 'summary']]).
-            doAction(onNext).
-            doAction(noOp, noOp, function() {
+            do(onNext).
+            do(noOp, noOp, function() {
                 expect(onNext.called).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -91,8 +91,8 @@ describe('Multi-Indexer', function() {
 
         router.
             get([['test', ['one', 'two'], 0, 0]]).
-            doAction(onNext).
-            doAction(noOp, noOp, function() {
+            do(onNext).
+            do(noOp, noOp, function() {
                 expect(onNext.called).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -125,8 +125,8 @@ describe('Multi-Indexer', function() {
 
         router.
             get([["test", ['one']]]).
-            doAction(onNext).
-            doAction(noOp, noOp, function() {
+            do(onNext).
+            do(noOp, noOp, function() {
                 expect(onNext.called).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -168,8 +168,8 @@ describe('Multi-Indexer', function() {
                 ["test", 'one', 'three'],
                 ["test", 'two', 'four']
             ]).
-            doAction(onNext).
-            doAction(noOp, noOp, function() {
+            do(onNext).
+            do(noOp, noOp, function() {
                 expect(onNext.called).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {

@@ -3,7 +3,7 @@ var outputToObservable = require('./../conversion/outputToObservable');
 var noteToJsongOrPV = require('./../conversion/noteToJsongOrPV');
 var CallRequiresPathsError = require('./../../errors/CallRequiresPathsError');
 var mCGRI = require('./../mergeCacheAndGatherRefsAndInvalidations');
-var Observable = require('rx').Observable;
+var Observable = require('../../rx').Observable;
 
 module.exports =  outerRunCallAction;
 

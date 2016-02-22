@@ -20,12 +20,12 @@
   "dependencies": {
     "falcor-path-syntax": "0.2.4",
     "falcor-path-utils": "0.3.0",
-    "rx": "^4.0.7"
+    "rxjs": "^5.0.0-beta.2"
   },
   "devDependencies": {
     "chai": "^2.3.0",
     "coveralls": "^2.11.2",
-    "falcor": "0.1.12",
+    "falcor": "Netflix/falcor",
     "gulp": "~3.8.11",
     "gulp-bump": "~0.1.13",
     "gulp-clean": "~0.3.1",

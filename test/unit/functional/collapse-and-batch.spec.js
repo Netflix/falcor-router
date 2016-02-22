@@ -6,7 +6,7 @@ var expect = chai.expect;
 var falcor = require('falcor');
 var $ref = falcor.Model.ref;
 var $atom = falcor.Model.atom;
-var Observable = require('rx').Observable;
+var Observable = require('rxjs').Observable;
 var Promise = require('promise');
 
 describe('Collapse and Batch', function() {
@@ -22,7 +22,7 @@ describe('Collapse and Batch', function() {
             get([['genreLists', [0, 1], 'summary']]);
         var called = false;
         obs.
-            doAction(function(res) {
+            do(function(res) {
                 expect(res).to.deep.equals({
                     jsonGraph: {
                         genreLists: {
@@ -122,7 +122,7 @@ describe('Collapse and Batch', function() {
         var count = 0;
         var time = Date.now();
         obs.
-            doAction(function(res) {
+            do(function(res) {
                 var nextTime = Date.now();
                 expect(nextTime - time >= 4000).to.equal(false);
                 count++;
@@ -175,7 +175,7 @@ describe('Collapse and Batch', function() {
             get([['lists', [0, 1], 'summary']]);
         var count = 0;
         obs.
-            doAction(function(res) {
+            do(function(res) {
                 expect(res).to.deep.equals({
                     jsonGraph: {
                         lists: {
@@ -207,15 +207,9 @@ describe('Collapse and Batch', function() {
                 return Observable.
                     from(aliasMap.ids).
                     map(function(id) {
-                        if (id === 0) {
-                            return {
-                                path: ['lists', id],
-                                value: $ref('two.be[956]')
-                            };
-                        }
                         return {
                             path: ['lists', id],
-                            value: $ref('lists[0]')
+                            value: $ref('two.be[' + (956 + id) + ']')
                         };
                     });
             }
@@ -228,7 +222,7 @@ describe('Collapse and Batch', function() {
                         serviceCalls++;
                         return {
                             path: ['two', 'be', id, 'summary'],
-                            value: 'hello world'
+                            value: 'hello world ' + id
                         };
                     });
             }
@@ -238,17 +232,20 @@ describe('Collapse and Batch', function() {
             get([['lists', [0, 1], 'summary']]);
         var count = 0;
         obs.
-            doAction(function(res) {
+            do(function(res) {
                 expect(res).to.deep.equals({
                     jsonGraph: {
                         lists: {
                             0: $ref('two.be[956]'),
-                            1: $ref('lists[0]')
+                            1: $ref('two.be[957]')
                         },
                         two: {
                             be: {
                                 956: {
-                                    summary: 'hello world'
+                                    summary: 'hello world 956'
+                                },
+                                957: {
+                                    summary: 'hello world 957'
                                 }
                             }
                         }
@@ -293,7 +290,7 @@ describe('Collapse and Batch', function() {
         var router = new R(routes);
         router.
             get([['promise', [0, 1], 'summary']]).
-            doAction(noOp, noOp, function() {
+            do(noOp, noOp, function() {
                 expect(serviceCalls).to.equal(1);
             }).
             subscribe(noOp, done, done);

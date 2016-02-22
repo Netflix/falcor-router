@@ -1,4 +1,4 @@
-var Observable = require('rx').Observable;
+var Observable = require('../../rx').Observable;
 var isArray = Array.isArray;
 
 /**

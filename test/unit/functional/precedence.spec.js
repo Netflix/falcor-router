@@ -2,7 +2,7 @@ var R = require('../../../src/Router');
 var noOp = function() {};
 var chai = require('chai');
 var expect = chai.expect;
-var Observable = require('rx').Observable;
+var Observable = require('rxjs').Observable;
 var sinon = require('sinon');
 
 describe('Precedence Matching', function() {
@@ -23,7 +23,7 @@ describe('Precedence Matching', function() {
 
         router.
             get([['get', 11, 'six']]).
-            doAction(noOp, noOp, function() {
+            do(noOp, noOp, function() {
                 expect(longerGet.callCount).to.equals(0);
                 expect(shortGet.callCount).to.equals(1);
             }).
