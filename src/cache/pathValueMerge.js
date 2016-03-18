@@ -1,6 +1,7 @@
 var clone = require('./../support/clone');
 var types = require('./../support/types');
 var $ref = types.$ref;
+var $refset = types.$refset;
 var iterateKeySet = require('falcor-path-utils').iterateKeySet;
 
 /**
@@ -10,20 +11,24 @@ module.exports = function pathValueMerge(cache, pathValue) {
     var refs = [];
     var values = [];
     var invalidations = [];
-    var valueType = true;
+    var isValueType = true;
+
+    var path = pathValue.path;
+    var value = pathValue.value;
+    var type = value && value.$type;
 
     // The pathValue invalidation shape.
     if (pathValue.invalidated === true) {
-        invalidations.push({path: pathValue.path});
-        valueType = false;
+        invalidations.push({path: path});
+        isValueType = false;
     }
 
-    // References.  Needed for evaluationg suffixes in all three types, get,
-    // call and set.
-    else if ((pathValue.value !== null) && (pathValue.value.$type === $ref)) {
+    // References and reference sets. Needed for evaluating suffixes in all
+    // three types, get, call and set.
+    else if (type === $ref || type === $refset) {
         refs.push({
-            path: pathValue.path,
-            value: pathValue.value.value
+            path: path,
+            value: value.value
         });
     }
 
@@ -34,7 +39,7 @@ module.exports = function pathValueMerge(cache, pathValue) {
 
     // If the type of pathValue is a valueType (reference or value) then merge
     // it into the jsonGraph cache.
-    if (valueType) {
+    if (isValueType) {
         innerPathValueMerge(cache, pathValue);
     }
 

@@ -7,6 +7,7 @@ var expect = chai.expect;
 var falcor = require('falcor');
 var $ref = falcor.Model.ref;
 var $atom = falcor.Model.atom;
+var $refset = require('../../../src/support/types').$refset;
 var Observable = require('rx').Observable;
 var sinon = require('sinon');
 
@@ -434,6 +435,62 @@ describe('Get', function() {
             subscribe(noOp, done, done);
     });
 
+    it('should grab a reference set.', function(done) {
+        var called = 0;
+        var router = getPrecedenceRouter();
+        router.
+            get([['myList']]).
+            doAction(function(x) {
+                expect(x).to.deep.equals({
+                    jsonGraph: {
+                        myList: {
+                            $type: $refset,
+                            value: ['videos', [0, 1, 2]]
+                        }
+                    }
+                });
+                called++;
+            }, noOp, function() {
+                expect(called).to.equals(1);
+            }).
+            subscribe(noOp, done, done);
+    });
+
+    it('should follow a reference set.', function(done) {
+        var called = 0;
+        var router = getPrecedenceRouter();
+        router.
+            get([['myList', ['title', 'rating']]]).
+            doAction(function(x) {
+                expect(x).to.deep.equals({
+                    jsonGraph: {
+                        myList: {
+                            $type: $refset,
+                            value: ['videos', [0, 1, 2]]
+                        },
+                        videos: {
+                            0: {
+                                title: 'title 0',
+                                rating: 'rating 0'
+                            },
+                            1: {
+                                title: 'title 1',
+                                rating: 'rating 1'
+                            },
+                            2: {
+                                title: 'title 2',
+                                rating: 'rating 2'
+                            }
+                        }
+                    }
+                });
+                called++;
+            }, noOp, function() {
+                expect(called).to.equals(1);
+            }).
+            subscribe(noOp, done, done);
+    });
+
     it('should not follow references if no keys specified after path to reference', function (done) {
         var routeResponse = {
             jsonGraph: {
@@ -536,7 +593,6 @@ describe('Get', function() {
                         };
                     });
             }
-
         }, {
             route: 'lists[{keys:ids}][{integers:indices}]',
             get: function(alias) {
@@ -555,6 +611,17 @@ describe('Get', function() {
                             value: $ref(['videos', data.idx])
                         };
                     });
+            }
+        }, {
+            route: 'myList',
+            get: function() {
+                return [{
+                    path: ['myList'],
+                    value: {
+                        $type: $refset,
+                        value: ['videos', [0, 1, 2]]
+                    }
+                }]
             }
         }]);
     }

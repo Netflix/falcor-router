@@ -484,6 +484,115 @@ describe('Set', function() {
             });
     });
 
+    it('should perform a set with get reference set following.', function(done) {
+        var did = false;
+        var called = 0;
+        var refsetFollowed = false;
+        var router = new R(
+            Routes().Genrelists.Integers(function() {
+                refsetFollowed = true;
+            }).concat(
+            [{
+                route: 'genreLists.selected',
+                get: function() {
+                    return {
+                        path: ['genreLists', 'selected'],
+                        value: {
+                            $type: 'refset',
+                            value: ['genreLists', [0, 1, 2]]
+                        }
+                    };
+                }
+            }, {
+                route: 'videos[{integers:id}].rating',
+                set: function(json) {
+                    called++;
+                    try {
+                        expect(json).to.deep.equals({
+                            videos: {
+                                0: { rating: 5 },
+                                1: { rating: 4 },
+                                2: { rating: 3 }
+                            }
+                        });
+                    } catch (e) {
+                        done(e);
+                        did = true;
+                    }
+                    return [{
+                        path: ['videos', 0, 'rating'],
+                        value: 5
+                    }, {
+                        path: ['videos', 1, 'rating'],
+                        value: 4
+                    }, {
+                        path: ['videos', 2, 'rating'],
+                        value: 3
+                    }];
+                }
+            }]));
+
+        router.
+            set({
+                jsonGraph: {
+                    genreLists: {
+                        selected: {
+                            $type: 'refset',
+                            value: ['genreLists', [0, 1, 2]]
+                        },
+                        0: {
+                            rating: 5
+                        },
+                        1: {
+                            rating: 4
+                        },
+                        2: {
+                            rating: 3
+                        }
+                    }
+                },
+                paths: [
+                    ['genreLists', 'selected', 'rating']
+                ]
+            }).
+            doAction(function(res) {
+                expect(res).to.deep.equals({
+                    jsonGraph: {
+                        genreLists: {
+                            selected: {
+                                $type: 'refset',
+                                value: ['genreLists', [0, 1, 2]]
+                            },
+                            0: $ref('videos[0]'),
+                            1: $ref('videos[1]'),
+                            2: $ref('videos[2]')
+                        },
+                        videos: {
+                            0: {
+                                rating: 5
+                            },
+                            1: {
+                                rating: 4
+                            },
+                            2: {
+                                rating: 3
+                            }
+                        }
+                    }
+                });
+            }).
+            subscribe(noOp, done, function() {
+                if (!did) {
+                    try {
+                        expect(called && refsetFollowed).to.be.ok;
+                        done();
+                    } catch(e) {
+                        done(e);
+                    }
+                }
+            });
+    });
+
     it('should invoke getter on attempt to set read-only property.', function(done) {
         var onNext = sinon.spy();
         var router = new R([{

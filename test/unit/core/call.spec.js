@@ -96,6 +96,66 @@ describe('Call', function() {
             subscribe(noOp, done, done);
     });
 
+    it('should bind "this" properly on a call that tranverses through a reference set.', function(done) {
+        var called = 0;
+        var onNext = sinon.spy();
+        getCallRouter().
+            call(['genrelist', 'selected', 'titles', 'push'],
+                 [{ $type: 'ref', value: ['titlesById', 1] }],
+                 [['name'], ['rating']]).
+            doAction(onNext).
+            doAction(noOp, noOp, function(x) {
+                expect(onNext.called).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    jsonGraph: {
+                        genrelist: {
+                            selected: {
+                                $type: 'refset',
+                                value: ['genrelist', [0, 1, 2]]
+                            },
+                            0: {
+                                titles: {
+                                    2: {
+                                        $type: 'ref',
+                                        value: ['titlesById', 1]
+                                    }
+                                }
+                            },
+                            1: {
+                                titles: {
+                                    2: {
+                                        $type: 'ref',
+                                        value: ['titlesById', 1]
+                                    }
+                                }
+                            },
+                            2: {
+                                titles: {
+                                    2: {
+                                        $type: 'ref',
+                                        value: ['titlesById', 1]
+                                    }
+                                }
+                            }
+                        },
+                        titlesById: {
+                            1: {
+                                name: 'Orange is the new Black',
+                                rating: 5
+                            }
+                        }
+                    },
+                    paths: [
+                        ['genrelist', 'selected', 'titles', 2, ['name', 'rating']]
+                    ]
+                });
+                ++called;
+            }).
+            subscribe(noOp, done, function() {
+                expect(called).to.equals(1);
+                done();
+            });
+    });
 
     it('should return invalidations.', function(done) {
         var router = new R([{
@@ -452,7 +512,8 @@ describe('Call', function() {
     it('should allow item to be pushed onto collection.', function(done) {
         var onNext = sinon.spy();
         getCallRouter().
-            call(['genrelist', 0, 'titles', 'push'], [{ $type: 'ref', value: ['titlesById', 1] }]).
+            call(['genrelist', 0, 'titles', 'push'],
+                 [{ $type: 'ref', value: ['titlesById', 1] }]).
             doAction(onNext).
             doAction(noOp, noOp, function(x) {
                 expect(onNext.called).to.be.ok;
@@ -563,30 +624,54 @@ describe('Call', function() {
 
     function getCallRouter() {
         return new R([{
-            route: 'genrelist[{integers}].titles.push',
+            route: 'genrelist.selected',
+            get: function() {
+                return {
+                    path: ['genrelist', 'selected'],
+                    value: {
+                        $type: 'refset',
+                        value: ['genrelist', [0, 1, 2]]
+                    }
+                }
+            }
+        }, {
+            route: 'genrelist[{integers:genrelistIds}].titles.push',
             call: function(callPath, args) {
-                return {
-                    path: ['genrelist', 0, 'titles', 2],
-                    value: {
-                        $type: 'ref',
-                        value: ['titlesById', 1]
-                    }
-                };
+                var newTitleRef = args[0];
+                var genrelistIds = callPath.genrelistIds;
+                var newTitleRefPath = newTitleRef.value;
+                var newTitleRefId = newTitleRefPath[newTitleRefPath.length - 1];
+                return Observable
+                    .from(genrelistIds)
+                    .map(function(id) {
+                        return {
+                            path: ['genrelist', id, 'titles', 2 + newTitleRefId - 1],
+                            value: newTitleRef
+                        };
+                    });
             }
-        },
-        {
-            route: 'genrelist[{integers}].titles[{integers}]',
+        }, {
+            route: 'genrelist[{integers:genrelistIds}].titles[{integers:titleIndexes}]',
             get: function(pathSet) {
-                return {
-                    path: ['genrelist', 0, 'titles', 1],
-                    value: {
-                        $type: 'ref',
-                        value: ['titlesById', 1]
-                    }
-                };
+                var genrelistIds = pathSet.genrelistIds;
+                var titleIndexes = pathSet.titleIndexes;
+                return Observable
+                    .from(genrelistIds)
+                    .flatMap(function(genrelistId) {
+                        return Observable
+                            .from(titleIndexes)
+                            .map(function(titleIndex) {
+                                return { id: genrelistId, idx: titleIndex };
+                            });
+                    })
+                    .map(function(data) {
+                        return {
+                            path: ['genrelist', data.id, 'titles', data.idx],
+                            value: ['titlesById', data.idx]
+                        };
+                    });
             }
-        },
-        {
+        }, {
             route: 'titlesById[{integers}]["name", "rating"]',
             get: function(callPath, args) {
                 return [

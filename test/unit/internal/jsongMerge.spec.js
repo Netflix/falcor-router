@@ -29,7 +29,7 @@ describe('JSONG - Merge', function() {
         expect(out).to.deep.equals({
             values: [{
                 path: ['there', 'is'],
-                value: $atom('a value')
+                value: 'a value'
             }],
             references: []
         });
