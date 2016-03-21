@@ -19,8 +19,8 @@
   },
   "dependencies": {
     "falcor-path-syntax": "0.2.4",
-    "falcor-path-utils": "0.3.0",
-    "rx": "^4.0.7"
+    "rx": "^4.0.7",
+    "falcor-path-utils": "~0.5.0"
   },
   "devDependencies": {
     "chai": "^2.3.0",

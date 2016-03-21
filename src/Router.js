@@ -3,6 +3,7 @@ var parseTree = require('./parse-tree');
 var matcher = require('./operations/matcher');
 var JSONGraphError = require('./errors/JSONGraphError');
 var MAX_REF_FOLLOW = 50;
+var MAX_PATHS = 9000;
 
 var Router = function(routes, options) {
     var opts = options || {};
@@ -12,6 +13,7 @@ var Router = function(routes, options) {
     this._matcher = matcher(this._rst);
     this._debug = opts.debug;
     this.maxRefFollow = opts.maxRefFollow || MAX_REF_FOLLOW;
+    this.maxPaths = opts.maxPaths || MAX_PATHS;
 };
 
 Router.createClass = function(routes) {
