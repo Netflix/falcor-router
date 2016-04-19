@@ -63,7 +63,7 @@ function traverseAndConvert(obj) {
         }
     }
 
-    /* eslint-disable no-eq-null */
+    /* eslint-disable no-eq-null, eqeqeq */
     else if (obj != null && typeof obj === "object") {
         Object.keys(obj).forEach(function (k) {
             if (typeof obj[k] === "object") {
@@ -75,7 +75,7 @@ function traverseAndConvert(obj) {
             }
         });
     }
-    /* eslint-enable no-eq-null no-unused-vars */
+    /* eslint-enable no-eq-null, eqeqeq */
     return obj;
 }
 
