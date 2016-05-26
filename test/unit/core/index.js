@@ -7,4 +7,5 @@ describe('Core', function() {
     require('./set.spec');
     require('./get.spec');
     require('./multi-indexer.spec');
+    require('./max-paths.spec');
 });

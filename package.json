@@ -1,6 +1,6 @@
 {
   "name": "falcor-router",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "A router DataSource constructor for falcor that allows you to model all your cloud data sources as a single JSON resource.",
   "main": "src/Router.js",
   "homepage": "https://github.com/Netflix/falcor-router",
@@ -8,29 +8,24 @@
     "name": "Netflix",
     "url": "https://github.com/Netflix/falcor-router/authors.txt"
   },
-  "licenses": [
-    {
-      "type": "Apache License, Version 2.0",
-      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
-    }
-  ],
+  "license": "Apache-2.0",
   "directories": {
     "test": "test"
   },
   "dependencies": {
     "falcor-path-syntax": "0.2.4",
-    "falcor-path-utils": "0.3.0",
-    "rxjs": "^5.0.0-beta.2"
+    "falcor-path-utils": "~0.5.0",
+    "rxjs": "^5.0.0-beta.8"
   },
   "devDependencies": {
     "chai": "^2.3.0",
     "coveralls": "^2.11.2",
-    "falcor": "Netflix/falcor",
+    "falcor": "0.1.12",
     "gulp": "~3.8.11",
     "gulp-bump": "~0.1.13",
     "gulp-clean": "~0.3.1",
     "gulp-concat": "~2.4.3",
-    "gulp-eslint": "^0.12.0",
+    "gulp-eslint": "^2.0.0",
     "gulp-istanbul": "^0.9.0",
     "gulp-license": "~1.0.0",
     "gulp-mocha": "^2.0.1",
@@ -55,7 +50,6 @@
     "Netflix",
     "falcorjs"
   ],
-  "license": "ALV2",
   "bugs": {
     "url": "https://github.com/Netflix/falcor-router/issues"
   }
