@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 var outputToObservable = require('../conversion/outputToObservable');
 var noteToJsongOrPV = require('../conversion/noteToJsongOrPV');
+var onError = require('../onError');
 var spreadPaths = require('./../../support/spreadPaths');
 var getValue = require('./../../cache/getValue');
 var jsongMerge = require('./../../cache/jsongMerge');
@@ -81,6 +82,7 @@ function runSetAction(routerInstance, jsongMessage, matchAndPath, jsongCache) {
         filter(function(note) {
             return note.kind !== 'C';
         }).
+        map(onError(routerInstance, matchAndPath)).
         map(noteToJsongOrPV(matchAndPath.path)).
         map(function(jsonGraphOrPV) {
             return [matchAndPath.match, jsonGraphOrPV];

@@ -14,12 +14,14 @@ var Router = function(routes, options) {
     this._debug = opts.debug;
     this.maxRefFollow = opts.maxRefFollow || MAX_REF_FOLLOW;
     this.maxPaths = opts.maxPaths || MAX_PATHS;
+    this._onError = opts.onError;
 };
 
 Router.createClass = function(routes) {
     function C(options) {
         var opts = options || {};
         this._debug = opts.debug;
+        this._onError = opts.onError;
     }
 
     C.prototype = new Router(routes);
@@ -70,6 +72,19 @@ Router.prototype = {
      */
     routeUnhandledPathsTo: function routeUnhandledPathsTo(dataSource) {
         this._unhandled = dataSource;
+    },
+
+    /**
+     * When an exception is thrown on a call, get, or set we will
+     * call the onError callback on the router instance
+     * @param {string} method -
+     * @param {PathSet|PathSet[]} pathOrPathSet -
+     * @param {Exception} error -
+     */
+    onError: function(method, pathOrPathSet, error) {
+        if(this._onError) {
+            this._onError(method, pathOrPathSet, error);
+        }
     }
 };
 

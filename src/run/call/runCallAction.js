@@ -1,6 +1,7 @@
 var isJSONG = require('./../../support/isJSONG');
 var outputToObservable = require('./../conversion/outputToObservable');
 var noteToJsongOrPV = require('./../conversion/noteToJsongOrPV');
+var onError = require('../onError');
 var CallRequiresPathsError = require('./../../errors/CallRequiresPathsError');
 var mCGRI = require('./../mergeCacheAndGatherRefsAndInvalidations');
 var Observable = require('rx').Observable;
@@ -29,7 +30,7 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
         // This is where things get interesting
         out = Observable.
             defer(function() {
-            var next;
+                var next;
                 try {
                     next = match.
                         action.call(
@@ -192,6 +193,7 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
         filter(function(note) {
             return note.kind !== 'C';
         }).
+        map(onError(routerInstance, matchAndPath)).
         map(noteToJsongOrPV(matchAndPath.path)).
         map(function(jsonGraphOrPV) {
             return [matchAndPath.match, jsonGraphOrPV];

@@ -214,4 +214,160 @@ describe('Error', function() {
             subscribe(noOp, done, done);
     });
 
+    it('should call onError when an exception is thrown in a get request.', function(done) {
+        var onError = sinon.spy();
+
+        var router = new R([{
+            route: 'videos[{integers:ids}][\'title\']',
+            get: function (alias) {
+                /* eslint-disable no-throw-literal */
+                throw 'hello world';
+                /* eslint-enable no-throw-literal */
+            }
+        }], {onError: onError});
+        
+        router.
+            get([["videos", 1, "title"]]).
+            doAction(noOp, noOp, function() {
+                expect(onError.calledOnce).to.be.ok;
+
+                var call = onError.getCall(0);
+                expect(call.args[0]).to.equals('get');
+                expect(call.args[1]).to.deep.equals(['videos', 1, 'title']);
+                expect(call.args[2]).to.equals('hello world');
+            }).
+            subscribe(noOp, done, done);
+    });
+
+    it('should not call onError on a successful get', function(done) {
+        var onError = sinon.spy();
+        
+        var router = new R([{
+                route: 'videos[{integers:ids}][\'title\']',
+                get: function(path) {
+                    return { path: ['videos', [1], 'title'], value: "title" }
+                }
+        }], {onError: onError});
+
+        router.get([['videos', 1, 'title']]).
+            doAction(noOp, noOp, function() {
+                expect(onError.calledOnce).to.not.be.ok;
+            }).
+            subscribe(noOp, done, done);
+    });
+
+    it('should call onError when an exception is thrown in a call request.', function(done) {
+        var onError = sinon.spy();
+
+        var router = new R([{
+            route: 'videos[{integers:id}].ratings.length',
+            call: function (callPath, args) {
+                /* eslint-disable no-throw-literal */
+                throw 'hello world';
+                /* eslint-enable no-throw-literal */
+            }
+        }], {onError: onError});
+        
+        router.
+            call(["videos", [1,2], "ratings", "length"]).
+            doAction(noOp, noOp, function() {
+                expect(onError.calledOnce).to.be.ok;
+
+                var call = onError.getCall(0);
+                expect(call.args[0]).to.equals('call');
+                expect(call.args[1]).to.deep.equals(['videos', [1,2], 'ratings', 'length']);
+                expect(call.args[2]).to.equals('hello world');
+            }).
+            subscribe(noOp, done, done);
+    });
+
+    it('should not call onError on a successful call', function(done) {
+        var onError = sinon.spy();
+
+        var router = new R([{
+            route: 'a.b',
+            call: function(callPath, args) {
+                return [];
+            }
+        }], {onError: onError});
+
+        router.
+            call(['a', 'b']).
+            doAction(noOp, noOp, function() {
+                expect(onError.calledOnce, 'onError should not be called once').to.not.be.ok;
+            }).
+            subscribe(noOp, done, done);
+    });
+
+    it('should call onError when an exception is thrown in a set request.', function(done) {
+        var onError = sinon.spy();
+
+        var router = new R([{
+            route: 'videos[{integers:id}].rating',
+            set: function(json) {
+                /* eslint-disable no-throw-literal */
+                throw 'hello world';
+                /* eslint-enable no-throw-literal */
+            }
+        }], {onError: onError});
+        
+        router.
+            set({
+                jsonGraph: {
+                    videos: {
+                        1234: {
+                            rating: 5
+                        },
+                        333: {
+                            rating: 5
+                        }
+                    }
+                },
+                paths: [
+                    ['videos', [1234, 333], 'rating']
+                ]
+            }).
+            doAction(noOp, noOp, function() {
+                expect(onError.calledOnce).to.be.ok;
+
+                var call = onError.getCall(0);
+                expect(call.args[0]).to.equals('set');
+                expect(call.args[1]).to.deep.equals(['videos', [ 1234, 333 ], 'rating']);
+                expect(call.args[2]).to.equals('hello world');
+            }).
+            subscribe(noOp, done, done);
+    });
+
+    it('should not call onError on a successful set', function(done) {
+        var onError = sinon.spy();
+
+        var router = new R([{
+            route: 'titlesById[{integers:titleIds}].userRating',
+            set: function(json) {
+                return [];
+            }
+        }], {onError: onError});
+
+        router.
+            set({
+                "jsonGraph": {
+                    "titlesById": {
+                        "1": {
+                            "userRating": 5
+                        }
+                    }
+                },
+                "paths": [
+                    [
+                        "titlesById",
+                        1,
+                        "userRating"
+                    ]
+                ]
+            }).
+            doAction(noOp, noOp, function() {
+                expect(onError.calledOnce).to.not.be.ok;
+            }).
+            subscribe(noOp, done, done);
+    });
 });
