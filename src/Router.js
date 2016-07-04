@@ -83,7 +83,7 @@ Router.prototype = {
      */
     onError: function(method, pathOrPathSet, error) {
         if(this._onError) {
-            this._onError(method, pathOrPathSet, error);
+            return this._onError(method, pathOrPathSet, error);
         }
     }
 };

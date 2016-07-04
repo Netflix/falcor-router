@@ -7,6 +7,7 @@ var falcor = require('falcor');
 var $ref = falcor.Model.ref;
 var circularReference = require('./../../../src/exceptions').circularReference;
 var Promise = require('promise');
+var JSONGraphError = require('./../../../src/errors/JSONGraphError');
 
 describe('Error', function() {
     it('should return an empty error when throwing a non error.', function(done) {
@@ -369,5 +370,69 @@ describe('Error', function() {
                 expect(onError.calledOnce).to.not.be.ok;
             }).
             subscribe(noOp, done, done);
+    });
+
+    it('should be able to transform Error to JSONGraphError with onError callback', function(done) {
+        var onError = sinon.spy();
+
+        var router = new R([{
+                route: 'videos[{integers:ids}][\'title\']',
+                get: function(path) {
+                    throw new Error("error_message");
+                }
+        }], {
+            onError: (method, path, error) => {
+                return new JSONGraphError({
+                    '$type': 'error',
+                    value: {
+                        message: error.message,
+                        errorCode: "TEST_ERROR_CODE"
+                    }
+                });
+            }
+        });
+
+        router.get([['videos', 1, 'title']]).
+            doAction(onError, noOp, function() {
+                expect(onError.calledOnce).to.be.ok;
+
+                var title = onError.getCall(0).args[0].jsonGraph.videos[1].title;
+                expect(title.$type).to.be.equal("error");
+                expect(title.value.message).to.be.equal("error_message");
+                expect(title.value.errorCode).to.be.equal("TEST_ERROR_CODE");
+            }).
+            subscribe(noOp, done, done);
+    });
+
+    it('should be not be able to transform Error to other thing then JSONGraphError or Error with onError callback', function(done) {
+        var onError = sinon.spy();
+
+        var router = new R([{
+                route: 'videos[{integers:ids}][\'title\']',
+                get: function(path) {
+                    throw new Error("error_message");
+                }
+        }], {
+            onError: (method, path, error) => {
+                return {test: "otherTypeOfObject"};
+            }
+        });
+
+        router.get([['videos', 1, 'title']]).
+            doAction(noOp, noOp).
+            subscribe(
+                () => {
+                    done(new Error('get should have thrown an exception because of the onError callback'));
+                }, 
+                (e) => {
+                    try {
+                        expect(e.message).to.be.equal("onError callback should tranform Error to Error or JSONGraphError");
+                        done();
+                    } 
+                    catch (e) {
+                        done(e);
+                    }
+                }, 
+                noOp);
     });
 });

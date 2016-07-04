@@ -1,3 +1,4 @@
+var JSONGraphError = require('./../errors/JSONGraphError');
 var onNext = 'N';
 
 /**
@@ -27,7 +28,17 @@ function callOnErrorWithException(routerInstance, matchAndPath, note) {
             method = 'set';
         }
 
-        routerInstance.onError(method, pathOrPathSet, note.error);
+        // Make it possible for the callback to transform an Error to another Error or JSONGraphError
+        var transformedError = routerInstance.onError(method, pathOrPathSet, note.error);
+        
+        if (transformedError) {
+            if (transformedError instanceof Error || transformedError instanceof JSONGraphError) {
+                note.error = transformedError;
+            }
+            else {
+                throw new Error("onError callback should tranform Error to Error or JSONGraphError");
+            }
+        }
     }
 
     return note;
