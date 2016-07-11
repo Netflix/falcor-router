@@ -85,6 +85,9 @@ Router.prototype = {
         if(this._onError) {
             return this._onError(method, pathOrPathSet, error);
         }
+
+        // Return null to indicate no tranformation on error
+        return null;
     }
 };
 
