@@ -381,7 +381,7 @@ describe('Error', function() {
                     throw new Error("error_message");
                 }
         }], {
-            onError: (method, path, error) => {
+            onError: function(method, path, error) {
                 return new JSONGraphError({
                     '$type': 'error',
                     value: {
@@ -405,15 +405,13 @@ describe('Error', function() {
     });
 
     it('should be not be able to transform Error to other thing then JSONGraphError or Error with onError callback', function(done) {
-        var onError = sinon.spy();
-
         var router = new R([{
                 route: 'videos[{integers:ids}][\'title\']',
                 get: function(path) {
                     throw new Error("error_message");
                 }
         }], {
-            onError: (method, path, error) => {
+            onError: function(method, path, error) {
                 return {test: "otherTypeOfObject"};
             }
         });
@@ -421,16 +419,16 @@ describe('Error', function() {
         router.get([['videos', 1, 'title']]).
             doAction(noOp, noOp).
             subscribe(
-                () => {
+                function() {
                     done(new Error('get should have thrown an exception because of the onError callback'));
                 }, 
-                (e) => {
+                function(obsErr) {
                     try {
-                        expect(e.message).to.be.equal("onError callback should tranform Error to Error or JSONGraphError");
+                        expect(obsErr.message).to.be.equal("onError callback should tranform Error to Error or JSONGraphError");
                         done();
                     } 
-                    catch (e) {
-                        done(e);
+                    catch (err) {
+                        done(err);
                     }
                 }, 
                 noOp);
