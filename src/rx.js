@@ -17,6 +17,4 @@ require('rxjs/add/operator/materialize');
 require('rxjs/add/operator/mergeMap');
 require('rxjs/add/operator/reduce');
 
-Observable.return = Observable.of;
-
 module.exports = { Observable: Observable };

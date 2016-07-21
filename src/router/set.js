@@ -37,7 +37,7 @@ module.exports = function routerSet(jsonGraph) {
                                       set, router, jsongCache).
 
             // Takes the jsonGraphEnvelope and extra details that comes out
-            // of the recursive matching algorithm and either attempts the 
+            // of the recursive matching algorithm and either attempts the
             // fallback options or returns the built jsonGraph.
             flatMap(function(details) {
                 var out = {
@@ -51,7 +51,7 @@ module.exports = function routerSet(jsonGraph) {
                     var unhandledPaths = details.unhandledPaths;
                     var jsonGraphFragment = {};
 
-                    // PERFORMANCE: 
+                    // PERFORMANCE:
                     //   We know this is a potential performance downfall
                     //   but we want to see if its even a corner case.
                     //   Most likely this will not be hit, but if it does
@@ -101,7 +101,7 @@ module.exports = function routerSet(jsonGraph) {
                             // intersection
                             if (hasIntersection) {
                                 var value =
-                                    getValue(jsonGraph.jsonGraph, 
+                                    getValue(jsonGraph.jsonGraph,
                                         pathAndOPath[0]);
 
                                 return {
@@ -142,7 +142,7 @@ module.exports = function routerSet(jsonGraph) {
                         defaultIfEmpty(out);
                 }
 
-                return Observable.return(out);
+                return Observable.of(out);
             }).
 
             // We will continue to materialize over the whole jsonGraph message.

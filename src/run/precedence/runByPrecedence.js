@@ -36,7 +36,7 @@ module.exports = function runByPrecedence(pathSet, matches, actionRunner) {
 
     if (execs.unhandledPaths) {
         setOfMatchedPaths = setOfMatchedPaths.
-            concat(Observable.return({
+            concat(Observable.of({
                 match: {suffix: []},
                 value: {
                     isMessage: true,

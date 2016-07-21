@@ -12,7 +12,7 @@ module.exports = function outputToObservable(valueOrObservable) {
 
     // falsy value
     if (!value) {
-        return Observable.return(value);
+        return Observable.of(value);
     }
 
     // place holder.  Observables have highest precedence.

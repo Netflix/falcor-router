@@ -42,7 +42,7 @@ module.exports = function routerGet(paths) {
                     var unhandledPaths = details.unhandledPaths;
 
                     // The 3rd argument is the beginning of the actions
-                    // arguments, which for get is the same as the 
+                    // arguments, which for get is the same as the
                     // unhandledPaths.
                     return router._unhandled.
                         get(unhandledPaths).
@@ -58,7 +58,7 @@ module.exports = function routerGet(paths) {
                         defaultIfEmpty(out);
                 }
 
-                return Observable.return(out);
+                return Observable.of(out);
             }).
 
             // We will continue to materialize over the whole jsonGraph message.
