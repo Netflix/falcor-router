@@ -20,6 +20,8 @@ Router.createClass = function(routes) {
     function C(options) {
         var opts = options || {};
         this._debug = opts.debug;
+        this.maxRefFollow = opts.maxRefFollow || MAX_REF_FOLLOW;
+        this.maxPaths = opts.maxPaths || MAX_PATHS;
     }
 
     C.prototype = new Router(routes);
