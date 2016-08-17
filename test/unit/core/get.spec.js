@@ -507,6 +507,38 @@ describe('Get', function() {
             subscribe(noOp, done, done);
     });
 
+    it('should match all specific route handlers when input paths are collapsed', function (done) {
+
+        var called = 0;
+        var router = new R([
+            { route: 'foo.name',   get: function() { return { path: ['foo', 'name'],   value: 'foo-name'}; } },
+            { route: 'bar.name',   get: function() { return { path: ['bar', 'name'],   value: 'bar-name'}; } },
+            { route: 'foo.rating', get: function() { return { path: ['foo', 'rating'], value: 'foo-rating'}; } },
+            { route: 'bar.rating', get: function() { return { path: ['bar', 'rating'], value: 'bar-rating'}; } }
+        ]);
+
+        router.
+            get([[['foo', 'bar'], ['name', 'rating']]]).
+            doAction(function(x) {
+                expect(x).to.deep.equals({
+                    jsonGraph: {
+                        'foo': {
+                            name: 'foo-name',
+                            rating: 'foo-rating'
+                        },
+                        'bar': {
+                            name: 'bar-name',
+                            rating: 'bar-rating'
+                        }
+                    }
+                });
+                called++;
+            }, noOp, function() {
+                expect(called).to.equals(1);
+            }).
+            subscribe(noOp, done, done);
+    });
+
     function getPrecedenceRouter(onTitle, onRating) {
         return new R([{
             route: 'videos[{integers:ids}].title',

@@ -38,6 +38,8 @@ module.exports = function getExecutableMatches(matches, pathSet) {
                     match: match
                 };
                 remainingPaths = remainingPaths.concat(stripResults[1]);
+            } else if (i < matches.length - 1) {
+                remainingPaths[remainingPaths.length] = path;
             }
         }
     }
