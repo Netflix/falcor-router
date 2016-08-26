@@ -1,5 +1,6 @@
 var outputToObservable = require('../conversion/outputToObservable');
 var noteToJsongOrPV = require('../conversion/noteToJsongOrPV');
+var onError = require('../onError');
 var Observable = require('rx').Observable;
 
 module.exports = function runGetAction(routerInstance, jsongCache) {
@@ -23,6 +24,7 @@ function getAction(routerInstance, matchAndPath, jsongCache) {
         filter(function(note) {
             return note.kind !== 'C';
         }).
+        map(onError(routerInstance, matchAndPath)).
         map(noteToJsongOrPV(matchAndPath.path)).
         map(function(jsonGraphOrPV) {
             return [matchAndPath.match, jsonGraphOrPV];
