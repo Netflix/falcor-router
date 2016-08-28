@@ -2,7 +2,7 @@ var R = require('../../../src/Router');
 var noOp = function() {};
 var chai = require('chai');
 var expect = chai.expect;
-var Observable = require('rx').Observable;
+var Observable = require('rxjs').Observable;
 var Promise = require('promise');
 
 describe('return-types', function() {
@@ -125,7 +125,7 @@ describe('return-types', function() {
         var called = false;
         getRouter(dataFn).
             get([['videos', ids, 'title']]).
-            doAction(function(x) {
+            do(function(x) {
                 expect(x).to.deep.equals(getExpected(ids));
                 called = true;
             }, noOp, function() {

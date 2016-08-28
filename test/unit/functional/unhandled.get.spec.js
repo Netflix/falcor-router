@@ -4,7 +4,7 @@ var chai = require('chai');
 var expect = chai.expect;
 var sinon = require('sinon');
 var pathValueMerge = require('./../../../src/cache/pathValueMerge');
-var Observable = require('rx').Observable;
+var Observable = require('rxjs').Observable;
 var $atom = require('./../../../src/support/types').$atom;
 
 describe('#get', function() {
@@ -19,7 +19,7 @@ describe('#get', function() {
             get([['videos', 'summary']]);
         var onNext = sinon.spy();
         obs.
-            doAction(onNext, noOp, function() {
+            do(onNext, noOp, function() {
                 expect(onNext.calledOnce, 'onNext should be called.').to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -53,7 +53,7 @@ describe('#get', function() {
             get([['videos', 'summary']]);
         var onNext = sinon.spy();
         obs.
-            doAction(onNext, noOp, function() {
+            do(onNext, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -96,7 +96,7 @@ describe('#get', function() {
             get([['videos', ['length', 'summary']]]);
         var onNext = sinon.spy();
         obs.
-            doAction(onNext, noOp, function() {
+            do(onNext, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {

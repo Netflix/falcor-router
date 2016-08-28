@@ -86,8 +86,8 @@ describe('Integers', function() {
 
         router.
             get([['titlesById', {from: 1, to: 1}, ["name", "rating"]]]).
-            doAction(onNext).
-            doAction(noOp, noOp, function(x) {
+            do(onNext).
+            do(noOp, noOp, function(x) {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {

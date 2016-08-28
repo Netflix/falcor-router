@@ -14,13 +14,13 @@
   },
   "dependencies": {
     "falcor-path-syntax": "0.2.4",
-    "rx": "^4.0.7",
-    "falcor-path-utils": "~0.5.0"
+    "falcor-path-utils": "~0.5.0",
+    "rxjs": ">=5.0.0-beta.10"
   },
   "devDependencies": {
     "chai": "^2.3.0",
     "coveralls": "^2.11.2",
-    "falcor": "0.1.12",
+    "falcor": "Netflix/falcor",
     "gulp": "~3.8.11",
     "gulp-bump": "~0.1.13",
     "gulp-clean": "~0.3.1",

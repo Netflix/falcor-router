@@ -6,7 +6,7 @@ var CallNotFoundError = require('./../errors/CallNotFoundError');
 var materialize = require('../run/materialize');
 var pathUtils = require('falcor-path-utils');
 var collapse = pathUtils.collapse;
-var Observable = require('rx').Observable;
+var Observable = require('../rx').Observable;
 var MaxPathsExceededError = require('../errors/MaxPathsExceededError');
 var getPathsCount = require('./getPathsCount');
 
@@ -27,9 +27,9 @@ module.exports = function routerCall(callPath, args,
                                    refPaths, thisPaths, jsongCache);
         var callPaths = [callPath];
 
-        if (getPathsCount(refPaths) + 
-            getPathsCount(thisPaths) + 
-            getPathsCount(callPaths) > 
+        if (getPathsCount(refPaths) +
+            getPathsCount(thisPaths) +
+            getPathsCount(callPaths) >
             router.maxPaths) {
             throw new MaxPathsExceededError();
         }

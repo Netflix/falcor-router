@@ -1,5 +1,5 @@
 var falcor = require('falcor');
-var Rx = require('rx');
+var Rx = require('rxjs');
 var R = require('./../../src/Router');
 var Routes = require('./../data');
 var noOp = function() {};
@@ -14,16 +14,14 @@ describe('Get', function() {
         var called = false;
 
         Rx.Observable.
-            of(model.get('videos.summary')).
-            flatMap(function(obs) {
-                return obs;
-            }).
-            doAction(function(x) {
+            from(model.get('videos.summary')).
+            do(function(x) {
                 called = true;
                 expect(x).to.deep.equals({
                     json: {
                         videos: {
-                            summary: 75
+                            summary: 75,
+                            "$__path": ["videos"]
                         }
                     }
                 });
@@ -44,16 +42,15 @@ describe('Get', function() {
         var called = false;
 
         Rx.Observable.
-            of(model.get('genreLists[0].summary')).
-            flatMap(function(obs) {
-                return obs;
-            }).
-            doAction(function(x) {
+            from(model.get('genreLists[0].summary')).
+            do(function(x) {
                 called = true;
                 expect(x).to.deep.equals({
                     json: {
                         genreLists: {
+                            "$__path": ["genreLists"],
                             0: {
+                                "$__path": ["videos", 0],
                                 summary: {
                                     title: 'Some Movie 0'
                                 }

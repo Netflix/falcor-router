@@ -22,8 +22,8 @@ describe('Error', function() {
 
         router.
             get([["videos", 1, "title"]]).
-            doAction(onNext).
-            doAction(noOp, noOp, function() {
+            do(onNext).
+            do(noOp, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -52,7 +52,7 @@ describe('Error', function() {
         var obs = router.get([["videos", 1, "title"]]);
         var err = false;
         obs.
-            doAction(
+            do(
                 noOp,
                 function(e) {
                     expect(e.message).to.equals(circularReference);
@@ -83,8 +83,8 @@ describe('Error', function() {
         var onNext = sinon.spy();
         router.
             get([['videos', [1234, 333], 'rating']]).
-            doAction(onNext).
-            doAction(noOp, noOp, function() {
+            do(onNext).
+            do(noOp, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -135,8 +135,8 @@ describe('Error', function() {
                     ['videos', [1234, 333], 'rating']
                 ]
             }).
-            doAction(onNext).
-            doAction(noOp, noOp, function() {
+            do(onNext).
+            do(noOp, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -189,8 +189,8 @@ describe('Error', function() {
                     ['videos', [1234, 333], 'rating']
                 ]
             }).
-            doAction(onNext).
-            doAction(noOp, noOp, function() {
+            do(onNext).
+            do(noOp, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {

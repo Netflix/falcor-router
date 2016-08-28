@@ -1,4 +1,4 @@
-var Rx = require('rx');
+var Rx = require('rxjs');
 var Observable = Rx.Observable;
 var TestRunner = require('./../TestRunner');
 var falcor = require('falcor');

@@ -1,4 +1,4 @@
-var Rx = require('rx');
+var Rx = require('../rx');
 var Observable = Rx.Observable;
 var runByPrecedence = require('./precedence/runByPrecedence');
 var pathUtils = require('falcor-path-utils');
