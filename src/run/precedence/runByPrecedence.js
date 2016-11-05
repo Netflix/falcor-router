@@ -1,4 +1,4 @@
-var Observable = require('rx').Observable;
+var Observable = require('../../RouterRx.js').Observable;
 var getExecutableMatches = require('./getExecutableMatches');
 
 /**
@@ -36,7 +36,7 @@ module.exports = function runByPrecedence(pathSet, matches, actionRunner) {
 
     if (execs.unhandledPaths) {
         setOfMatchedPaths = setOfMatchedPaths.
-            concat(Observable.return({
+            concat(Observable.of({
                 match: {suffix: []},
                 value: {
                     isMessage: true,

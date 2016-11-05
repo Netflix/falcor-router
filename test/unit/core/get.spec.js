@@ -7,7 +7,7 @@ var expect = chai.expect;
 var falcor = require('falcor');
 var $ref = falcor.Model.ref;
 var $atom = falcor.Model.atom;
-var Observable = require('rx').Observable;
+var Observable = require('rxjs').Observable;
 var sinon = require('sinon');
 
 describe('Get', function() {
@@ -32,7 +32,7 @@ describe('Get', function() {
         var router = new R([{
                 route: 'videos.falsey',
                 get: function(path) {
-                    return Observable.return({
+                    return Observable.of({
                         jsonGraph: {
                             videos: {
                                 falsey: null
@@ -46,8 +46,8 @@ describe('Get', function() {
         var onNext = sinon.spy();
 
         router.get([['videos', 'falsey']]).
-            doAction(onNext).
-            doAction(noOp, noOp, function() {
+            do(onNext).
+            do(noOp, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -65,7 +65,7 @@ describe('Get', function() {
         var router = new R([{
                 route: 'videos.falsey',
                 get: function(path) {
-                    return Observable.return({
+                    return Observable.of({
                         jsonGraph: {
                             videos: {
                                 falsey: $atom(null)
@@ -79,8 +79,8 @@ describe('Get', function() {
         var onNext = sinon.spy();
 
         router.get([['videos', 'falsey']]).
-            doAction(onNext).
-            doAction(noOp, noOp, function() {
+            do(onNext).
+            do(noOp, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -98,7 +98,7 @@ describe('Get', function() {
         var router = new R([{
                 route: 'videos.falsey',
                 get: function(path) {
-                    return Observable.return({
+                    return Observable.of({
                         jsonGraph: {
                             videos: {
                                 falsey: 0
@@ -112,8 +112,8 @@ describe('Get', function() {
         var onNext = sinon.spy();
 
         router.get([['videos', 'falsey']]).
-            doAction(onNext).
-            doAction(noOp, noOp, function() {
+            do(onNext).
+            do(noOp, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -131,7 +131,7 @@ describe('Get', function() {
         var router = new R([{
                 route: 'videos.falsey',
                 get: function(path) {
-                    return Observable.return({
+                    return Observable.of({
                         jsonGraph: {
                             videos: {
                                 falsey: $atom(0)
@@ -145,8 +145,8 @@ describe('Get', function() {
         var onNext = sinon.spy();
 
         router.get([['videos', 'falsey']]).
-            doAction(onNext).
-            doAction(noOp, noOp, function() {
+            do(onNext).
+            do(noOp, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -164,7 +164,7 @@ describe('Get', function() {
         var router = new R([{
                 route: 'videos.falsey',
                 get: function(path) {
-                    return Observable.return({
+                    return Observable.of({
                         value: 0,
                         path: ['videos', 'falsey']
                     });
@@ -174,8 +174,8 @@ describe('Get', function() {
         var onNext = sinon.spy();
 
         router.get([['videos', 'falsey']]).
-            doAction(onNext).
-            doAction(noOp, noOp, function() {
+            do(onNext).
+            do(noOp, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -193,7 +193,7 @@ describe('Get', function() {
         var router = new R([{
             route: 'videos.falsey',
             get: function(path) {
-                return Observable.return({
+                return Observable.of({
                     value: null,
                     path: ['videos', 'falsey']
                 });
@@ -203,8 +203,8 @@ describe('Get', function() {
         var onNext = sinon.spy();
 
         router.get([['videos', 'falsey']]).
-            doAction(onNext).
-            doAction(noOp, noOp, function() {
+            do(onNext).
+            do(noOp, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -222,7 +222,7 @@ describe('Get', function() {
         var router = new R([{
                 route: 'videos.falsey',
                 get: function(path) {
-                    return Observable.return({
+                    return Observable.of({
                         value: false,
                         path: ['videos', 'falsey']
                     });
@@ -232,8 +232,8 @@ describe('Get', function() {
         var onNext = sinon.spy();
 
         router.get([['videos', 'falsey']]).
-            doAction(onNext).
-            doAction(noOp, noOp, function() {
+            do(onNext).
+            do(noOp, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -251,7 +251,7 @@ describe('Get', function() {
         var router = new R([{
                 route: 'videos.falsey',
                 get: function(path) {
-                    return Observable.return({
+                    return Observable.of({
                         value: '',
                         path: ['videos', 'falsey']
                     });
@@ -261,8 +261,8 @@ describe('Get', function() {
         var onNext = sinon.spy();
 
         router.get([['videos', 'falsey']]).
-            doAction(onNext).
-            doAction(noOp, noOp, function() {
+            do(onNext).
+            do(noOp, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -317,8 +317,8 @@ describe('Get', function() {
         var router = new R(routes);
         router.
             get([['lists', [0, 1], 'summary']]).
-            doAction(onNext).
-            doAction(noOp, noOp, function() {
+            do(onNext).
+            do(noOp, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -360,7 +360,7 @@ describe('Get', function() {
 
         router.
             get([['videos', 123, ['title', 'rating']]]).
-            doAction(function(x) {
+            do(function(x) {
                 expect(x).to.deep.equals({
                     jsonGraph: {
                         videos: {
@@ -405,7 +405,7 @@ describe('Get', function() {
             get([
                 ['a', 'specific']
             ]).
-            doAction(noOp, noOp, function() {
+            do(noOp, noOp, function() {
                 expect(getSpecific.calledOnce, 'getSpecific').to.be.ok;
                 expect(getKeys.calledOnce, 'getKeys').to.be.not.ok;
             }).
@@ -417,7 +417,7 @@ describe('Get', function() {
         var router = getPrecedenceRouter();
         router.
             get([['lists', 'abc', 0]]).
-            doAction(function(x) {
+            do(function(x) {
                 expect(x).to.deep.equals({
                     jsonGraph: {
                         lists: {
@@ -478,7 +478,7 @@ describe('Get', function() {
         var obs = router.get([["ProffersById", 1, "ProductsList", {"from": 0, "to": 1}]]);
         var called = false;
         obs.
-            doAction(function (res) {
+            do(function (res) {
                 expect(res).to.deep.equals(routeResponse);
                 called = true;
             }, noOp, function () {
@@ -498,7 +498,7 @@ describe('Get', function() {
         var onNext = sinon.spy();
 
         obs.
-            doAction(onNext, noOp, function() {
+            do(onNext, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {videos: {1: {title: {$type: 'atom'}}}}
@@ -519,7 +519,7 @@ describe('Get', function() {
 
         router.
             get([[['foo', 'bar'], ['name', 'rating']]]).
-            doAction(function(x) {
+            do(function(x) {
                 expect(x).to.deep.equals({
                     jsonGraph: {
                         'foo': {

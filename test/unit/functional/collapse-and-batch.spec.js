@@ -6,7 +6,7 @@ var expect = chai.expect;
 var falcor = require('falcor');
 var $ref = falcor.Model.ref;
 var $atom = falcor.Model.atom;
-var Observable = require('rx').Observable;
+var Observable = require('rxjs').Observable;
 var Promise = require('promise');
 
 describe('Collapse and Batch', function() {
@@ -22,7 +22,7 @@ describe('Collapse and Batch', function() {
             get([['genreLists', [0, 1], 'summary']]);
         var called = false;
         obs.
-            doAction(function(res) {
+            do(function(res) {
                 expect(res).to.deep.equals({
                     jsonGraph: {
                         genreLists: {
@@ -122,7 +122,7 @@ describe('Collapse and Batch', function() {
         var count = 0;
         var time = Date.now();
         obs.
-            doAction(function(res) {
+            do(function(res) {
                 var nextTime = Date.now();
                 expect(nextTime - time >= 4000).to.equal(false);
                 count++;
@@ -175,7 +175,7 @@ describe('Collapse and Batch', function() {
             get([['lists', [0, 1], 'summary']]);
         var count = 0;
         obs.
-            doAction(function(res) {
+            do(function(res) {
                 expect(res).to.deep.equals({
                     jsonGraph: {
                         lists: {
@@ -199,6 +199,8 @@ describe('Collapse and Batch', function() {
             subscribe(noOp, done, done);
     });
 
+    // HACK: This test is not passing
+    // NOTE: I made the test easier to read by simplifying it. I'm still not sure what it's testing.
     it('should validate batching/collapsing makes two request since its onNextd without toArray().', function(done) {
         var serviceCalls = 0;
         var routes = [{
@@ -238,7 +240,7 @@ describe('Collapse and Batch', function() {
             get([['lists', [0, 1], 'summary']]);
         var count = 0;
         obs.
-            doAction(function(res) {
+            do(function(res) {
                 expect(res).to.deep.equals({
                     jsonGraph: {
                         lists: {
@@ -255,11 +257,11 @@ describe('Collapse and Batch', function() {
                     }
                 });
                 count++;
-            }, noOp, function() {
+            }, null, function() {
                 expect(count, 'expect onNext called 1 time.').to.equal(1);
                 expect(serviceCalls).to.equal(2);
-            }).
-            subscribe(noOp, done, done);
+            })
+            .subscribe(noOp, done, done);
     });
 
     it('should validate that a Promise that emits an array gets properly batched.', function(done) {
@@ -293,7 +295,7 @@ describe('Collapse and Batch', function() {
         var router = new R(routes);
         router.
             get([['promise', [0, 1], 'summary']]).
-            doAction(noOp, noOp, function() {
+            do(noOp, noOp, function() {
                 expect(serviceCalls).to.equal(1);
             }).
             subscribe(noOp, done, done);

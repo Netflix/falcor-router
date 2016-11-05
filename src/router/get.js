@@ -3,7 +3,7 @@ var get = 'get';
 var recurseMatchAndExecute = require('../run/recurseMatchAndExecute');
 var normalizePathSets = require('../operations/ranges/normalizePathSets');
 var materialize = require('../run/materialize');
-var Observable = require('rx').Observable;
+var Observable = require('../RouterRx.js').Observable;
 var mCGRI = require('./../run/mergeCacheAndGatherRefsAndInvalidations');
 var MaxPathsExceededError = require('../errors/MaxPathsExceededError');
 var getPathsCount = require('./getPathsCount');
@@ -58,7 +58,7 @@ module.exports = function routerGet(paths) {
                         defaultIfEmpty(out);
                 }
 
-                return Observable.return(out);
+                return Observable.of(out);
             }).
 
             // We will continue to materialize over the whole jsonGraph message.

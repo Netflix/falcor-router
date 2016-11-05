@@ -4,7 +4,7 @@ var chai = require('chai');
 var expect = chai.expect;
 var sinon = require('sinon');
 var pathValueMerge = require('./../../../src/cache/pathValueMerge');
-var Observable = require('rx').Observable;
+var Observable = require('rxjs').Observable;
 var $atom = require('./../../../src/support/types').$atom;
 var $ref = require('./../../../src/support/types').$ref;
 
@@ -29,7 +29,7 @@ describe('#set', function() {
             });
         var onNext = sinon.spy();
         obs.
-            doAction(onNext, noOp, function() {
+            do(onNext, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -63,7 +63,7 @@ describe('#set', function() {
                 return jsonGraph;
             }, {jsonGraph: {}});
 
-            return Observable.return(returnValue);
+            return Observable.of(returnValue);
         });
         router.routeUnhandledPathsTo({set: onUnhandledPaths});
 
@@ -80,7 +80,7 @@ describe('#set', function() {
             });
         var onNext = sinon.spy();
         obs.
-            doAction(onNext, noOp, function() {
+            do(onNext, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -122,7 +122,7 @@ describe('#set', function() {
                 });
                 return jsonGraph;
             }, {jsonGraph: {}});
-            return Observable.return(returnValue);
+            return Observable.of(returnValue);
         });
         router.routeUnhandledPathsTo({set: onUnhandledPaths});
 
@@ -140,7 +140,7 @@ describe('#set', function() {
             });
         var onNext = sinon.spy();
         obs.
-            doAction(onNext, noOp, function() {
+            do(onNext, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -202,7 +202,7 @@ describe('#set', function() {
                 path: unicorn,
                 value: 'missing'
             });
-            return Observable.return(next);
+            return Observable.of(next);
         });
         router.routeUnhandledPathsTo({set: onUnhandledPaths});
 
@@ -227,7 +227,7 @@ describe('#set', function() {
             });
         var onNext = sinon.spy();
         obs.
-            doAction(onNext, noOp, function() {
+            do(onNext, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {

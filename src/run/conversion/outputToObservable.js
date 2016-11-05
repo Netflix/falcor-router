@@ -1,4 +1,4 @@
-var Observable = require('rx').Observable;
+var Observable = require('../../RouterRx.js').Observable;
 var isArray = Array.isArray;
 
 /**
@@ -12,7 +12,7 @@ module.exports = function outputToObservable(valueOrObservable) {
 
     // falsy value
     if (!value) {
-        return Observable.return(value);
+        return Observable.of(value);
     }
 
     // place holder.  Observables have highest precedence.

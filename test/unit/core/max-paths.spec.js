@@ -12,12 +12,12 @@ describe('MaxPaths', function() {
 
         r.get([["lomo", {length: 9001}, "name"]]).
         subscribe({
-            onNext: function(x) {},
-            onError: function(e) {
+            next: function(x) {},
+            error: function(e) {
                 expect(e).to.be.an.instanceof(MaxPathsExceededError);
                 done();
             },
-            onCompleted: function() {}
+            complete: function() {}
         });
 
     });
@@ -31,12 +31,12 @@ describe('MaxPaths', function() {
             paths: [["lomo", {length: 9001}, "name"]]
         }).
         subscribe({
-            onNext: function(x) {},
-            onError: function(e) {
+            next: function(x) {},
+            error: function(e) {
                 expect(e).to.be.an.instanceof(MaxPathsExceededError);
                 done();
             },
-            onCompleted: function() {}
+            complete: function() {}
         });
     });
 
@@ -46,12 +46,12 @@ describe('MaxPaths', function() {
 
         r.call(["lomo", {length: 9001}, "name"], [], [], []).
             subscribe({
-                onNext: function(x) {},
-                onError: function(e) {
+                next: function(x) {},
+                error: function(e) {
                     expect(e).to.be.an.instanceof(MaxPathsExceededError);
                     done();
                 },
-                onCompleted: function() {}
+                complete: function() {}
             });
     });
 
@@ -61,12 +61,12 @@ describe('MaxPaths', function() {
 
         r.call(["lomo", 0, "name"], [], [[{ length: 9001 }]], []).
             subscribe({
-                onNext: function(x) {},
-                onError: function(e) {
+                next: function(x) {},
+                error: function(e) {
                     expect(e).to.be.an.instanceof(MaxPathsExceededError);
                     done();
                 },
-                onCompleted: function() {}
+                complete: function() {}
             });
     });
 
@@ -76,12 +76,12 @@ describe('MaxPaths', function() {
 
         r.call(["lomo", 0, "name"], [], [], [[{ length: 9001 }]]).
             subscribe({
-                onNext: function(x) {},
-                onError: function(e) {
+                next: function(x) {},
+                error: function(e) {
                     expect(e).to.be.an.instanceof(MaxPathsExceededError);
                     done();
                 },
-                onCompleted: function() {}
+                complete: function() {}
             });
     });
 
@@ -91,12 +91,12 @@ describe('MaxPaths', function() {
 
         r.call(["lomo", { length: 3001 }, "name"], [], [[{ length: 3000 }]], [[{ length: 3000 }]]).
             subscribe({
-                onNext: function(x) {},
-                onError: function(e) {
+                next: function(x) {},
+                error: function(e) {
                     expect(e).to.be.an.instanceof(MaxPathsExceededError);
                     done();
                 },
-                onCompleted: function() {}
+                complete: function() {}
             });
     });
 
@@ -114,12 +114,12 @@ describe('MaxPaths', function() {
 
         r.get([["titlesById", {length: 21}, "name"]]).
             subscribe({
-                onNext: function(x) {},
-                onError: function(e) {
+                next: function(x) {},
+                error: function(e) {
                     expect(e).to.be.an.instanceof(MaxPathsExceededError);
                     done();
                 },
-                onCompleted: function() {}
+                complete: function() {}
             });
     });
 
@@ -150,12 +150,12 @@ describe('MaxPaths', function() {
             paths: [["titlesById", [0, 1], "name"]]
         }).
         subscribe({
-            onNext: function(x) {},
-            onError: function(e) {
+            next: function(x) {},
+            error: function(e) {
                 expect(e).to.be.an.instanceof(MaxPathsExceededError);
                 done();
             },
-            onCompleted: function() {}
+            complete: function() {}
         });
     });
 
@@ -176,12 +176,12 @@ describe('MaxPaths', function() {
             [{ $type: "ref", value: ["genrelistsById", 296] }],
             [[{ to: 500 }, "name"]]).
             subscribe({
-                onNext: function(x) {},
-                onError: function(e) {
+                next: function(x) {},
+                error: function(e) {
                     expect(e).to.be.an.instanceof(MaxPathsExceededError);
                     done();
                 },
-                onCompleted: function() {}
+                complete: function() {}
             });
 
     });

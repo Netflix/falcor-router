@@ -2,7 +2,7 @@ var set = 'set';
 var recurseMatchAndExecute = require('./../run/recurseMatchAndExecute');
 var runSetAction = require('./../run/set/runSetAction');
 var materialize = require('../run/materialize');
-var Observable = require('rx').Observable;
+var Observable = require('../RouterRx.js').Observable;
 var spreadPaths = require('./../support/spreadPaths');
 var pathValueMerge = require('./../cache/pathValueMerge');
 var optimizePathSets = require('./../cache/optimizePathSets');
@@ -142,7 +142,7 @@ module.exports = function routerSet(jsonGraph) {
                         defaultIfEmpty(out);
                 }
 
-                return Observable.return(out);
+                return Observable.of(out);
             }).
 
             // We will continue to materialize over the whole jsonGraph message.

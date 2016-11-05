@@ -6,7 +6,7 @@ var CallNotFoundError = require('./../errors/CallNotFoundError');
 var materialize = require('../run/materialize');
 var pathUtils = require('falcor-path-utils');
 var collapse = pathUtils.collapse;
-var Observable = require('rx').Observable;
+var Observable = require('../RouterRx.js').Observable;
 var MaxPathsExceededError = require('../errors/MaxPathsExceededError');
 var getPathsCount = require('./getPathsCount');
 
