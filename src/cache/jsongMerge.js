@@ -1,6 +1,7 @@
 var iterateKeySet = require('falcor-path-utils').iterateKeySet;
 var types = require('./../support/types');
 var $ref = types.$ref;
+var $refset = types.$refset;
 var clone = require('./../support/clone');
 var cloneArray = require('./../support/cloneArray');
 var catAndSlice = require('./../support/catAndSlice');
@@ -38,21 +39,17 @@ function merge(config, cache, message, depth, path, fromParent, fromKey) {
     var requestedPath = config.requestedPath;
     var ignoreCount = config.ignoreCount;
     var typeOfMessage = typeof message;
-    var requestIdx = config.requestIdx;
-    var updateRequestedPath = ignoreCount <= depth;
-    if (updateRequestedPath) {
-        requestIdx = ++config.requestIdx;
-    }
+    var messageType = message && message.$type;
 
     // The message at this point should always be defined.
     // Reached the end of the JSONG message path
-    if (message === null || typeOfMessage !== 'object' || message.$type) {
+    if (message === null || typeOfMessage !== 'object' || messageType) {
         fromParent[fromKey] = clone(message);
 
         // NOTE: If we have found a reference at our cloning position
         // and we have resolved our path then add the reference to
         // the unfulfilledRefernces.
-        if (message && message.$type === $ref) {
+        if (messageType === $ref || messageType === $refset) {
             var references = config.references;
             references.push({
                 path: cloneArray(requestedPath),
@@ -67,11 +64,18 @@ function merge(config, cache, message, depth, path, fromParent, fromKey) {
             var values = config.values;
             values.push({
                 path: cloneArray(requestedPath),
-                value: (message && message.type) ? message.value : message
+                value: messageType ? message.value : message
             });
         }
 
         return;
+    }
+
+    var requestIdx = config.requestIdx;
+    var updateRequestedPath = ignoreCount <= depth;
+
+    if (updateRequestedPath) {
+        requestIdx = ++config.requestIdx;
     }
 
     var outerKey = path[depth];
@@ -109,9 +113,10 @@ function merge(config, cache, message, depth, path, fromParent, fromKey) {
             // references are always pathSets of 1, they can be evaluated
             // iteratively.
 
+            messageType = messageRes && messageRes.$type;
             // There is only a need to consider message references since the
             // merge is only for the path that is provided.
-            if (messageRes && messageRes.$type === $ref &&
+            if ((messageType === $ref || messageType === $refset) &&
                 depth < path.length - 1) {
 
                 nextDepth = 0;
@@ -138,4 +143,8 @@ function merge(config, cache, message, depth, path, fromParent, fromKey) {
         // Are we done with the loop?
         key = iterateKeySet(outerKey, iteratorNote);
     } while (!iteratorNote.done);
+
+    if (updateRequestedPath) {
+        requestIdx = --config.requestIdx;
+    }
 }

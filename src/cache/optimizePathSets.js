@@ -1,8 +1,8 @@
 var iterateKeySet = require('falcor-path-utils').iterateKeySet;
-var cloneArray = require('./../support/cloneArray');
 var catAndSlice = require('./../support/catAndSlice');
 var $types = require('./../support/types');
 var $ref = $types.$ref;
+var $refset = $types.$refset;
 var followReference = require('./followReference');
 
 /**
@@ -36,46 +36,59 @@ function optimizePathSet(cache, cacheRoot, pathSet,
         return;
     }
 
+    var typeofCache = cache === null ? 'undefined' : typeof cache;
+    var type = typeofCache !== 'object' ? undefined : cache.$type;
+
     // all other sentinels are short circuited.
     // Or we found a primitive (which includes null)
-    if (cache === null || (cache.$type && cache.$type !== $ref) ||
-            (typeof cache !== 'object')) {
+    if (typeofCache !== 'object' || (type && !(
+        type === $ref || type === $refset))) {
         return;
     }
 
     // If the reference is the last item in the path then do not
     // continue to search it.
-    if (cache.$type === $ref && depth === pathSet.length) {
+    if ((type === $ref || type === $refset) && depth === pathSet.length) {
         return;
     }
 
     var keySet = pathSet[depth];
     var nextDepth = depth + 1;
+    var isBranchKey = nextDepth < pathSet.length;
     var iteratorNote = {};
     var key, next, nextOptimized;
 
     key = iterateKeySet(keySet, iteratorNote);
     do {
         next = cache[key];
+        type = next && next.$type;
         var optimizedPathLength = optimizedPath.length;
         if (key !== null) {
             optimizedPath[optimizedPathLength] = key;
         }
 
-        if (next && next.$type === $ref && nextDepth < pathSet.length) {
-            var refResults =
-                followReference(cacheRoot, next.value, maxRefFollow);
-            next = refResults[0];
-
-            // must clone to avoid the mutation from above destroying the cache.
-            nextOptimized = cloneArray(refResults[1]);
+        if (isBranchKey && type === $refset) {
+            nextOptimized = [];
+            var refsetPath = catAndSlice(next.value, pathSet, nextDepth);
+            optimizePathSet(cacheRoot, cacheRoot, refsetPath, 0,
+                            out, nextOptimized, maxRefFollow);
+            optimizedPath.length = optimizedPathLength;
         } else {
-            nextOptimized = optimizedPath;
-        }
+            if (isBranchKey && type === $ref) {
+                var refResults =
+                    followReference(cacheRoot, next.value, maxRefFollow);
+                next = refResults[0];
 
-        optimizePathSet(next, cacheRoot, pathSet, nextDepth,
-                        out, nextOptimized, maxRefFollow);
-        optimizedPath.length = optimizedPathLength;
+                // `followReference` clones the refPath before returning it.
+                nextOptimized = refResults[1];
+            } else {
+                nextOptimized = optimizedPath;
+            }
+
+            optimizePathSet(next, cacheRoot, pathSet, nextDepth,
+                            out, nextOptimized, maxRefFollow);
+            optimizedPath.length = optimizedPathLength;
+        }
 
         if (!iteratorNote.done) {
             key = iterateKeySet(keySet, iteratorNote);

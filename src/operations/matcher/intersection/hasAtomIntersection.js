@@ -36,11 +36,34 @@ module.exports = function hasAtomIntersection(matchedAtom, virtualAtom) {
         matched = isNumber(matchedAtom) || isRange(matchedAtom);
     }
 
-    // is virtual an array (last option)
+    // is virtual an array
     // Go through each of the array elements and compare against matched item.
     else if (isArray(virtualAtom)) {
         for (i = 0, len = virtualAtom.length; i < len && !matched; ++i) {
             matched = hasAtomIntersection(matchedAtom, virtualAtom[i]);
+        }
+    }
+
+    // is virtual a range (last option)
+    else if (virtualAtom && typeof virtualAtom === 'object') {
+
+        var from = virtualAtom.from || 0;
+        var length = (doubleEquals(virtualAtom.to, null) ?
+            virtualAtom.length :
+            (virtualAtom.to - virtualAtom.from) + 1) || 0;
+
+        if (!isNaN(from)) {
+            if (isNumber(matchedAtom)) {
+                matched = matchedAtom >= from && matchedAtom < from + length;
+            } else if (isRange(matchedAtom)) {
+
+                var matchFrom = matchedAtom.from || 0;
+                var matchLength = (doubleEquals(matchedAtom.to, null) ?
+                    matchedAtom.length :
+                    (matchedAtom.to - matchedAtom.from) + 1) || 0;
+
+                matched = (matchFrom >= from) && (matchLength <= length);
+            }
         }
     }
 
