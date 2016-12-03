@@ -27,9 +27,9 @@ module.exports = function routerCall(callPath, args,
                                    refPaths, thisPaths, jsongCache);
         var callPaths = [callPath];
 
-        if (getPathsCount(refPaths) + 
-            getPathsCount(thisPaths) + 
-            getPathsCount(callPaths) > 
+        if (getPathsCount(refPaths) +
+            getPathsCount(thisPaths) +
+            getPathsCount(callPaths) >
             router.maxPaths) {
             throw new MaxPathsExceededError();
         }

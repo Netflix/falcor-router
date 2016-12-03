@@ -11,9 +11,9 @@ describe('MaxPaths', function() {
         var r = new Router([]);
 
         r.get([["lomo", {length: 9001}, "name"]]).
-        subscribe({ 
+        subscribe({
             onNext: function(x) {},
-            onError: function(e) { 
+            onError: function(e) {
                 expect(e).to.be.an.instanceof(MaxPathsExceededError);
                 done();
             },
@@ -30,9 +30,9 @@ describe('MaxPaths', function() {
             jsonGraph: {},
             paths: [["lomo", {length: 9001}, "name"]]
         }).
-        subscribe({ 
+        subscribe({
             onNext: function(x) {},
-            onError: function(e) { 
+            onError: function(e) {
                 expect(e).to.be.an.instanceof(MaxPathsExceededError);
                 done();
             },
@@ -45,9 +45,9 @@ describe('MaxPaths', function() {
         var r = new Router([]);
 
         r.call(["lomo", {length: 9001}, "name"], [], [], []).
-            subscribe({ 
+            subscribe({
                 onNext: function(x) {},
-                onError: function(e) { 
+                onError: function(e) {
                     expect(e).to.be.an.instanceof(MaxPathsExceededError);
                     done();
                 },
@@ -60,9 +60,9 @@ describe('MaxPaths', function() {
         var r = new Router([]);
 
         r.call(["lomo", 0, "name"], [], [[{ length: 9001 }]], []).
-            subscribe({ 
+            subscribe({
                 onNext: function(x) {},
-                onError: function(e) { 
+                onError: function(e) {
                     expect(e).to.be.an.instanceof(MaxPathsExceededError);
                     done();
                 },
@@ -75,9 +75,9 @@ describe('MaxPaths', function() {
         var r = new Router([]);
 
         r.call(["lomo", 0, "name"], [], [], [[{ length: 9001 }]]).
-            subscribe({ 
+            subscribe({
                 onNext: function(x) {},
-                onError: function(e) { 
+                onError: function(e) {
                     expect(e).to.be.an.instanceof(MaxPathsExceededError);
                     done();
                 },
@@ -90,9 +90,9 @@ describe('MaxPaths', function() {
         var r = new Router([]);
 
         r.call(["lomo", { length: 3001 }, "name"], [], [[{ length: 3000 }]], [[{ length: 3000 }]]).
-            subscribe({ 
+            subscribe({
                 onNext: function(x) {},
-                onError: function(e) { 
+                onError: function(e) {
                     expect(e).to.be.an.instanceof(MaxPathsExceededError);
                     done();
                 },
@@ -113,9 +113,9 @@ describe('MaxPaths', function() {
         }]);
 
         r.get([["titlesById", {length: 21}, "name"]]).
-            subscribe({ 
+            subscribe({
                 onNext: function(x) {},
-                onError: function(e) { 
+                onError: function(e) {
                     expect(e).to.be.an.instanceof(MaxPathsExceededError);
                     done();
                 },
@@ -149,7 +149,7 @@ describe('MaxPaths', function() {
             },
             paths: [["titlesById", [0, 1], "name"]]
         }).
-        subscribe({ 
+        subscribe({
             onNext: function(x) {},
             onError: function(e) {
                 expect(e).to.be.an.instanceof(MaxPathsExceededError);
@@ -172,12 +172,12 @@ describe('MaxPaths', function() {
             }
         }]);
 
-        r.call(["genrelist", 23, "push"], 
-            [{ $type: "ref", value: ["genrelistsById", 296] }], 
+        r.call(["genrelist", 23, "push"],
+            [{ $type: "ref", value: ["genrelistsById", 296] }],
             [[{ to: 500 }, "name"]]).
-            subscribe({ 
+            subscribe({
                 onNext: function(x) {},
-                onError: function(e) { 
+                onError: function(e) {
                     expect(e).to.be.an.instanceof(MaxPathsExceededError);
                     done();
                 },

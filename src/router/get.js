@@ -42,7 +42,7 @@ module.exports = function routerGet(paths) {
                     var unhandledPaths = details.unhandledPaths;
 
                     // The 3rd argument is the beginning of the actions
-                    // arguments, which for get is the same as the 
+                    // arguments, which for get is the same as the
                     // unhandledPaths.
                     return router._unhandled.
                         get(unhandledPaths).
