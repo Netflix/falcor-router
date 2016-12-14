@@ -1,4 +1,4 @@
-var Rx = require('rx');
+var Rx = require('rxjs');
 var Observable = Rx.Observable;
 var R = require('../../src/Router');
 var TestRunner = require('./../TestRunner');
@@ -12,7 +12,7 @@ module.exports = function() {
                 route: 'videos.summary',
                 get: function(path) {
                     fn && fn(path);
-                    return Observable.return({
+                    return Observable.of({
                         jsonGraph: {
                             videos: {
                                 summary: $atom(75)

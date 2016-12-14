@@ -1,4 +1,4 @@
-var Rx = require('rx');
+var Rx = require('../RouterRx.js');
 var Observable = Rx.Observable;
 var runByPrecedence = require('./precedence/runByPrecedence');
 var pathUtils = require('falcor-path-utils');
@@ -147,7 +147,7 @@ function _recurseMatchAndExecute(
                 }).
                 defaultIfEmpty([]);
 
-        }).
+        }, Number.POSITIVE_INFINITY, Rx.Scheduler.queue).
         reduce(function(acc, x) {
             return acc;
         }, null).
@@ -160,4 +160,3 @@ function _recurseMatchAndExecute(
             };
         });
 }
-

@@ -1,6 +1,6 @@
 var outputToObservable = require('../conversion/outputToObservable');
 var noteToJsongOrPV = require('../conversion/noteToJsongOrPV');
-var Observable = require('rx').Observable;
+var Observable = require('../../RouterRx.js').Observable;
 
 module.exports = function runGetAction(routerInstance, jsongCache) {
     return function innerGetAction(matchAndPath) {

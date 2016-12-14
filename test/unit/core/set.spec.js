@@ -258,7 +258,7 @@ describe('Set', function() {
                     ['path', 'to', ['a', 'b', 'c']]
                 ]
             }).
-            doAction(onNext, noOp, function() {
+            do(onNext, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -318,7 +318,7 @@ describe('Set', function() {
                     ['videos', [1234, 333], 'rating']
                 ]
             }).
-            doAction(function(result) {
+            do(function(result) {
                 expect(result).to.deep.equals({
                     jsonGraph: {
                         videos: {
@@ -378,8 +378,8 @@ describe('Set', function() {
                     ["genreLists", 10, "userRating"]
                 ]
             }).
-            doAction(onNext).
-            doAction(noOp, noOp, function() {
+            do(onNext).
+            do(noOp, noOp, function() {
                 expect(onNext.calledOnce, 'onNext calledOnce').to.be.ok;
                 expect(routerSet.calledTwice, 'routerSet calledTwice').to.be.ok;
                 expect(routerSet.getCall(0).args[0]).to.deep.equals({
@@ -458,7 +458,7 @@ describe('Set', function() {
                     ['genreLists', 0, 'rating']
                 ]
             }).
-            doAction(function(res) {
+            do(function(res) {
                 expect(res).to.deep.equals({
                     jsonGraph: {
                         genreLists: {
@@ -506,8 +506,8 @@ describe('Set', function() {
                     }
                 }
             }).
-            doAction(onNext).
-            doAction(noOp, noOp, function(x) {
+            do(onNext).
+            do(noOp, noOp, function(x) {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {

@@ -1,4 +1,4 @@
-var Observable = require('rx').Observable;
+var Observable = require('rxjs').Observable;
 var R = require('../../../src/Router');
 var noOp = function() {};
 var chai = require('chai');
@@ -26,7 +26,7 @@ describe('Call', function() {
         var onNext = sinon.spy();
         router.
             call(['a', 'b']).
-            doAction(onNext, noOp, function() {
+            do(onNext, noOp, function() {
                 expect(onNext.calledOnce, 'onNext called once').to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {},
@@ -47,7 +47,7 @@ describe('Call', function() {
         var onNext = sinon.spy();
         router.
             call(['a', 'b']).
-            doAction(onNext, noOp, function() {
+            do(onNext, noOp, function() {
                 expect(onNext.calledOnce, 'onNext called once').to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {},
@@ -90,7 +90,7 @@ describe('Call', function() {
 
         router.testValue = 1;
         router.call(['genrelist', 'myList', 'titles', 'push'], ["title100"]).
-            doAction(noOp, noOp, function() {
+            do(noOp, noOp, function() {
                 expect(values).to.deep.equals([1, 1]);
             }).
             subscribe(noOp, done, done);
@@ -121,7 +121,7 @@ describe('Call', function() {
         var onNext = sinon.spy();
         router.
             call(['genrelist', 0, 'titles', 'remove'], [1]).
-            doAction(onNext, noOp, function() {
+            do(onNext, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     "invalidated": [
@@ -170,8 +170,8 @@ describe('Call', function() {
         var onNext = sinon.spy();
         router.
             call(['videos', 1234, 'rating'], [5]).
-            doAction(onNext, onError).
-            doAction(noOp, function() {
+            do(onNext, onError).
+            do(noOp, function() {
                 expect(onNext.callCount).to.equal(0);
                 expect(onError.getCall(0).args[0].message).to.equal('Oops?');
             }).
@@ -190,8 +190,8 @@ describe('Call', function() {
         var onNext = sinon.spy();
         router.
             call(['videos', 1234, 'rating'], [5]).
-            doAction(onNext, onError).
-            doAction(noOp, function() {
+            do(onNext, onError).
+            do(noOp, function() {
                 expect(onNext.callCount).to.equal(0);
                 expect(onError.getCall(0).args[0].message).to.equal('Oops?');
             }).
@@ -228,8 +228,8 @@ describe('Call', function() {
 
         router.
             call(['genrelist', 0, 'titles', 'push'], [{$type: "ref", value: ['titlesById', 1]}], [], []).
-            doAction(onNext).
-            doAction(noOp, noOp, function() {
+            do(onNext).
+            do(noOp, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     "jsonGraph": {
@@ -256,7 +256,7 @@ describe('Call', function() {
     it('should completely onError when an error is thrown from call.', function(done) {
         getRouter(true, true).
             call(['videos', 1234, 'rating'], [5]).
-            doAction(function() {
+            do(function() {
                 throw new Error('Should not be called.  onNext');
             }, function(x) {
                 expect(x.message).to.equal('Oops?');
@@ -275,7 +275,7 @@ describe('Call', function() {
     it('should cause the router to on error only.', function(done) {
         getRouter(true).
             call(['videos', 1234, 'rating'], [5]).
-            doAction(noOp, function(x) {
+            do(noOp, function(x) {
                 expect(x instanceof CallRequiresPathsError).to.be.ok;
             }).
             subscribe(
@@ -310,8 +310,8 @@ describe('Call', function() {
 
         router.
             call(['genrelist', 0, 'titles', 'push'], [{$type: "ref", value: ['titlesById', 1]}], [], []).
-            doAction(onNext).
-            doAction(noOp, noOp, function() {
+            do(onNext).
+            do(noOp, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     "jsonGraph": {
@@ -341,8 +341,8 @@ describe('Call', function() {
         var onNext = sinon.spy();
         getRouter().
             call(['videos', 1234, 'rating'], [5]).
-            doAction(onNext).
-            doAction(noOp, noOp, function() {
+            do(onNext).
+            do(noOp, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -362,8 +362,8 @@ describe('Call', function() {
         var onNext = sinon.spy();
         getExtendedRouter().
             call(['lolomo', 'pvAdd'], ['Thrillers'], [['name']]).
-            doAction(onNext).
-            doAction(noOp, noOp, function() {
+            do(onNext).
+            do(noOp, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -391,7 +391,7 @@ describe('Call', function() {
         var called = 0;
         getExtendedRouter().
             call(['lolomo', 'pvAdd'], ['Thrillers'], null, [['length']]).
-            doAction(function(jsongEnv) {
+            do(function(jsongEnv) {
                 expect(jsongEnv).to.deep.equals({
                     jsonGraph: {
                         lolomo: $ref('lolomos[123]'),
@@ -419,7 +419,7 @@ describe('Call', function() {
         var called = 0;
         getExtendedRouter().
             call(['lolomo', 'pvAdd'], ['Thrillers'], [['name']], [['length']]).
-            doAction(function(jsongEnv) {
+            do(function(jsongEnv) {
                 expect(jsongEnv).to.deep.equals({
                     jsonGraph: {
                         lolomo: $ref('lolomos[123]'),
@@ -453,8 +453,8 @@ describe('Call', function() {
         var onNext = sinon.spy();
         getCallRouter().
             call(['genrelist', 0, 'titles', 'push'], [{ $type: 'ref', value: ['titlesById', 1] }]).
-            doAction(onNext).
-            doAction(noOp, noOp, function(x) {
+            do(onNext).
+            do(noOp, noOp, function(x) {
                 expect(onNext.called).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -486,8 +486,8 @@ describe('Call', function() {
             call(['genrelist', 0, 'titles', 'push'],
                  [{ $type: 'ref', value: ['titlesById', 1] }],
                  [['name'], ['rating']]).
-            doAction(onNext).
-            doAction(noOp, noOp, function(x) {
+            do(onNext).
+            do(noOp, noOp, function(x) {
                 expect(onNext.called).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -525,8 +525,8 @@ describe('Call', function() {
         var onError = sinon.spy();
         router.
             call(['videos', 1234, 'rating'], [5]).
-            doAction(noOp, onError).
-            doAction(noOp, function() {
+            do(noOp, onError).
+            do(noOp, function() {
                 expect(onError.calledOnce).to.be.ok;
 
                 var args = onError.getCall(0).args;
@@ -547,8 +547,8 @@ describe('Call', function() {
         var onError = sinon.spy();
         router.
             call(['videos', 1234, 'rating'], [5]).
-            doAction(noOp, onError).
-            doAction(noOp, function() {
+            do(noOp, onError).
+            do(noOp, function() {
                 expect(onError.calledOnce).to.be.ok;
 
                 var args = onError.getCall(0).args;
