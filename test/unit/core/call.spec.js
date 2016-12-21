@@ -178,6 +178,39 @@ describe('Call', function() {
             subscribe(noOp, doneOnError(done), errorOnCompleted(done));
     });
 
+    it('should execute error hooks when an error occurs.', function(done) {
+        var callCount = 0;
+        var callContext = null;
+        var callArgs = null;
+
+        var router = new R([{
+            route: 'videos[{integers:id}].rating',
+            call: function(callPath, args) {
+                return Promise.reject(new Error("Oops?"));
+            }
+        }], {
+            hooks: {
+                error: function () {
+                    callCount++;
+                    callArgs = Array.prototype.slice.call(arguments, 0);
+                    callContext = this;
+                }
+            }
+        });
+
+        router.
+            call(['videos', 1234, 'rating'], [5]).
+            do(noOp, function(err) {
+                expect(callCount).to.equal(1);
+                expect(callArgs).to.deep.equal([
+                    ['videos', 1234, 'rating'],
+                    err
+                ]);
+                expect(callContext).to.equal(router);
+            }).
+            subscribe(noOp, doneOnError(done), errorOnCompleted(done));
+    });
+
     it('should onError when an Observable.throw of Error is returned from call.', function(done) {
         var router = new R([{
             route: 'videos[{integers:id}].rating',

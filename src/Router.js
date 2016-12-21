@@ -5,6 +5,8 @@ var JSONGraphError = require('./errors/JSONGraphError');
 var MAX_REF_FOLLOW = 50;
 var MAX_PATHS = 9000;
 
+var noOp = function noOp() {};
+
 var Router = function(routes, options) {
     var opts = options || {};
 
@@ -12,6 +14,7 @@ var Router = function(routes, options) {
     this._rst = parseTree(routes);
     this._matcher = matcher(this._rst);
     this._debug = opts.debug;
+    this._errorHook = (opts.hooks && opts.hooks.error) || noOp;
     this.maxRefFollow = opts.maxRefFollow || MAX_REF_FOLLOW;
     this.maxPaths = opts.maxPaths || MAX_PATHS;
 };
@@ -80,5 +83,3 @@ Router.integers = Keys.integers;
 Router.keys = Keys.keys;
 Router.JSONGraphError = JSONGraphError;
 module.exports = Router;
-
-

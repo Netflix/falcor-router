@@ -76,5 +76,8 @@ module.exports = function routerCall(callPath, args,
                 }
                 throw e;
             });
+    })
+    .do(null, function errorHookHandler(err) {
+      router._errorHook(callPath, err);
     });
 };
