@@ -9,13 +9,20 @@ var errorToPathValue = require('./errorToPathValue');
  * @param {PathSet|PathSet[]} pathOrPathSet -
  * @param {Boolean} isPathSet -
  */
-module.exports = function noteToJsongOrPV(pathOrPathSet, isPathSet) {
+module.exports = function noteToJsongOrPV(pathOrPathSet,
+                                          isPathSet,
+                                          routerInstance) {
     return function(note) {
-        return convertNoteToJsongOrPV(pathOrPathSet, note, isPathSet);
+        return convertNoteToJsongOrPV(
+          pathOrPathSet, note, isPathSet, routerInstance
+        );
     };
 };
 
-function convertNoteToJsongOrPV(pathOrPathSet, note, isPathSet) {
+function convertNoteToJsongOrPV(pathOrPathSet,
+                                note,
+                                isPathSet,
+                                routerInstance) {
     var incomingJSONGOrPathValues;
     var kind = note.kind;
 
@@ -29,6 +36,8 @@ function convertNoteToJsongOrPV(pathOrPathSet, note, isPathSet) {
     else {
         incomingJSONGOrPathValues =
             errorToPathValue(note.error, pathOrPathSet);
+
+        routerInstance._errorHook(pathOrPathSet, note.error);
     }
 
     // If its jsong we may need to optionally attach the
@@ -44,4 +53,3 @@ function convertNoteToJsongOrPV(pathOrPathSet, note, isPathSet) {
 
     return incomingJSONGOrPathValues;
 }
-

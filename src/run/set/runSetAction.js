@@ -81,7 +81,7 @@ function runSetAction(routerInstance, jsongMessage, matchAndPath, jsongCache) {
         filter(function(note) {
             return note.kind !== 'C';
         }).
-        map(noteToJsongOrPV(matchAndPath.path)).
+        map(noteToJsongOrPV(matchAndPath.path, false, routerInstance)).
         map(function(jsonGraphOrPV) {
             return [matchAndPath.match, jsonGraphOrPV];
         });

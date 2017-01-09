@@ -232,6 +232,40 @@ describe('Set', function() {
             subscribe(noOp, noOp, noOp);
     });
 
+    it('should call the error hook when an error occurs.', function(done) {
+      var errorHook = sinon.spy();
+
+      var router = new R([{
+          route: ['im', 'a', 'route', 'yo'],
+          set: function(jsonGraph) {
+              throw new Error('error lawl');
+          }
+      }],
+      {
+          hooks: {
+              error: errorHook
+          }
+      });
+
+      router.set({
+          jsonGraph: {
+              im: {
+                  a: {
+                      route: {
+                          yo: 'weeeee!'
+                      }
+                  }
+              }
+          },
+          paths: [['im', 'a', 'route', 'yo']]
+      })
+      .do(function() {
+          expect(errorHook.callCount).to.equal(1);
+          expect(errorHook.calledWith(['im', 'a', 'route', 'yo'], new Error('error lawl'))).to.be.ok;
+      })
+      .subscribe(noOp, done, done);
+    });
+
     it('should correctly collapse and pluck paths with jsonGraph and set.', function(done) {
         var router = new R([{
             route: ['path', 'to', ['a', 'b', 'c']],
