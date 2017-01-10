@@ -7,6 +7,7 @@ var Observable = require('../RouterRx.js').Observable;
 var mCGRI = require('./../run/mergeCacheAndGatherRefsAndInvalidations');
 var MaxPathsExceededError = require('../errors/MaxPathsExceededError');
 var getPathsCount = require('./getPathsCount');
+var rxNewToRxNewAndOld = require('../run/conversion/rxNewToRxNewAndOld');
 
 /**
  * The router get function
@@ -15,7 +16,7 @@ module.exports = function routerGet(paths) {
 
     var router = this;
 
-    return Observable.defer(function() {
+    return rxNewToRxNewAndOld(Observable.defer(function() {
 
         var jsongCache = {};
         var action = runGetAction(router, jsongCache);
@@ -68,5 +69,5 @@ module.exports = function routerGet(paths) {
             map(function(jsonGraphEnvelope) {
                 return materialize(router, normPS, jsonGraphEnvelope);
             });
-    });
+    }));
 };
