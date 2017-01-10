@@ -15,6 +15,7 @@ var collapse = pathUtils.collapse;
 var mCGRI = require('./../run/mergeCacheAndGatherRefsAndInvalidations');
 var MaxPathsExceededError = require('../errors/MaxPathsExceededError');
 var getPathsCount = require('./getPathsCount');
+var rxNewToRxNewAndOld = require('../run/conversion/rxNewToRxNewAndOld');
 
 /**
  * @returns {Observable.<JSONGraph>}
@@ -24,7 +25,7 @@ module.exports = function routerSet(jsonGraph) {
 
     var router = this;
 
-    return Observable.defer(function() {
+    return rxNewToRxNewAndOld(Observable.defer(function() {
         var jsongCache = {};
         var action = runSetAction(router, jsonGraph, jsongCache);
         jsonGraph.paths = normalizePathSets(jsonGraph.paths);
@@ -152,5 +153,5 @@ module.exports = function routerSet(jsonGraph) {
             map(function(jsonGraphEnvelope) {
                 return materialize(router, jsonGraph.paths, jsonGraphEnvelope);
             });
-    });
+    }));
 };

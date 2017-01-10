@@ -9,6 +9,7 @@ var collapse = pathUtils.collapse;
 var Observable = require('../RouterRx.js').Observable;
 var MaxPathsExceededError = require('../errors/MaxPathsExceededError');
 var getPathsCount = require('./getPathsCount');
+var rxNewToRxNewAndOld = require('../run/conversion/rxNewToRxNewAndOld');
 
 /**
  * Performs the call mutation.  If a call is unhandled, IE throws error, then
@@ -18,7 +19,7 @@ module.exports = function routerCall(callPath, args,
                                      refPathsArg, thisPathsArg) {
     var router = this;
 
-    return Observable.defer(function() {
+    return rxNewToRxNewAndOld(Observable.defer(function() {
 
         var refPaths = normalizePathSets(refPathsArg || []);
         var thisPaths = normalizePathSets(thisPathsArg || []);
@@ -79,5 +80,5 @@ module.exports = function routerCall(callPath, args,
     })
     .do(null, function errorHookHandler(err) {
       router._errorHook(callPath, err);
-    });
+    }));
 };

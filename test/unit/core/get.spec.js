@@ -217,6 +217,86 @@ describe('Get', function() {
             subscribe(noOp, done, done);
     });
 
+    it('should not return empty atoms for a false path value with old observables', function(done) {
+        var router = new R([{
+            route: 'videos.falsey',
+            get: function(path) {
+                return {
+                  subscribe: function (observer) {
+                    observer.onNext({
+                        value: false,
+                        path: ['videos', 'falsey']
+                    });
+                    observer.onCompleted();
+                    return {
+                        dispose: function () {
+
+                        }
+                    };
+                  }
+                }
+            }
+        }]);
+
+        var onNext = sinon.spy();
+
+        router.get([['videos', 'falsey']]).
+            do(onNext).
+            do(noOp, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    jsonGraph: {
+                        videos: {
+                            falsey: false
+                        }
+                    }
+                });
+            }).
+            subscribe(noOp, done, done);
+    });
+
+    it('should return observables consumable in an Rx4 and under format', function() {
+
+        var router = new R([{
+                route: 'videos.falsey',
+                get: function(path) {
+                    return Observable.of({
+                        value: false,
+                        path: ['videos', 'falsey']
+                    });
+                }
+        }]);
+
+        var completed = false;
+        var results = [];
+
+        var source = router.get([['videos', 'falsey']]);
+        var sub = source .subscribe({
+                onNext: function (x) {
+                    results.push(x);
+                },
+                onError: function () {
+                    throw new Error('this should not be reached');
+                },
+                onCompleted: function () {
+                    completed = true;
+                }
+            });
+
+        expect(sub.dispose).to.be.a('function');
+        expect(sub.unsubscribe).to.be.a('function');
+        expect(completed).to.equal(true);
+        expect(results).to.deep.equal([
+          {
+              jsonGraph: {
+                  videos: {
+                      falsey: false
+                  }
+              }
+          }
+        ]);
+    });
+
     it('should not return empty atoms for a false path value', function(done) {
 
         var router = new R([{
