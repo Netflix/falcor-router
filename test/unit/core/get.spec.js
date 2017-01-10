@@ -217,6 +217,44 @@ describe('Get', function() {
             subscribe(noOp, done, done);
     });
 
+    it('should not return empty atoms for a false path value with old observables', function(done) {
+        var router = new R([{
+            route: 'videos.falsey',
+            get: function(path) {
+                return {
+                  subscribe: function (observer) {
+                    observer.onNext({
+                        value: false,
+                        path: ['videos', 'falsey']
+                    });
+                    observer.onCompleted();
+                    return {
+                        dispose: function () {
+
+                        }
+                    };
+                  }
+                }
+            }
+        }]);
+
+        var onNext = sinon.spy();
+
+        router.get([['videos', 'falsey']]).
+            do(onNext).
+            do(noOp, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    jsonGraph: {
+                        videos: {
+                            falsey: false
+                        }
+                    }
+                });
+            }).
+            subscribe(noOp, done, done);
+    });
+
     it('should not return empty atoms for a false path value', function(done) {
 
         var router = new R([{
