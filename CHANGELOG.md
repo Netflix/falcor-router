@@ -1,5 +1,5 @@
 <a name=""></a>
-# [](https://github.com/blesh/falcor-router/compare/v0.4.0...v) (2017-01-11)
+# [0.5.0](https://github.com/blesh/falcor-router/compare/v0.4.0...v) (2017-01-11)
 
 ### Features
 
@@ -8,6 +8,9 @@
 * **hooks:** add error hook to set, get and call ([b0222b3](https://github.com/blesh/falcor-router/commit/b0222b3))
 
 
+### BREAKING CHANGES
+
+* `get`, `set` and `call` now return RxJS 5 observables. They've been patched to support Rx4 subscription style, however, the methods and operators on them will be different. `flatMapLatest` will be `switchMap`, for example. For more information about operator changes, see [the RxJS migration docs](https://github.com/ReactiveX/rxjs/blob/master/MIGRATION.md)
 
 <a name="0.3.0"></a>
 # [0.3.0](https://github.com/Netflix/falcor-router/compare/v0.2.12...v0.3.0) (2016-01-28)
