@@ -1,3 +1,14 @@
+<a name=""></a>
+# [](https://github.com/blesh/falcor-router/compare/v0.4.0...v) (2017-01-11)
+
+### Features
+
+* **routes:** support routes returning Rx5 and Rx4 observables, as well as observables implementing `Symbol.observable`, such as Most.js. ([d28d5b6](https://github.com/blesh/falcor-router/commit/d28d5b6))
+* **get, set, call:** support both Rx4 and Rx5+ formats ([25cc985](https://github.com/blesh/falcor-router/commit/25cc985))
+* **hooks:** add error hook to set, get and call ([b0222b3](https://github.com/blesh/falcor-router/commit/b0222b3))
+
+
+
 <a name="0.3.0"></a>
 # [0.3.0](https://github.com/Netflix/falcor-router/compare/v0.2.12...v0.3.0) (2016-01-28)
 
