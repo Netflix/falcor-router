@@ -6,7 +6,7 @@ var expect = chai.expect;
 var falcor = require('falcor');
 var $ref = falcor.Model.ref;
 var $atom = falcor.Model.atom;
-var Observable = require('rxjs').Observable;
+var Observable = require('rxjs/Observable').Observable;
 var Promise = require('promise');
 
 describe('Collapse and Batch', function() {

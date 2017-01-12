@@ -6,7 +6,7 @@ var chai = require('chai');
 var expect = chai.expect;
 var falcor = require('falcor');
 var $ref = falcor.Model.ref;
-var Observable = require('rxjs').Observable;
+var Observable = require('rxjs/Observable').Observable;
 
 describe('Materialized Paths.', function() {
     function partialRouter() {

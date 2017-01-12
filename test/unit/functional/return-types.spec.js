@@ -2,7 +2,7 @@ var R = require('../../../src/Router');
 var noOp = function() {};
 var chai = require('chai');
 var expect = chai.expect;
-var Observable = require('rxjs').Observable;
+var Observable = require('rxjs/Observable').Observable;
 var Promise = require('promise');
 
 describe('return-types', function() {
