@@ -1,4 +1,5 @@
-var Observable = require('rxjs/Rx').Observable;
+// var Observable = require('rxjs/Rx').Observable;
+var Observable = require('rxjs/Observable').Observable;
 var rxNewToRxNewAndOld =
     require('../../../../src/run/conversion/rxNewToRxNewAndOld');
 var chai = require('chai');
