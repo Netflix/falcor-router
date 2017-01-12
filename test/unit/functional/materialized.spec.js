@@ -6,19 +6,18 @@ var chai = require('chai');
 var expect = chai.expect;
 var falcor = require('falcor');
 var $ref = falcor.Model.ref;
-var Observable = require('rxjs').Observable;
+var Observable = require('../../../src/RouterRx').Observable;
+var delay = require('rxjs/operator/delay').delay;
 
 describe('Materialized Paths.', function() {
     function partialRouter() {
         return new R([{
             route: 'one[{integers:ids}]',
             get: function(aliasMap) {
-                return Observable.
-                    of({
-                        path: ['one', 0],
-                        value: $ref(['two', 'be', 956])
-                    }).
-                    delay(100);
+                return delay.call(Observable.of({
+                    path: ['one', 0],
+                    value: $ref(['two', 'be', 956])
+                }), 100);
             }
         }]);
     }

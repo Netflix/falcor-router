@@ -4,7 +4,7 @@ var chai = require('chai');
 var expect = chai.expect;
 var sinon = require('sinon');
 var pathValueMerge = require('./../../../src/cache/pathValueMerge');
-var Observable = require('rxjs').Observable;
+var Observable = require('../../../src/RouterRx').Observable;
 var $atom = require('./../../../src/support/types').$atom;
 
 describe('#get', function() {

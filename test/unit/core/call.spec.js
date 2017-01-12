@@ -1,4 +1,4 @@
-var Observable = require('rxjs').Observable;
+var Observable = require('../../../src/RouterRx').Observable;
 var R = require('../../../src/Router');
 var noOp = function() {};
 var chai = require('chai');
