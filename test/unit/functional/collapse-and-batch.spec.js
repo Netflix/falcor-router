@@ -6,8 +6,9 @@ var expect = chai.expect;
 var falcor = require('falcor');
 var $ref = falcor.Model.ref;
 var $atom = falcor.Model.atom;
-var Observable = require('rxjs').Observable;
+var Observable = require('../../../src/RouterRx').Observable;
 var Promise = require('promise');
+var delay = require('rxjs/operator/delay').delay;
 
 describe('Collapse and Batch', function() {
     it('should ensure that collapse is being ran.', function(done) {
@@ -71,9 +72,7 @@ describe('Collapse and Batch', function() {
         var routes = [{
             route: 'one[{integers:ids}]',
             get: function(aliasMap) {
-                return Observable.
-                    from(aliasMap.ids).
-                    delay(100).
+                return delay.call(Observable.from(aliasMap.ids), 100).
                     map(function(id) {
                         if (id === 0) {
                             return {
@@ -91,9 +90,7 @@ describe('Collapse and Batch', function() {
             route: 'two.be[{integers:ids}].summary',
             get: function(aliasMap) {
                 called(1);
-                return Observable.
-                    from(aliasMap.ids).
-                    delay(2000).
+                return delay.call(Observable.from(aliasMap.ids), 2000).
                     map(function(id) {
                         return {
                             path: ['two', 'be', id, 'summary'],
@@ -105,9 +102,7 @@ describe('Collapse and Batch', function() {
             route: 'three.four[{integers:ids}].summary',
             get: function(aliasMap) {
                 called(2);
-                return Observable.
-                    from(aliasMap.ids).
-                    delay(2000).
+                return delay.call(Observable.from(aliasMap.ids), 2000).
                     map(function(id) {
                         return {
                             path: ['three', 'four', id, 'summary'],

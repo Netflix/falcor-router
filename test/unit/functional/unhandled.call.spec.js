@@ -3,7 +3,7 @@ var noOp = function() {};
 var chai = require('chai');
 var expect = chai.expect;
 var sinon = require('sinon');
-var Observable = require('rxjs').Observable;
+var Observable = require('../../../src/RouterRx').Observable;
 
 describe('#call', function() {
     it('should ensure a missing function gets chained.', function(done) {
