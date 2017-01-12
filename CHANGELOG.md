@@ -1,5 +1,13 @@
-<a name=""></a>
-# [0.5.0](https://github.com/blesh/falcor-router/compare/v0.4.0...v) (2017-01-11)
+<a name="0.5.1"></a>
+## [0.5.1](https://github.com/Netflix/falcor-router/compare/v0.4.0...v0.5.1) (2017-01-12)
+
+
+### Bug Fixes
+
+* **Rx:** make sure all necessary operators are added for router internal use ([eab1145](https://github.com/Netflix/falcor-router/commit/eab1145))
+
+<a name="0.5.0"></a>
+# [0.5.0](https://github.com/blesh/falcor-router/compare/v0.4.0...v0.5.0) (2017-01-11)
 
 ### Features
 
