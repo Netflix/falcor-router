@@ -1,8 +1,6 @@
 var RouterRx = {
   Observable: require('rxjs/Observable').Observable,
-  Scheduler: {
-    queue: require('rxjs/scheduler/queue').queue
-  }
+  Scheduler: { queue: require('rxjs/scheduler/queue').queue }
 };
 
 require('rxjs/add/observable/defer');

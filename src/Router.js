@@ -8,40 +8,39 @@ var MAX_PATHS = 9000;
 var noOp = function noOp() {};
 
 var Router = function(routes, options) {
-    var opts = options || {};
+  var opts = options || {};
 
-    this._routes = routes;
-    this._rst = parseTree(routes);
-    this._matcher = matcher(this._rst);
-    this._debug = opts.debug;
-    this._errorHook = (opts.hooks && opts.hooks.error) || noOp;
-    this.maxRefFollow = opts.maxRefFollow || MAX_REF_FOLLOW;
-    this.maxPaths = opts.maxPaths || MAX_PATHS;
+  this._routes = routes;
+  this._rst = parseTree(routes);
+  this._matcher = matcher(this._rst);
+  this._debug = opts.debug;
+  this._errorHook = opts.hooks && opts.hooks.error || noOp;
+  this.maxRefFollow = opts.maxRefFollow || MAX_REF_FOLLOW;
+  this.maxPaths = opts.maxPaths || MAX_PATHS;
 };
 
 Router.createClass = function(routes) {
-    function C(options) {
-        var opts = options || {};
-        this._debug = opts.debug;
-        this.maxRefFollow = opts.maxRefFollow || MAX_REF_FOLLOW;
-        this.maxPaths = opts.maxPaths || MAX_PATHS;
-    }
+  function C(options) {
+    var opts = options || {};
+    this._debug = opts.debug;
+    this.maxRefFollow = opts.maxRefFollow || MAX_REF_FOLLOW;
+    this.maxPaths = opts.maxPaths || MAX_PATHS;
+  }
 
-    C.prototype = new Router(routes);
-    C.prototype.constructor = C;
+  C.prototype = new Router(routes);
+  C.prototype.constructor = C;
 
-    return C;
+  return C;
 };
 
 Router.prototype = {
-    /**
+  /**
      * Performs the get algorithm on the router.
      * @param {PathSet[]} paths -
      * @returns {Observable.<JSONGraphEnvelope>}
      */
-    get: require('./router/get'),
-
-    /**
+  get: require('./router/get'),
+  /**
      * Takes in a jsonGraph and outputs a Observable.<jsonGraph>.  The set
      * method will use get until it evaluates the last key of the path inside
      * of paths.  At that point it will produce an intermediate structure that
@@ -54,9 +53,8 @@ Router.prototype = {
      * @param {JSONGraphEnvelope} jsonGraph -
      * @returns {Observable.<JSONGraphEnvelope>}
      */
-    set: require('./router/set'),
-
-    /**
+  set: require('./router/set'),
+  /**
      * Invokes a function in the DataSource's JSONGraph object at the path
      * provided in the callPath argument.  If there are references that are
      * followed, a get will be performed to get to the call function.
@@ -66,16 +64,15 @@ Router.prototype = {
      * @param {Array.<PathSet>} refPaths -
      * @param {Array.<PathSet>} thisPaths -
      */
-    call: require('./router/call'),
-
-    /**
+  call: require('./router/call'),
+  /**
      * When a route misses on a call, get, or set the unhandledDataSource will
      * have a chance to fulfill that request.
      * @param {DataSource} dataSource -
      */
-    routeUnhandledPathsTo: function routeUnhandledPathsTo(dataSource) {
-        this._unhandled = dataSource;
-    }
+  routeUnhandledPathsTo: function routeUnhandledPathsTo(dataSource) {
+    this._unhandled = dataSource;
+  }
 };
 
 Router.ranges = Keys.ranges;

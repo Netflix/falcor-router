@@ -32,6 +32,7 @@
     "gulp-mocha": "^2.0.1",
     "gulp-rename": "~1.2.0",
     "lodash": "^3.8.0",
+    "prettier": "0.0.6",
     "promise": "^7.0.1",
     "sinon": "^1.15.4",
     "through2": "~0.6.3"
@@ -39,7 +40,8 @@
   "scripts": {
     "test": "node node_modules/gulp/bin/gulp.js test-coverage",
     "dist": "node node_modules/gulp/bin/gulp.js dist",
-    "lint": "node node_modules/gulp/bin/gulp.js lint"
+    "lint": "node node_modules/gulp/bin/gulp.js lint",
+    "prettier": "prettier **/*.js --write --single-quote"
   },
   "repository": {
     "type": "git",
