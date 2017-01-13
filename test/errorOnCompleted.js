@@ -1,5 +1,5 @@
 module.exports = function(done) {
-    return function() {
-        done(new Error('should not onCompleted'));
-    };
+  return function() {
+    done(new Error('should not onCompleted'));
+  };
 };
