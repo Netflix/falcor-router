@@ -1,3 +1,13 @@
+<a name="0.5.2"></a>
+## [0.5.2](https://github.com/Netflix/falcor-router/compare/0.5.1...v0.5.2) (2017-01-13)
+
+
+### Bug Fixes
+
+* **symbol-observable:** dependency added appropriately ([#202](https://github.com/Netflix/falcor-router/issues/202)) ([fbfa09b](https://github.com/Netflix/falcor-router/commit/fbfa09b))
+
+
+
 <a name="0.5.1"></a>
 ## [0.5.1](https://github.com/Netflix/falcor-router/compare/v0.4.0...v0.5.1) (2017-01-12)
 
