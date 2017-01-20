@@ -215,6 +215,47 @@ describe('JSONG - Merge', function() {
             }]
         });
     });
+
+    it('should fire the router pathError hook if $type:"error" is found while walking', function () {
+        var jsong = {
+            jsonGraph: {
+                this: {
+                    is: {
+                        deep: {
+                            yo: { $type: 'error', value: { message: 'lol error' } }
+                        }
+                    }
+                }
+            },
+            paths: [['this', 'is', 'deep', 'yo']]
+        };
+        var callArgs = null;
+        var callCount = 0;
+        var mockRouter = {
+            _pathErrorHook: function () {
+                callCount++;
+                callArgs = Array.prototype.slice.call(arguments);
+            }
+        }
+        var cache = {};
+        var out = jsongMerge(cache, jsong, mockRouter);
+        expect(out).to.deep.equal({
+            values: [{
+                path: ['this', 'is', 'deep', 'yo'],
+                value: { $type: 'error', value: { message: 'lol error' } }
+            }],
+            references: []
+        });
+        expect(callArgs).to.deep.equals([
+            {
+                path: ['this', 'is', 'deep', 'yo'],
+                value : {
+                    $type: 'error', value: { message: 'lol error'}
+                }
+            }
+        ]);
+        expect(callCount).to.equals(1);
+    });
 });
 
 function mergeTest(jsong) {

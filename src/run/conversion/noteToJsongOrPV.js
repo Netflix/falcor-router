@@ -37,7 +37,7 @@ function convertNoteToJsongOrPV(pathOrPathSet,
         incomingJSONGOrPathValues =
             errorToPathValue(note.error, pathOrPathSet);
 
-        routerInstance._errorHook(pathOrPathSet, note.error);
+        routerInstance._errorHook(note.error);
     }
 
     // If its jsong we may need to optionally attach the

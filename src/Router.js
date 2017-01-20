@@ -14,6 +14,7 @@ var Router = function(routes, options) {
     this._rst = parseTree(routes);
     this._matcher = matcher(this._rst);
     this._debug = opts.debug;
+    this._pathErrorHook = (opts.hooks && opts.hooks.pathError) || noOp;
     this._errorHook = (opts.hooks && opts.hooks.error) || noOp;
     this.maxRefFollow = opts.maxRefFollow || MAX_REF_FOLLOW;
     this.maxPaths = opts.maxPaths || MAX_PATHS;

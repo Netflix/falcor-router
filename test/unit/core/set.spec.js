@@ -261,7 +261,7 @@ describe('Set', function() {
       })
       .do(function() {
           expect(errorHook.callCount).to.equal(1);
-          expect(errorHook.calledWith(['im', 'a', 'route', 'yo'], new Error('error lawl'))).to.be.ok;
+          expect(errorHook.calledWith(new Error('error lawl'))).to.be.ok;
       })
       .subscribe(noOp, done, done);
     });

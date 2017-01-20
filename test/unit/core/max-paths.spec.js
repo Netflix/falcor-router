@@ -22,6 +22,32 @@ describe('MaxPaths', function() {
 
     });
 
+    it('should execute the error hook on MaxPathsExceededError during get', function(done) {
+        var callCount = 0;
+        var callArgs = null;
+        var r = new Router([],
+        {
+            hooks: {
+                error: function () {
+                    callCount++;
+                    callArgs = Array.prototype.slice.call(arguments);
+                }
+            }
+        });
+
+        r.get([["lomo", {length: 9001}, "name"]]).
+        subscribe({
+            next: function(x) {},
+            error: function(e) {
+                expect(callCount).to.equal(1);
+                expect(callArgs).to.deep.equal([e]);
+                done();
+            },
+            complete: function() {}
+        });
+
+    });
+
     it('should fail if number of set paths is greater than maxPaths.', function(done) {
 
         var r = new Router([]);
@@ -40,6 +66,33 @@ describe('MaxPaths', function() {
         });
     });
 
+    it('should call error hook on MaxPathsExceededError in set.', function(done) {
+        var callCount = 0;
+        var callArgs = null;
+        var r = new Router([], {
+            hooks: {
+                error: function () {
+                    callCount++;
+                    callArgs = Array.prototype.slice.call(arguments);
+                }
+            }
+        });
+
+        r.set({
+            jsonGraph: {},
+            paths: [["lomo", {length: 9001}, "name"]]
+        }).
+        subscribe({
+            next: function(x) {},
+            error: function(e) {
+                expect(callCount).to.equal(1);
+                expect(callArgs).to.deep.equal([e]);
+                done();
+            },
+            complete: function() {}
+        });
+    });
+
     it('should fail if number of call paths is greater than maxPaths.', function(done) {
 
         var r = new Router([]);
@@ -49,6 +102,31 @@ describe('MaxPaths', function() {
                 next: function(x) {},
                 error: function(e) {
                     expect(e).to.be.an.instanceof(MaxPathsExceededError);
+                    done();
+                },
+                complete: function() {}
+            });
+    });
+
+    it('should call the error hook on MaxPathsExceededError during call.', function(done) {
+        var callCount = 0;
+        var callArgs = null;
+
+        var r = new Router([], {
+            hooks: {
+                error: function () {
+                    callCount++;
+                    callArgs = Array.prototype.slice.call(arguments);
+                }
+            }
+        });
+
+        r.call(["lomo", {length: 9001}, "name"], [], [], []).
+            subscribe({
+                next: function(x) {},
+                error: function(e) {
+                    expect(callCount).to.equal(1);
+                    expect(callArgs).to.deep.equal([e]);
                     done();
                 },
                 complete: function() {}

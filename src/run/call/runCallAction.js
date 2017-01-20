@@ -84,7 +84,8 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
 
                 });
 
-                var invsRefsAndValues = mCGRI(jsongCache, callOutput);
+                var invsRefsAndValues =
+                    mCGRI(jsongCache, callOutput, routerInstance);
                 invsRefsAndValues.references.forEach(function(ref) {
                     refs[++refLen] = ref;
                 });

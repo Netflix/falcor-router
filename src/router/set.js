@@ -137,7 +137,7 @@ module.exports = function routerSet(jsonGraph) {
                             mCGRI(out.jsonGraph, [{
                                 jsonGraph: unhandledJsonGraphEnv.jsonGraph,
                                 paths: unhandledPaths
-                            }]);
+                            }], router);
                             return out;
                         }).
                         defaultIfEmpty(out);
@@ -153,5 +153,8 @@ module.exports = function routerSet(jsonGraph) {
             map(function(jsonGraphEnvelope) {
                 return materialize(router, jsonGraph.paths, jsonGraphEnvelope);
             });
+    }).
+    do(null, function errorHookHandler(err) {
+      router._errorHook(err);
     }));
 };

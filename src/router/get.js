@@ -53,7 +53,7 @@ module.exports = function routerGet(paths) {
                             mCGRI(out.jsonGraph, [{
                                 jsonGraph: jsonGraphFragment.jsonGraph,
                                 paths: unhandledPaths
-                            }]);
+                            }], router);
                             return out;
                         }).
                         defaultIfEmpty(out);
@@ -69,5 +69,8 @@ module.exports = function routerGet(paths) {
             map(function(jsonGraphEnvelope) {
                 return materialize(router, normPS, jsonGraphEnvelope);
             });
+    }).
+    do(null, function errorHookHandler(err) {
+      router._errorHook(err);
     }));
 };

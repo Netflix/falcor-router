@@ -77,7 +77,8 @@ function _recurseMatchAndExecute(
                         value = [value];
                     }
 
-                    var invsRefsAndValues = mCGRI(jsongCache, value);
+                    var invsRefsAndValues =
+                        mCGRI(jsongCache, value, routerInstance);
                     var invalidations = invsRefsAndValues.invalidations;
                     var unhandled = invsRefsAndValues.unhandledPaths;
                     var messages = invsRefsAndValues.messages;

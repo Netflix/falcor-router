@@ -14,7 +14,9 @@ module.exports = mergeCacheAndGatherRefsAndInvalidations;
  * @param {Object} cache
  * @param {Array} jsongOrPVs
  */
-function mergeCacheAndGatherRefsAndInvalidations(cache, jsongOrPVs) {
+function mergeCacheAndGatherRefsAndInvalidations(
+    cache, jsongOrPVs, routerInstance
+) {
     var references = [];
     var len = -1;
     var invalidations = [];
@@ -39,7 +41,7 @@ function mergeCacheAndGatherRefsAndInvalidations(cache, jsongOrPVs) {
         }
 
         else if (isJSONG(jsongOrPV)) {
-            refsAndValues = jsongMerge(cache, jsongOrPV);
+            refsAndValues = jsongMerge(cache, jsongOrPV, routerInstance);
         }
 
         // Last option are path values.
