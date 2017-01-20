@@ -202,10 +202,7 @@ describe('Call', function() {
             call(['videos', 1234, 'rating'], [5]).
             do(noOp, function(err) {
                 expect(callCount).to.equal(1);
-                expect(callArgs).to.deep.equal([
-                    ['videos', 1234, 'rating'],
-                    err
-                ]);
+                expect(callArgs).to.deep.equal([err]);
                 expect(callContext).to.equal(router);
             }).
             subscribe(noOp, doneOnError(done), errorOnCompleted(done));

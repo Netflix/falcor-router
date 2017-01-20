@@ -722,7 +722,6 @@ describe('Get', function() {
               function () {
                   expect(callCount).to.equal(1);
                   expect(callArgs).to.deep.equal([
-                      ['videos', 1, 'title'],
                       new Error('bad luck for you')
                   ]);
                   expect(callContext).to.equal(router);
