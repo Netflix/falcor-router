@@ -1,3 +1,24 @@
+<a name="0.6.0"></a>
+# [0.6.0](https://github.com/Netflix/falcor-router/compare/0.5.2...v0.6.0) (2017-01-20)
+
+
+### Bug Fixes
+
+* **error hook:** Ensure error hook is called on MaxPathsExceededError ([2f6e65f](https://github.com/Netflix/falcor-router/commit/2f6e65f))
+* **error hook:** Error hook will only pass error object ([8fd2182](https://github.com/Netflix/falcor-router/commit/8fd2182))
+
+
+### Features
+
+* **pathError hook:** add pathError hook for errors identified while ([816eccc](https://github.com/Netflix/falcor-router/commit/816eccc))
+
+
+### BREAKING CHANGES
+
+* error hook: error hook arguments have changes. Now only the error itself is passed, not the path information.
+
+
+
 <a name="0.5.2"></a>
 ## [0.5.2](https://github.com/Netflix/falcor-router/compare/0.5.1...v0.5.2) (2017-01-13)
 
