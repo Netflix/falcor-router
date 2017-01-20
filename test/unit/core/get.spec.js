@@ -619,7 +619,7 @@ describe('Get', function() {
             subscribe(noOp, done, done);
     });
 
-    it('should fire the error hook if the graph  node in it', function (done) {
+    it('should fire the pathError hook if the graph has a $type: "error" node in it', function (done) {
         var callCount = 0;
         var callContext = null;
         var callArgs = null;
