@@ -216,7 +216,7 @@ describe('JSONG - Merge', function() {
         });
     });
 
-    it('should fire the router error hook if $type:"error" is found while walking', function () {
+    it('should fire the router pathError hook if $type:"error" is found while walking', function () {
         var jsong = {
             jsonGraph: {
                 this: {
