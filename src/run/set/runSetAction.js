@@ -67,7 +67,7 @@ function runSetAction(routerInstance, jsongMessage, matchAndPath, jsongCache) {
             paths: [match.requested]
         };
         arg = {};
-        jsongMerge(arg, subJsonGraphEnv);
+        jsongMerge(arg, subJsonGraphEnv, routerInstance);
     }
     try {
         out = match.action.call(routerInstance, arg);

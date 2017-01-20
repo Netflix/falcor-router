@@ -1,6 +1,7 @@
 var iterateKeySet = require('falcor-path-utils').iterateKeySet;
 var types = require('./../support/types');
 var $ref = types.$ref;
+var $error = types.$error;
 var clone = require('./../support/clone');
 var cloneArray = require('./../support/cloneArray');
 var catAndSlice = require('./../support/catAndSlice');
@@ -8,7 +9,7 @@ var catAndSlice = require('./../support/catAndSlice');
 /**
  * merges jsong into a seed
  */
-module.exports = function jsongMerge(cache, jsongEnv) {
+module.exports = function jsongMerge(cache, jsongEnv, routerInstance) {
     var paths = jsongEnv.paths;
     var j = jsongEnv.jsonGraph;
     var references = [];
@@ -16,6 +17,7 @@ module.exports = function jsongMerge(cache, jsongEnv) {
 
     paths.forEach(function(p) {
         merge({
+            router: routerInstance,
             cacheRoot: cache,
             messageRoot: j,
             references: references,
@@ -48,6 +50,12 @@ function merge(config, cache, message, depth, path, fromParent, fromKey) {
     // Reached the end of the JSONG message path
     if (message === null || typeOfMessage !== 'object' || message.$type) {
         fromParent[fromKey] = clone(message);
+
+        // If we notice an error while merging, we'll fire the error hook
+        // for logging purposes.
+        if (message && message.$type === $error) {
+            config.router._pathErrorHook({ path: path, value: message });
+        }
 
         // NOTE: If we have found a reference at our cloning position
         // and we have resolved our path then add the reference to

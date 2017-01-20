@@ -619,6 +619,68 @@ describe('Get', function() {
             subscribe(noOp, done, done);
     });
 
+    it('should fire the error hook if the graph  node in it', function (done) {
+        var callCount = 0;
+        var callContext = null;
+        var callArgs = null;
+        var router = new R([{
+            route: 'videos[{integers:ids}].title',
+            get: function (alias) {
+                return Observable.of({
+                    jsonGraph: {
+                        videos: {
+                            1: {
+                                title: { $type: 'error', value: { message: 'bad luck for you' } }
+                            }
+                        }
+                    }
+                });
+            }
+        }],
+        {
+            hooks: {
+                pathError: function () {
+                    callCount++;
+                    callArgs = Array.prototype.slice.call(arguments, 0);
+                    callContext = this;
+                }
+            }
+        });
+
+        router.get([['videos',1,'title']])
+            .do(
+                function (jsonGraph) {
+                    expect(jsonGraph).to.deep.equal({
+                        jsonGraph: {
+                            'videos': {
+                                1: {
+                                    'title': {
+                                        $type: 'error', value: {
+                                            message: 'bad luck for you'
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    })
+                },
+                noOp,
+                function () {
+                    expect(callCount).to.equal(1);
+                    expect(callArgs).to.deep.equal([{
+                        path: ['videos', 1, 'title'],
+                        value: { $type: 'error', value: { message: 'bad luck for you' } }
+                    }]);
+                    expect(callContext).to.equal(router);
+                }
+            )
+            .subscribe(
+                noOp,
+                done,
+                done
+            )
+    });
+
     it('should fire the error hook passed in via options.hooks', function (done) {
       var callCount = 0;
       var callContext = null;

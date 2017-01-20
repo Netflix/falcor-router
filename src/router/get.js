@@ -53,7 +53,7 @@ module.exports = function routerGet(paths) {
                             mCGRI(out.jsonGraph, [{
                                 jsonGraph: jsonGraphFragment.jsonGraph,
                                 paths: unhandledPaths
-                            }]);
+                            }], router);
                             return out;
                         }).
                         defaultIfEmpty(out);
