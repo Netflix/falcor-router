@@ -153,5 +153,8 @@ module.exports = function routerSet(jsonGraph) {
             map(function(jsonGraphEnvelope) {
                 return materialize(router, jsonGraph.paths, jsonGraphEnvelope);
             });
+    }).
+    do(null, function errorHookHandler(err) {
+      router._errorHook(err);
     }));
 };

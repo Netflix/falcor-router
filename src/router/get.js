@@ -69,5 +69,8 @@ module.exports = function routerGet(paths) {
             map(function(jsonGraphEnvelope) {
                 return materialize(router, normPS, jsonGraphEnvelope);
             });
+    }).
+    do(null, function errorHookHandler(err) {
+      router._errorHook(err);
     }));
 };
