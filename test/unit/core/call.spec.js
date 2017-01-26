@@ -178,7 +178,7 @@ describe('Call', function() {
             subscribe(noOp, doneOnError(done), errorOnCompleted(done));
     });
 
-    it('should trigger the provided routeSummary hook in an error condition', function(done) {
+    it('should trigger the provided methodSummary hook in an error condition', function(done) {
         var i = 0;
 
         var router = new R([{
@@ -191,33 +191,20 @@ describe('Call', function() {
                 return i++;
             },
             hooks: {
-                routeSummary: function (summary) {
+                methodSummary: function (summary) {
                     expect(summary).to.deep.equal({
                         method: "call",
                         start: 0,
-                        arguments: {
-                            callPath: [
-                                "videos",
-                                1234,
-                                "doSomethingReturnRating"
-                            ],
-                            args: [
-                                "arg1"
-                            ],
-                            refPathsArg: undefined,
-                            thisPathsArg: undefined
-                        },
-                        paths: [
-                            {
-                                path: [
-                                    "videos",
-                                    1234,
-                                    "doSomethingReturnRating"
-                                ],
-                                routes: [],
-                                start: 1
-                            }
+                        callPath: [
+                            "videos",
+                            1234,
+                            "doSomethingReturnRating"
                         ],
+                        args: [
+                            "arg1"
+                        ],
+                        refPaths: null,
+                        thisPaths: null,
                         end: 2,
                         error: (function () {
                             var err = new Error('Oops?');
@@ -230,10 +217,10 @@ describe('Call', function() {
             }
         });
 
-        router.call(['videos', 1234, 'doSomethingReturnRating'], ['arg1']).subscribe();
+        router.call(['videos', 1234, 'doSomethingReturnRating'], ['arg1'], null, null).subscribe();
     });
 
-    it('should run routeSummary hook if provided', function (done) {
+    it('should run methodSummary hook if provided', function (done) {
         var i = 0;
         var router = new R([{
             route: 'videos[{integers:id}].doSomethingReturnRating',
@@ -253,7 +240,7 @@ describe('Call', function() {
             }
         }], {
             hooks: {
-                routeSummary: function (summary) {
+                methodSummary: function (summary) {
                     // HACK: the JSON.parse(JSON.stringify()) hack is a workaround
                     //  for some bug in chai. In this case it had something to do
                     // with `undefined` vs `null` assertions? StackOverflow FTW.
@@ -261,78 +248,37 @@ describe('Call', function() {
                     expect(JSON.parse(JSON.stringify(summary))).to.deep.equal({
                         method: "call",
                         start: 0,
-                        arguments: {
-                            callPath: [
-                                "videos",
-                                1,
-                                "doSomethingReturnRating"
-                            ],
-                            args: [
-                                "wut"
-                            ]
-                            // refPathsArg: undefined,
-                            // thisPathsArg: undefined
-                        },
-                        paths: [
+                        callPath: ["videos", 1, "doSomethingReturnRating"],
+                        args: ["wut"],
+                        refPaths: null,
+                        thisPaths: null,
+                        routes: [
                             {
-                                path: [
-                                    "videos",
-                                    1,
-                                    "doSomethingReturnRating"
-                                ],
-                                routes: [
+                                start: 1,
+                                end: 2,
+                                paths: ["videos", [1], "doSomethingReturnRating"],
+                                route: 'videos[{integers:id}].doSomethingReturnRating',
+                                response: [
                                     {
-                                        end: 2,
-                                        requested: [
-                                            "videos",
-                                            [
-                                                1
-                                            ],
-                                            "doSomethingReturnRating"
-                                        ],
-                                        virtual: [
-                                            "videos",
-                                            {
-                                                type: "\u001eintegers",
-                                                named: true,
-                                                name: "id"
-                                            },
-                                            "doSomethingReturnRating"
-                                        ],
-                                        value: [
-                                            {
-                                                jsonGraph: {
-                                                    videos: {
-                                                        1: {
-                                                            rating: 5
-                                                        }
-                                                    }
-                                                },
-                                                paths: [
-                                                    [
-                                                        "videos",
-                                                        1,
-                                                        "rating"
-                                                    ]
-                                                ]
-                                            },
-                                            null,
-                                            {
-                                                isMessage: true,
-                                                method: "get"
-                                            },
-                                            {
-                                                isMessage: true,
-                                                additionalPath: [
-                                                    "videos",
-                                                    1,
-                                                    "rating"
-                                                ]
+                                        jsonGraph: {
+                                            videos: {
+                                                1: {
+                                                    rating: 5
+                                                }
                                             }
-                                        ]
+                                        },
+                                        paths: [["videos", 1, "rating"]]
+                                    },
+                                    null,
+                                    {
+                                        isMessage: true,
+                                        method: "get"
+                                    },
+                                    {
+                                        isMessage: true,
+                                        additionalPath: ["videos", 1, "rating"]
                                     }
-                                ],
-                                start: 1
+                                ]
                             }
                         ],
                         end: 3,
@@ -361,7 +307,7 @@ describe('Call', function() {
             }
         });
 
-        router.call(['videos', 1, 'doSomethingReturnRating'], ['wut'])
+        router.call(['videos', 1, 'doSomethingReturnRating'], ['wut'], null, null)
             .subscribe();
     });
 

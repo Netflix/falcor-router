@@ -232,11 +232,11 @@ describe('Set', function() {
             subscribe(noOp, noOp, noOp);
     });
 
-    it('should call the routeSummary hook if there is one', function (done) {
+    it('should call the methodSummary hook if there is one', function (done) {
         var i = 0;
         var router = new R([
             {
-                route: ['some', 'route'],
+                route: 'some.route',
                 set: function (jsonGraph) {
                     return {
                         paths: [['some', 'route']],
@@ -255,44 +255,37 @@ describe('Set', function() {
                 return i++;
             },
             hooks: {
-                routeSummary: function (summary) {
+                methodSummary: function (summary) {
                     expect(summary).to.deep.equal({
                         method: 'set',
                         start: 0,
-                        arguments: {
+                        jsonGraph: {
+                            paths: [['some', 'route']],
                             jsonGraph: {
-                                paths: [['some', 'route']],
-                                jsonGraph: {
-                                    some: {
-                                        route: {
-                                            value: 'is here'
-                                        }
+                                some: {
+                                    route: {
+                                        value: 'is here'
                                     }
                                 }
                             }
                         },
-                        paths: [
+                        routes: [
                             {
-                                path: ['some', 'route'],
-                                routes: [
-                                    {
-                                        end: 2,
-                                        requested: ['some', 'route'],
-                                        virtual: ['some', 'route'],
-                                        value: {
-                                            paths: [['some', 'route']],
-                                            jsonGraph: {
-                                                some: {
-                                                    route: {
-                                                        $type: 'value',
-                                                        value: 'hi there'
-                                                    }
-                                                }
+                                start: 1,
+                                end: 2,
+                                paths: ['some', 'route'],
+                                route: 'some.route',
+                                response: {
+                                    paths: [['some', 'route']],
+                                    jsonGraph: {
+                                        some: {
+                                            route: {
+                                                $type: 'value',
+                                                value: 'hi there'
                                             }
                                         }
                                     }
-                                ],
-                                start: 1
+                                }
                             }
                         ],
                         end: 3,
@@ -325,10 +318,10 @@ describe('Set', function() {
         .subscribe();
     });
 
-    it('should call the routeSummary hook, if provided, when an error occurs.', function(done) {
+    it('should call the methodSummary hook, if provided, when an error occurs.', function(done) {
         var i = 0;
         var router = new R([{
-            route: ['im', 'a', 'route', 'yo'],
+            route: 'im.a.route.yo',
             set: function(jsonGraph) {
                 throw new Error('error lawl');
             }
@@ -338,71 +331,37 @@ describe('Set', function() {
                 return i++;
             },
             hooks: {
-                routeSummary: function (summary) {
+                methodSummary: function (summary) {
                     expect(summary).to.deep.equal({
                         method: 'set',
                         start: 0,
-                        arguments: {
+                        jsonGraph: {
                             jsonGraph: {
-                                jsonGraph: {
-                                    im: {
-                                        a: {
-                                            route: {
-                                                yo: 'weeeee!'
-                                            }
+                                im: {
+                                    a: {
+                                        route: {
+                                            yo: 'weeeee!'
                                         }
                                     }
-                                },
-                                paths: [
-                                    [
-                                        'im',
-                                        'a',
-                                        'route',
-                                        'yo'
-                                    ]
-                                ]
-                            }
+                                }
+                            },
+                            paths: [['im', 'a', 'route', 'yo']]
                         },
-                        paths: [
+                        routes: [
                             {
-                                path: [
-                                    'im',
-                                    'a',
-                                    'route',
-                                    'yo'
-                                ],
-                                routes: [
-                                    {
-                                        end: 2,
-                                        requested: [
-                                            'im',
-                                            'a',
-                                            'route',
-                                            'yo'
-                                        ],
-                                        virtual: [
-                                            'im',
-                                            'a',
-                                            'route',
-                                            'yo'
-                                        ],
+                                start: 1,
+                                end: 2,
+                                paths: ['im', 'a', 'route', 'yo'],
+                                route: 'im.a.route.yo',
+                                response: {
+                                    path: ['im', 'a', 'route', 'yo'],
+                                    value: {
+                                        $type: 'error',
                                         value: {
-                                            path: [
-                                                'im',
-                                                'a',
-                                                'route',
-                                                'yo'
-                                            ],
-                                            value: {
-                                                $type: 'error',
-                                                value: {
-                                                    message: 'error lawl'
-                                                }
-                                            }
+                                            message: 'error lawl'
                                         }
                                     }
-                                ],
-                                start: 1
+                                }
                             }
                         ],
                         end: 3,

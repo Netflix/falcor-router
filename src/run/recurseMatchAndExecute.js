@@ -17,12 +17,12 @@ var isArray = Array.isArray;
 module.exports = function recurseMatchAndExecute(
         match, actionRunner, paths,
         method, routerInstance, jsongCache,
-        routeSummary) {
+        methodSummary) {
 
     return _recurseMatchAndExecute(
         match, actionRunner, paths,
         method, routerInstance, jsongCache,
-        routeSummary);
+        methodSummary);
 };
 
 /**
@@ -31,7 +31,7 @@ module.exports = function recurseMatchAndExecute(
 function _recurseMatchAndExecute(
         match, actionRunner, paths,
         method, routerInstance, jsongCache,
-        routeSummary) {
+        methodSummary) {
     var unhandledPaths = [];
     var invalidated = [];
     var reportedPaths = [];
@@ -47,16 +47,9 @@ function _recurseMatchAndExecute(
                 return Observable.empty();
             }
 
-            var pathSummary;
-            if (routerInstance._routeSummaryHook) {
-                routeSummary.paths = routeSummary.paths || [];
-                var now = routerInstance._now();
-                pathSummary = {
-                    path: nextPaths,
-                    routes: [],
-                    start: now
-                };
-                routeSummary.paths.push(pathSummary);
+            var start;
+            if (routerInstance._methodSummaryHook) {
+                start = routerInstance._now();
             }
 
             // We have to return an Observable of error instead of just
@@ -75,13 +68,15 @@ function _recurseMatchAndExecute(
                 return Observable.empty();
             }
             return runByPrecedence(nextPaths, matchedResults, actionRunner).
-                do(function routeSummaryHookHandler(results) {
-                    if (pathSummary) {
-                        pathSummary.routes.push({
+                do(function methodSummaryHookHandler(results) {
+                    if (methodSummary) {
+                        methodSummary.routes = methodSummary.routes || [];
+                        methodSummary.routes.push({
+                            start: start,
                             end: routerInstance._now(),
-                            requested: results.match.requested,
-                            virtual: results.match.virtual,
-                            value: results.value
+                            paths: results.match.requested,
+                            route: results.match.prettyRoute,
+                            response: results.value
                         });
                     }
                 }).

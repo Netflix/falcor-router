@@ -15,7 +15,7 @@ var rxNewToRxNewAndOld = require('../run/conversion/rxNewToRxNewAndOld');
 module.exports = function routerGet(paths) {
 
     var router = this;
-    var routeSummary = null;
+    var methodSummary = null;
 
     var source = Observable.defer(function() {
 
@@ -28,7 +28,7 @@ module.exports = function routerGet(paths) {
         }
 
         return recurseMatchAndExecute(router._matcher, action, normPS,
-                                      get, router, jsongCache, routeSummary).
+                                      get, router, jsongCache, methodSummary).
 
             // Turn it(jsongGraph, invalidations, missing, etc.) into a
             // jsonGraph envelope
@@ -72,30 +72,28 @@ module.exports = function routerGet(paths) {
             });
     });
 
-    if (router._routeSummaryHook || router._errorHook) {
+    if (router._methodSummaryHook || router._errorHook) {
 
-        if(router._routeSummaryHook) {
-            routeSummary = {
+        if(router._methodSummaryHook) {
+            methodSummary = {
                 method: 'get',
                 start: router._now(),
-                arguments: {
-                    paths: paths
-                }
+                paths: paths
             };
         }
 
         source = source.
             do(function summaryHookHandler(response) {
-                if (router._routeSummaryHook) {
-                    routeSummary.end = router._now();
-                    routeSummary.response = response;
-                    router._routeSummaryHook(routeSummary);
+                if (router._methodSummaryHook) {
+                    methodSummary.end = router._now();
+                    methodSummary.response = response;
+                    router._methodSummaryHook(methodSummary);
                 }
             }, function summaryHookErrorHandler(err) {
-                if (router._routeSummaryHook) {
-                    routeSummary.end = router._now();
-                    routeSummary.error = err;
-                    router._routeSummaryHook(routeSummary);
+                if (router._methodSummaryHook) {
+                    methodSummary.end = router._now();
+                    methodSummary.error = err;
+                    router._methodSummaryHook(methodSummary);
                 }
                 if (router._errorHook) {
                     router._errorHook(err)

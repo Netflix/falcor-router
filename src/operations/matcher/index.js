@@ -31,7 +31,6 @@ var call = 'call';
  * @return {matched: Array.<Match>, missingPaths: Array.<Array>}
  */
 module.exports = function matcher(rst) {
-
     /**
      * This is where the matching is done.  Will recursively
      * match the paths until it has found all the matchable
@@ -164,7 +163,7 @@ function match(
             // string indexers.
             id: currentMatch[methodToUse + 'Id'],
             requested: cloneArray(requested),
-
+            prettyRoute: currentMatch.prettyRoute,
             action: currentMatch[methodToUse],
             authorize: currentMatch.authorize,
             virtual: cloneArray(virtual),
