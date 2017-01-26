@@ -17,12 +17,12 @@ var isArray = Array.isArray;
 module.exports = function recurseMatchAndExecute(
         match, actionRunner, paths,
         method, routerInstance, jsongCache,
-        summaryContext) {
+        routeSummary) {
 
     return _recurseMatchAndExecute(
         match, actionRunner, paths,
         method, routerInstance, jsongCache,
-        summaryContext);
+        routeSummary);
 };
 
 /**
@@ -31,7 +31,7 @@ module.exports = function recurseMatchAndExecute(
 function _recurseMatchAndExecute(
         match, actionRunner, paths,
         method, routerInstance, jsongCache,
-        summaryContext) {
+        routeSummary) {
     var unhandledPaths = [];
     var invalidated = [];
     var reportedPaths = [];
@@ -49,14 +49,14 @@ function _recurseMatchAndExecute(
 
             var pathSummary;
             if (routerInstance._routeSummaryHook) {
-                summaryContext.paths = summaryContext.paths || [];
+                routeSummary.paths = routeSummary.paths || [];
                 var now = routerInstance._now();
                 pathSummary = {
                     path: nextPaths,
                     routes: [],
                     start: now
                 };
-                summaryContext.paths.push(pathSummary);
+                routeSummary.paths.push(pathSummary);
             }
 
             // We have to return an Observable of error instead of just

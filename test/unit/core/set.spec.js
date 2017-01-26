@@ -232,6 +232,217 @@ describe('Set', function() {
             subscribe(noOp, noOp, noOp);
     });
 
+    it('should call the routeSummary hook if there is one', function (done) {
+        var i = 0;
+        var router = new R([
+            {
+                route: ['some', 'route'],
+                set: function (jsonGraph) {
+                    return {
+                        paths: [['some', 'route']],
+                        jsonGraph: {
+                            some: {
+                                route: {
+                                    $type: 'value', value: 'hi there'
+                                }
+                            }
+                        }
+                    };
+                }
+            }
+        ], {
+            now: function () {
+                return i++;
+            },
+            hooks: {
+                routeSummary: function (summary) {
+                    expect(summary).to.deep.equal({
+                        type: 'set',
+                        start: 0,
+                        arguments: {
+                            jsonGraph: {
+                                paths: [['some', 'route']],
+                                jsonGraph: {
+                                    some: {
+                                        route: {
+                                            value: 'is here'
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        paths: [
+                            {
+                                path: ['some', 'route'],
+                                routes: [
+                                    {
+                                        end: 2,
+                                        requested: ['some', 'route'],
+                                        virtual: ['some', 'route'],
+                                        value: {
+                                            paths: [['some', 'route']],
+                                            jsonGraph: {
+                                                some: {
+                                                    route: {
+                                                        $type: 'value',
+                                                        value: 'hi there'
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                ],
+                                start: 1
+                            }
+                        ],
+                        end: 3,
+                        response: {
+                            jsonGraph: {
+                                some: {
+                                    route: {
+                                        $type: 'value',
+                                        value: 'hi there'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    done();
+                }
+            }
+        });
+
+        router.set({
+            paths: [['some', 'route']],
+            jsonGraph: {
+                some: {
+                    route: {
+                        value: 'is here'
+                    }
+                }
+            }
+        })
+        .subscribe();
+    });
+
+    it('should call the routeSummary hook, if provided, when an error occurs.', function(done) {
+        var i = 0;
+        var router = new R([{
+            route: ['im', 'a', 'route', 'yo'],
+            set: function(jsonGraph) {
+                throw new Error('error lawl');
+            }
+        }],
+        {
+            now: function () {
+                return i++;
+            },
+            hooks: {
+                routeSummary: function (summary) {
+                    expect(summary).to.deep.equal({
+                        type: 'set',
+                        start: 0,
+                        arguments: {
+                            jsonGraph: {
+                                jsonGraph: {
+                                    im: {
+                                        a: {
+                                            route: {
+                                                yo: 'weeeee!'
+                                            }
+                                        }
+                                    }
+                                },
+                                paths: [
+                                    [
+                                        'im',
+                                        'a',
+                                        'route',
+                                        'yo'
+                                    ]
+                                ]
+                            }
+                        },
+                        paths: [
+                            {
+                                path: [
+                                    'im',
+                                    'a',
+                                    'route',
+                                    'yo'
+                                ],
+                                routes: [
+                                    {
+                                        end: 2,
+                                        requested: [
+                                            'im',
+                                            'a',
+                                            'route',
+                                            'yo'
+                                        ],
+                                        virtual: [
+                                            'im',
+                                            'a',
+                                            'route',
+                                            'yo'
+                                        ],
+                                        value: {
+                                            path: [
+                                                'im',
+                                                'a',
+                                                'route',
+                                                'yo'
+                                            ],
+                                            value: {
+                                                $type: 'error',
+                                                value: {
+                                                    message: 'error lawl'
+                                                }
+                                            }
+                                        }
+                                    }
+                                ],
+                                start: 1
+                            }
+                        ],
+                        end: 3,
+                        response: {
+                            jsonGraph: {
+                                im: {
+                                    a: {
+                                        route: {
+                                            yo: {
+                                                $type: 'error',
+                                                value: {
+                                                    message: 'error lawl'
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    done();
+                }
+            }
+        });
+
+        router.set({
+            jsonGraph: {
+                im: {
+                    a: {
+                        route: {
+                            yo: 'weeeee!'
+                        }
+                    }
+                }
+            },
+            paths: [['im', 'a', 'route', 'yo']]
+        })
+        .subscribe();
+    });
+
     it('should call the error hook when an error occurs.', function(done) {
       var errorHook = sinon.spy();
 

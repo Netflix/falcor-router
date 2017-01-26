@@ -18,6 +18,21 @@ var rxNewToRxNewAndOld = require('../run/conversion/rxNewToRxNewAndOld');
 module.exports = function routerCall(callPath, args,
                                      refPathsArg, thisPathsArg) {
     var router = this;
+    var routeSummary;
+    if (router._routeSummaryHook) {
+        routeSummary = {
+            type: 'call',
+            start: router._now(),
+            arguments: {
+                callPath: callPath,
+                args: args,
+                refPathsArg: typeof refPathsArg === 'undefined' ?
+                    null : refPathsArg,
+                thisPathsArg: typeof thisPathsArg === 'undefined' ?
+                    null : thisPathsArg
+            }
+        };
+    }
 
     return rxNewToRxNewAndOld(Observable.defer(function() {
 
@@ -36,7 +51,7 @@ module.exports = function routerCall(callPath, args,
         }
 
         return recurseMatchAndExecute(router._matcher, action, callPaths, call,
-                                      router, jsongCache).
+                                      router, jsongCache, routeSummary).
 
             // Take that
             map(function(jsongResult) {
@@ -77,8 +92,21 @@ module.exports = function routerCall(callPath, args,
                 }
                 throw e;
             });
-    })
-    .do(null, function errorHookHandler(err) {
+    }).
+    do(function summaryHookHandler(response) {
+        if (router._routeSummaryHook) {
+            routeSummary.end = router._now();
+            routeSummary.response = response;
+            router._routeSummaryHook(routeSummary);
+        }
+    }, function summaryHookErrorHandler(err) {
+        if (router._routeSummaryHook) {
+            routeSummary.end = router._now();
+            routeSummary.error = err;
+            router._routeSummaryHook(routeSummary);
+        }
+    }).
+    do(null, function errorHookHandler(err) {
       router._errorHook(err);
     }));
 };

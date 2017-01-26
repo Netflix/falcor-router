@@ -25,6 +25,16 @@ module.exports = function routerSet(jsonGraph) {
 
     var router = this;
 
+    var routeSummary = null;
+    if (router._routeSummaryHook) {
+        routeSummary = {
+            type: 'set',
+            start: router._now(),
+            arguments: {
+                jsonGraph: jsonGraph
+            }
+        };
+    }
     return rxNewToRxNewAndOld(Observable.defer(function() {
         var jsongCache = {};
         var action = runSetAction(router, jsonGraph, jsongCache);
@@ -35,7 +45,7 @@ module.exports = function routerSet(jsonGraph) {
         }
 
         return recurseMatchAndExecute(router._matcher, action, jsonGraph.paths,
-                                      set, router, jsongCache).
+                                      set, router, jsongCache, routeSummary).
 
             // Takes the jsonGraphEnvelope and extra details that comes out
             // of the recursive matching algorithm and either attempts the
@@ -153,6 +163,19 @@ module.exports = function routerSet(jsonGraph) {
             map(function(jsonGraphEnvelope) {
                 return materialize(router, jsonGraph.paths, jsonGraphEnvelope);
             });
+    }).
+    do(function summaryHookHandler(response) {
+        if (router._routeSummaryHook) {
+            routeSummary.end = router._now();
+            routeSummary.response = response;
+            router._routeSummaryHook(routeSummary);
+        }
+    }, function summaryHookErrorHandler(err) {
+        if (router._routeSummaryHook) {
+            routeSummary.end = router._now();
+            routeSummary.error = err;
+            router._routeSummaryHook(routeSummary);
+        }
     }).
     do(null, function errorHookHandler(err) {
       router._errorHook(err);

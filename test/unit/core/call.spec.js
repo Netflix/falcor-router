@@ -178,6 +178,194 @@ describe('Call', function() {
             subscribe(noOp, doneOnError(done), errorOnCompleted(done));
     });
 
+    it('should trigger the provided routeSummary hook in an error condition', function(done) {
+        var i = 0;
+
+        var router = new R([{
+            route: 'videos[{integers:id}].rating',
+            call: function(callPath, args) {
+                return Promise.reject(new Error("Oops?"));
+            }
+        }], {
+            now: function () {
+                return i++;
+            },
+            hooks: {
+                routeSummary: function (summary) {
+                    expect(summary).to.deep.equal({
+                        type: "call",
+                        start: 0,
+                        arguments: {
+                            callPath: [
+                                "videos",
+                                1234,
+                                "rating"
+                            ],
+                            args: [
+                                5
+                            ],
+                            refPathsArg: null,
+                            thisPathsArg: null
+                        },
+                        paths: [
+                            {
+                                path: [
+                                    "videos",
+                                    1234,
+                                    "rating"
+                                ],
+                                routes: [],
+                                start: 1
+                            }
+                        ],
+                        end: 2,
+                        error: (function () {
+                            var err = new Error('Oops?');
+                            err.throwToNext = true;
+                            return err;
+                        }())
+                    });
+                    done();
+                }
+            }
+        });
+
+        router.call(['videos', 1234, 'rating'], [5]).subscribe();
+    });
+
+    it('should run routeSummary hook if provided', function (done) {
+        var i = 0;
+        var router = new R([{
+            route: 'videos[{integers:id}].rating',
+            call: function(callPath, args) {
+                return Promise.resolve({
+                    jsonGraph: {
+                        videos: {
+                            1: {
+                                rating: 5
+                            }
+                        }
+                    },
+                    paths: [
+                        ['videos', 1, 'rating']
+                    ]
+                });
+            }
+        }], {
+            hooks: {
+                routeSummary: function (summary) {
+                    // HACK: the JSON.parse(JSON.stringify()) hack is a workaround
+                    //  for some bug in chai. In this case it had something to do
+                    // with `undefined` vs `null` assertions? StackOverflow FTW.
+                    // The important thing is the output has the fields we need.
+                    expect(JSON.parse(JSON.stringify(summary))).to.deep.equal({
+                        type: "call",
+                        start: 0,
+                        arguments: {
+                            callPath: [
+                                "videos",
+                                1,
+                                "rating"
+                            ],
+                            args: [
+                                "wut"
+                            ],
+                            refPathsArg: null,
+                            thisPathsArg: null
+                        },
+                        paths: [
+                            {
+                                path: [
+                                    "videos",
+                                    1,
+                                    "rating"
+                                ],
+                                routes: [
+                                    {
+                                        end: 2,
+                                        requested: [
+                                            "videos",
+                                            [
+                                                1
+                                            ],
+                                            "rating"
+                                        ],
+                                        virtual: [
+                                            "videos",
+                                            {
+                                                type: "\u001eintegers",
+                                                named: true,
+                                                name: "id"
+                                            },
+                                            "rating"
+                                        ],
+                                        value: [
+                                            {
+                                                jsonGraph: {
+                                                    videos: {
+                                                        1: {
+                                                            rating: 5
+                                                        }
+                                                    }
+                                                },
+                                                paths: [
+                                                    [
+                                                        "videos",
+                                                        1,
+                                                        "rating"
+                                                    ]
+                                                ]
+                                            },
+                                            null,
+                                            {
+                                                isMessage: true,
+                                                method: "get"
+                                            },
+                                            {
+                                                isMessage: true,
+                                                additionalPath: [
+                                                    "videos",
+                                                    1,
+                                                    "rating"
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ],
+                                start: 1
+                            }
+                        ],
+                        end: 3,
+                        response: {
+                            jsonGraph: {
+                                videos: {
+                                    1: {
+                                        rating: 5
+                                    }
+                                }
+                            },
+                            paths: [
+                                [
+                                    "videos",
+                                    1,
+                                    "rating"
+                                ]
+                            ]
+                        }
+                    });
+                    done();
+                }
+            },
+            now: function () {
+                return i++;
+            }
+        });
+
+        router.call(['videos', 1, 'rating'], ['wut'])
+            .subscribe();
+    });
+
+
     it('should execute error hooks when an error occurs.', function(done) {
         var callCount = 0;
         var callContext = null;

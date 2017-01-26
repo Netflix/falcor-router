@@ -15,12 +15,14 @@ var rxNewToRxNewAndOld = require('../run/conversion/rxNewToRxNewAndOld');
 module.exports = function routerGet(paths) {
 
     var router = this;
-    var summaryContext = null;
+    var routeSummary = null;
     if (router._routeSummaryHook) {
-        summaryContext = {
+        routeSummary = {
             type: 'get',
             start: router._now(),
-            pathsArgument: paths
+            arguments: {
+                paths: paths
+            }
         };
     }
 
@@ -35,7 +37,7 @@ module.exports = function routerGet(paths) {
         }
 
         return recurseMatchAndExecute(router._matcher, action, normPS,
-                                      get, router, jsongCache, summaryContext).
+                                      get, router, jsongCache, routeSummary).
 
             // Turn it(jsongGraph, invalidations, missing, etc.) into a
             // jsonGraph envelope
@@ -80,15 +82,15 @@ module.exports = function routerGet(paths) {
     }).
     do(function summaryHookHandler(response) {
         if (router._routeSummaryHook) {
-            summaryContext.end = router._now();
-            summaryContext.response = response;
-            router._routeSummaryHook(summaryContext);
+            routeSummary.end = router._now();
+            routeSummary.response = response;
+            router._routeSummaryHook(routeSummary);
         }
     }, function summaryHookErrorHandler(err) {
         if (router._routeSummaryHook) {
-            summaryContext.end = router._now();
-            summaryContext.error = err;
-            router._routeSummaryHook(summaryContext);
+            routeSummary.end = router._now();
+            routeSummary.error = err;
+            router._routeSummaryHook(routeSummary);
         }
     }).
     do(null, function errorHookHandler(err) {

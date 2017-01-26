@@ -619,6 +619,95 @@ describe('Get', function() {
             subscribe(noOp, done, done);
     });
 
+    it('should fire the routeSummary hook if there is an error', function (done) {
+        var i = 0;
+
+        var router = new R([{
+            route: 'videos[{integers:ids}].title',
+            get: function (alias) {
+                return Observable.of({
+                    jsonGraph: {
+                        videos: {
+                            1: {
+                                title: { $type: 'error', value: { message: 'bad luck for you' } }
+                            }
+                        }
+                    }
+                });
+            }
+        }],
+        {
+            now: function () {
+                return i++;
+            },
+            hooks: {
+                routeSummary: function (summary) {
+                    expect(summary).to.deep.equal({
+                        type: 'get',
+                        start: 0,
+                        arguments: {
+                            paths: [['videos', 1, 'title']]
+                        },
+                        paths: [
+                            {
+                                path: ['videos', 1, 'title'],
+                                routes: [
+                                    {
+                                        end: 2,
+                                        requested: ['videos', [1], 'title'],
+                                        virtual: [
+                                            'videos',
+                                            {
+                                                type: '\u001eintegers',
+                                                named: true,
+                                                name: 'ids'
+                                            },
+                                            'title'
+                                        ],
+                                        value: {
+                                            jsonGraph: {
+                                                videos: {
+                                                    1: {
+                                                        title: {
+                                                            $type: 'error',
+                                                            value: {
+                                                                message: 'bad luck for you'
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            paths: [['videos', 1, 'title']]
+                                        }
+                                    }
+                                ],
+                                start: 1
+                            }
+                        ],
+                        end: 3,
+                        response: {
+                            jsonGraph: {
+                                videos: {
+                                    1: {
+                                        title: {
+                                            $type: 'error',
+                                            value: {
+                                                message: 'bad luck for you'
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    done();
+                }
+            }
+        });
+        router.get([['videos', 1, 'title']])
+            .subscribe();
+    });
+
     it('should fire the routeSummary hook if one is provided', function (done) {
         var i = 0;
         var router = getPrecedenceRouter(null, null, {
@@ -631,10 +720,12 @@ describe('Get', function() {
                     expect(e).to.deep.equal({
                         type: 'get',
                         start: 0,
-                        pathsArgument: [
-                            ['videos', 123, [ 'title', 'rating' ]],
-                            ['videos', 124, [ 'title', 'rating' ]]
-                        ],
+                        arguments: {
+                            paths : [
+                                ['videos', 123, [ 'title', 'rating' ]],
+                                ['videos', 124, [ 'title', 'rating' ]]
+                            ]
+                        },
                         paths: [
                             {
                                 path: ['videos', 123, ['title', 'rating']],
