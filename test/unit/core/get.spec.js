@@ -619,6 +619,130 @@ describe('Get', function() {
             subscribe(noOp, done, done);
     });
 
+    it('should fire the routeSummary hook if one is provided', function (done) {
+        var i = 0;
+        var router = getPrecedenceRouter(null, null, {
+            now: function () {
+                return i++;
+            },
+            hooks: {
+                routeSummary: function routeSummaryHook(e) {
+
+                    expect(e).to.deep.equal({
+                        type: 'get',
+                        start: 0,
+                        pathsArgument: [
+                            ['videos', 123, [ 'title', 'rating' ]],
+                            ['videos', 124, [ 'title', 'rating' ]]
+                        ],
+                        paths: [
+                            {
+                                path: ['videos', 123, ['title', 'rating']],
+                                routes: [
+                                    {
+                                        end: 2,
+                                        requested: ['videos', [123], 'title'],
+                                        virtual: [
+                                            'videos',
+                                            {
+                                                type: '\u001eintegers',
+                                                named: true,
+                                                name: 'ids'
+                                            },
+                                            'title'
+                                        ],
+                                        value: {
+                                            path: ['videos', 123, 'title'],
+                                            value: 'title 123'
+                                        }
+                                    },
+                                    {
+                                        end: 3,
+                                        requested: ['videos', [123], 'rating'],
+                                        virtual: [
+                                            'videos',
+                                            {
+                                                type: '\u001eintegers',
+                                                named: true,
+                                                name: 'ids'
+                                            },
+                                            'rating'
+                                        ],
+                                        value: {
+                                            path: ['videos', 123, 'rating'],
+                                            value: 'rating 123'
+                                        }
+                                    }
+                                ],
+                                start: 1
+                            },
+                            {
+                                path: ['videos', 124, ['title', 'rating']],
+                                routes: [
+                                    {
+                                    end: 5,
+                                    requested: [ 'videos', [124], 'title' ],
+                                    virtual: [
+                                        'videos',
+                                        {
+                                            type: '\u001eintegers',
+                                            named: true,
+                                            name: 'ids'
+                                        },
+                                        'title'
+                                    ],
+                                    value: {
+                                        path: ['videos', 124, 'title'],
+                                        value: 'title 124'
+                                    }
+                                    },
+                                    {
+                                    end: 6,
+                                    requested: ['videos', [124], 'rating'],
+                                    virtual: [
+                                        'videos',
+                                        {
+                                            type: '\u001eintegers',
+                                            named: true,
+                                            name: 'ids'
+                                        },
+                                        'rating'
+                                    ],
+                                    value: {
+                                        path: ['videos', 124, 'rating'],
+                                        value: 'rating 124'
+                                    }
+                                }
+                            ],
+                            start: 4
+                            }
+                        ],
+                        end: 7,
+                        response: {
+                            jsonGraph: {
+                                videos: {
+                                    123: {
+                                        title: 'title 123',
+                                        rating: 'rating 123'
+                                    },
+                                    124: {
+                                        title: 'title 124',
+                                        rating: 'rating 124'
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    done();
+                }
+            }
+        });
+
+        router.get([['videos', 123, ['title', 'rating']], ['videos', 124, ['title', 'rating']]])
+            .subscribe();
+    });
+
     it('should fire the pathError hook if the graph has a $type: "error" node in it', function (done) {
         var callCount = 0;
         var callContext = null;
@@ -734,7 +858,7 @@ describe('Get', function() {
           )
     });
 
-    function getPrecedenceRouter(onTitle, onRating) {
+    function getPrecedenceRouter(onTitle, onRating, options) {
         return new R([{
             route: 'videos[{integers:ids}].title',
             get: function(alias) {
@@ -783,6 +907,7 @@ describe('Get', function() {
                         };
                     });
             }
-        }]);
+        }],
+        options);
     }
 });
