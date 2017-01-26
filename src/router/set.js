@@ -24,18 +24,9 @@ var rxNewToRxNewAndOld = require('../run/conversion/rxNewToRxNewAndOld');
 module.exports = function routerSet(jsonGraph) {
 
     var router = this;
-
     var routeSummary = null;
-    if (router._routeSummaryHook) {
-        routeSummary = {
-            method: 'set',
-            start: router._now(),
-            arguments: {
-                jsonGraph: jsonGraph
-            }
-        };
-    }
-    return rxNewToRxNewAndOld(Observable.defer(function() {
+
+    var source = Observable.defer(function() {
         var jsongCache = {};
         var action = runSetAction(router, jsonGraph, jsongCache);
         jsonGraph.paths = normalizePathSets(jsonGraph.paths);
@@ -163,21 +154,37 @@ module.exports = function routerSet(jsonGraph) {
             map(function(jsonGraphEnvelope) {
                 return materialize(router, jsonGraph.paths, jsonGraphEnvelope);
             });
-    }).
-    do(function summaryHookHandler(response) {
+    });
+
+    if (router._routeSummaryHook || router._errorHook) {
         if (router._routeSummaryHook) {
-            routeSummary.end = router._now();
-            routeSummary.response = response;
-            router._routeSummaryHook(routeSummary);
+            routeSummary = {
+                method: 'set',
+                start: router._now(),
+                arguments: {
+                    jsonGraph: jsonGraph
+                }
+            };
         }
-    }, function summaryHookErrorHandler(err) {
-        if (router._routeSummaryHook) {
-            routeSummary.end = router._now();
-            routeSummary.error = err;
-            router._routeSummaryHook(routeSummary);
-        }
-    }).
-    do(null, function errorHookHandler(err) {
-      router._errorHook(err);
-    }));
+
+        source = source.
+            do(function summaryHookHandler(response) {
+                if (router._routeSummaryHook) {
+                    routeSummary.end = router._now();
+                    routeSummary.response = response;
+                    router._routeSummaryHook(routeSummary);
+                }
+            }, function summaryHookErrorHandler(err) {
+                if (router._routeSummaryHook) {
+                    routeSummary.end = router._now();
+                    routeSummary.error = err;
+                    router._routeSummaryHook(routeSummary);
+                }
+                if (router._errorHook) {
+                    router._errorHook(err);
+                }
+            })
+    }
+
+    return rxNewToRxNewAndOld(source);
 };
