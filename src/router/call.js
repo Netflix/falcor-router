@@ -21,15 +21,13 @@ module.exports = function routerCall(callPath, args,
     var routeSummary;
     if (router._routeSummaryHook) {
         routeSummary = {
-            type: 'call',
+            method: 'call',
             start: router._now(),
             arguments: {
                 callPath: callPath,
                 args: args,
-                refPathsArg: typeof refPathsArg === 'undefined' ?
-                    null : refPathsArg,
-                thisPathsArg: typeof thisPathsArg === 'undefined' ?
-                    null : thisPathsArg
+                refPathsArg: refPathsArg,
+                thisPathsArg: thisPathsArg
             }
         };
     }

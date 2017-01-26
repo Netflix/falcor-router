@@ -28,7 +28,7 @@ module.exports = function routerSet(jsonGraph) {
     var routeSummary = null;
     if (router._routeSummaryHook) {
         routeSummary = {
-            type: 'set',
+            method: 'set',
             start: router._now(),
             arguments: {
                 jsonGraph: jsonGraph

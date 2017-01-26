@@ -18,7 +18,7 @@ module.exports = function routerGet(paths) {
     var routeSummary = null;
     if (router._routeSummaryHook) {
         routeSummary = {
-            type: 'get',
+            method: 'get',
             start: router._now(),
             arguments: {
                 paths: paths

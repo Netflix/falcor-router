@@ -257,7 +257,7 @@ describe('Set', function() {
             hooks: {
                 routeSummary: function (summary) {
                     expect(summary).to.deep.equal({
-                        type: 'set',
+                        method: 'set',
                         start: 0,
                         arguments: {
                             jsonGraph: {
@@ -340,7 +340,7 @@ describe('Set', function() {
             hooks: {
                 routeSummary: function (summary) {
                     expect(summary).to.deep.equal({
-                        type: 'set',
+                        method: 'set',
                         start: 0,
                         arguments: {
                             jsonGraph: {

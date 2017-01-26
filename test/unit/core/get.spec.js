@@ -643,7 +643,7 @@ describe('Get', function() {
             hooks: {
                 routeSummary: function (summary) {
                     expect(summary).to.deep.equal({
-                        type: 'get',
+                        method: 'get',
                         start: 0,
                         arguments: {
                             paths: [['videos', 1, 'title']]
@@ -718,7 +718,7 @@ describe('Get', function() {
                 routeSummary: function routeSummaryHook(e) {
 
                     expect(e).to.deep.equal({
-                        type: 'get',
+                        method: 'get',
                         start: 0,
                         arguments: {
                             paths : [

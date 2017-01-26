@@ -182,7 +182,7 @@ describe('Call', function() {
         var i = 0;
 
         var router = new R([{
-            route: 'videos[{integers:id}].rating',
+            route: 'videos[{integers:id}].doSomethingReturnRating',
             call: function(callPath, args) {
                 return Promise.reject(new Error("Oops?"));
             }
@@ -193,26 +193,26 @@ describe('Call', function() {
             hooks: {
                 routeSummary: function (summary) {
                     expect(summary).to.deep.equal({
-                        type: "call",
+                        method: "call",
                         start: 0,
                         arguments: {
                             callPath: [
                                 "videos",
                                 1234,
-                                "rating"
+                                "doSomethingReturnRating"
                             ],
                             args: [
-                                5
+                                "arg1"
                             ],
-                            refPathsArg: null,
-                            thisPathsArg: null
+                            refPathsArg: undefined,
+                            thisPathsArg: undefined
                         },
                         paths: [
                             {
                                 path: [
                                     "videos",
                                     1234,
-                                    "rating"
+                                    "doSomethingReturnRating"
                                 ],
                                 routes: [],
                                 start: 1
@@ -230,13 +230,13 @@ describe('Call', function() {
             }
         });
 
-        router.call(['videos', 1234, 'rating'], [5]).subscribe();
+        router.call(['videos', 1234, 'doSomethingReturnRating'], ['arg1']).subscribe();
     });
 
     it('should run routeSummary hook if provided', function (done) {
         var i = 0;
         var router = new R([{
-            route: 'videos[{integers:id}].rating',
+            route: 'videos[{integers:id}].doSomethingReturnRating',
             call: function(callPath, args) {
                 return Promise.resolve({
                     jsonGraph: {
@@ -259,26 +259,26 @@ describe('Call', function() {
                     // with `undefined` vs `null` assertions? StackOverflow FTW.
                     // The important thing is the output has the fields we need.
                     expect(JSON.parse(JSON.stringify(summary))).to.deep.equal({
-                        type: "call",
+                        method: "call",
                         start: 0,
                         arguments: {
                             callPath: [
                                 "videos",
                                 1,
-                                "rating"
+                                "doSomethingReturnRating"
                             ],
                             args: [
                                 "wut"
-                            ],
-                            refPathsArg: null,
-                            thisPathsArg: null
+                            ]
+                            // refPathsArg: undefined,
+                            // thisPathsArg: undefined
                         },
                         paths: [
                             {
                                 path: [
                                     "videos",
                                     1,
-                                    "rating"
+                                    "doSomethingReturnRating"
                                 ],
                                 routes: [
                                     {
@@ -288,7 +288,7 @@ describe('Call', function() {
                                             [
                                                 1
                                             ],
-                                            "rating"
+                                            "doSomethingReturnRating"
                                         ],
                                         virtual: [
                                             "videos",
@@ -297,7 +297,7 @@ describe('Call', function() {
                                                 named: true,
                                                 name: "id"
                                             },
-                                            "rating"
+                                            "doSomethingReturnRating"
                                         ],
                                         value: [
                                             {
@@ -361,7 +361,7 @@ describe('Call', function() {
             }
         });
 
-        router.call(['videos', 1, 'rating'], ['wut'])
+        router.call(['videos', 1, 'doSomethingReturnRating'], ['wut'])
             .subscribe();
     });
 
