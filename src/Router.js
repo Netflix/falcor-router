@@ -6,6 +6,9 @@ var MAX_REF_FOLLOW = 50;
 var MAX_PATHS = 9000;
 
 var noOp = function noOp() {};
+var defaultNow = function defaultNow() {
+    return Date.now();
+};
 
 var Router = function(routes, options) {
     var opts = options || {};
@@ -16,6 +19,8 @@ var Router = function(routes, options) {
     this._debug = opts.debug;
     this._pathErrorHook = (opts.hooks && opts.hooks.pathError) || noOp;
     this._errorHook = (opts.hooks && opts.hooks.error) || noOp;
+    this._routeSummaryHook = opts.hooks && opts.hooks.routeSummary;
+    this._now = opts.now || defaultNow;
     this.maxRefFollow = opts.maxRefFollow || MAX_REF_FOLLOW;
     this.maxPaths = opts.maxPaths || MAX_PATHS;
 };
