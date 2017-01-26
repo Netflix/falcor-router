@@ -1,3 +1,13 @@
+<a name="0.6.1"></a>
+## [0.6.1](https://github.com/Netflix/falcor-router/compare/0.6.0...v0.6.1) (2017-01-26)
+
+
+### Features
+
+* **routeSummary:** add route summary hook for gathering metrics and meta data from `get` ([#205](https://github.com/Netflix/falcor-router/issues/205)) ([3ac8143](https://github.com/Netflix/falcor-router/commit/3ac8143))
+
+
+
 <a name="0.6.0"></a>
 # [0.6.0](https://github.com/Netflix/falcor-router/compare/0.5.2...v0.6.0) (2017-01-20)
 

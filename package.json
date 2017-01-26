@@ -1,6 +1,6 @@
 {
   "name": "falcor-router",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "A router DataSource constructor for falcor that allows you to model all your cloud data sources as a single JSON resource.",
   "main": "src/Router.js",
   "homepage": "https://github.com/Netflix/falcor-router",
