@@ -331,7 +331,7 @@ describe('Set', function() {
                     var expected = {
                         method: 'set',
                         start: 0,
-                        jsonGraph: {
+                        jsonGraphEnvelope: {
                             jsonGraph: {
                                 videos: {
                                     1234: {
@@ -349,7 +349,7 @@ describe('Set', function() {
                         routes: [
                             {
                                 route: 'videos[{integers:id}].rating',
-                                paths: ['videos', [1234, 333], 'rating'],
+                                pathSet: ['videos', [1234, 333], 'rating'],
                                 start: 1,
                                 results: [
                                     [

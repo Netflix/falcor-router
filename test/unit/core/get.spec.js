@@ -677,7 +677,7 @@ describe('Get', function() {
                                         }
                                     }
                                 ],
-                                paths: ['videos', [1, 2], 'title']
+                                pathSet: ['videos', [1, 2], 'title']
                             }
                         ],
                         end: 3,
@@ -715,7 +715,7 @@ describe('Get', function() {
                             {path: ['videos', 1, 'title'], value: 'Orange Is The New Black'},
                             {path: ['videos', 2, 'title'], value: 'Whatever'}
                         ],
-                        paths: ['videos', [1, 2], 'title']
+                        pathSet: ['videos', [1, 2], 'title']
                     }
                 ],
                 end: t + 3,
@@ -794,7 +794,7 @@ describe('Get', function() {
                                     {path: ['videos', 1, 'title'], value: 'Orange Is The New Black'},
                                     {path: ['videos', 2, 'title'], value: 'Whatever'}
                                 ],
-                                paths: ['videos', [1, 2], 'title']
+                                pathSet: ['videos', [1, 2], 'title']
                             }
                         ],
                         end: 3,
@@ -841,7 +841,7 @@ describe('Get', function() {
                                 start: 1,
                                 end: 2,
                                 error: new Error('bad luck for you'),
-                                paths: ['videos', 1, 'title']
+                                pathSet: ['videos', 1, 'title']
                             }
                         ],
                         end: 3,

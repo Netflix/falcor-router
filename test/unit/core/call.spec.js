@@ -104,7 +104,7 @@ describe('Call', function() {
                             {
                                 start: 1,
                                 route: 'genrelist[10].titles.push',
-                                paths: ['genrelist', 10, 'titles', 'push'],
+                                pathSet: ['genrelist', 10, 'titles', 'push'],
                                 responses: [
                                     [
                                         {
@@ -119,14 +119,14 @@ describe('Call', function() {
                                 start: 3,
                                 end: 4,
                                 route: 'titlesById[{integers:id}].name',
-                                paths: ['titlesById', 54, 'name'],
+                                pathSet: ['titlesById', 54, 'name'],
                                 error: new Error('Live or die? Too bad! <HONK>')
                             },
                             {
                                 start: 5,
                                 end: 6,
                                 route: 'genrelist[10].titles.length',
-                                paths: ['genrelist', 10, 'titles', 'length'],
+                                pathSet: ['genrelist', 10, 'titles', 'length'],
                                 responses: [
                                     [{ path: ['genrelist', 10, 'titles', 'length'], value: 50 }]
                                 ]
@@ -221,7 +221,7 @@ describe('Call', function() {
                             {
                                 start: 1,
                                 route: 'genrelist[10].titles.push',
-                                paths: ['genrelist', 10, 'titles', 'push'],
+                                pathSet: ['genrelist', 10, 'titles', 'push'],
                                 responses: [
                                     [
                                         {
@@ -236,7 +236,7 @@ describe('Call', function() {
                                 start: 3,
                                 end: 4,
                                 route: 'titlesById[{integers:id}].name',
-                                paths: ['titlesById', 54, 'name'],
+                                pathSet: ['titlesById', 54, 'name'],
                                 responses: [
                                     [{ path: ['titlesById', 54, 'name'], value: 'Die Hard'}]
                                 ]
@@ -245,7 +245,7 @@ describe('Call', function() {
                                 start: 5,
                                 end: 6,
                                 route: 'genrelist[10].titles.length',
-                                paths: ['genrelist', 10, 'titles', 'length'],
+                                pathSet: ['genrelist', 10, 'titles', 'length'],
                                 responses: [
                                     [{ path: ['genrelist', 10, 'titles', 'length'], value: 50 }]
                                 ]

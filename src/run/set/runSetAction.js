@@ -79,7 +79,7 @@ function runSetAction(routerInstance, jsongMessage, matchAndPath,
             out = Observable.defer(function () {
                 var route = {
                     route: matchAndPath.match.prettyRoute,
-                    paths: matchAndPath.path,
+                    pathSet: matchAndPath.path,
                     start: routerInstance._now()
                 };
                 methodSummary.routes = methodSummary.routes || [];

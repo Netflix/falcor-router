@@ -44,7 +44,7 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
                     var route = {
                         start: routerInstance._now(),
                         route: matchAndPath.match.prettyRoute,
-                        paths: matchAndPath.path
+                        pathSet: matchAndPath.path
                     };
                     methodSummary.routes = methodSummary.routes || [];
                     methodSummary.routes.push(route);
@@ -218,7 +218,7 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
             var route = {
                 start: routerInstance._now(),
                 route: matchAndPath.match.prettyRoute,
-                paths: matchAndPath.path
+                pathSet: matchAndPath.path
             };
             methodSummary.routes = methodSummary.routes || [];
             methodSummary.routes.push(route);

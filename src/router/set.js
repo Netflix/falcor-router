@@ -32,7 +32,7 @@ module.exports = function routerSet(jsonGraph) {
         if (router._methodSummaryHook) {
             methodSummary = {
                 method: 'set',
-                jsonGraph: jsonGraph,
+                jsonGraphEnvelope: jsonGraph,
                 start: router._now()
             };
         }
