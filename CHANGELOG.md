@@ -1,3 +1,18 @@
+<a name="0.7.0"></a>
+# [0.7.0](https://github.com/Netflix/falcor-router/compare/0.6.1...v0.7.0) (2017-01-27)
+
+
+### Features
+
+* **methodSummary hooking:** add methodSummary hooking to get, set and call ([521fff3](https://github.com/Netflix/falcor-router/commit/521fff3))
+
+
+### BREAKING CHANGES
+
+* **routeSummary hook:** The `routeSummary` hook has been removed in favor of the `methodSummary` hook.
+
+
+
 <a name="0.6.1"></a>
 ## [0.6.1](https://github.com/Netflix/falcor-router/compare/0.6.0...v0.6.1) (2017-01-26)
 
