@@ -619,6 +619,149 @@ describe('Get', function() {
             subscribe(noOp, done, done);
     });
 
+    it('should fire the methodSummary hook, if the route returns jsonGraphs', function (done) {
+        var i = 0;
+
+        var router = new R([{
+            route: 'videos[{integers:ids}].title',
+            get: function (alias) {
+                return Observable.of({
+                    jsonGraph: {
+                        videos: {
+                            1: {
+                                title: 'Orange Is The New Black'
+                            }
+                        }
+                    }
+                }, {
+                    jsonGraph: {
+                        videos: {
+                            2: {
+                                title: 'Whatever'
+                            }
+                        }
+                    }
+                });
+            }
+        }],
+        {
+            now: function () {
+                return i++;
+            },
+            hooks: {
+                methodSummary: function (summary) {
+                    var expected = {
+                        start: 0,
+                        routes: [
+                            {
+                                route: 'videos[{integers:ids}].title',
+                                start: 1,
+                                end: 2,
+                                responses: [
+                                    {
+                                        jsonGraph: {
+                                            videos: {
+                                                1: {
+                                                    title: 'Orange Is The New Black'
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        jsonGraph: {
+                                            videos: {
+                                                2: {
+                                                    title: 'Whatever'
+                                                }
+                                            }
+                                        }
+                                    }
+                                ],
+                                paths: ['videos', [1, 2], 'title']
+                            }
+                        ],
+                        end: 3,
+                        responses: [{
+                            jsonGraph: {
+                                videos: {
+                                    '1': {title: 'Orange Is The New Black'},
+                                    '2': {title: 'Whatever'}
+                                }
+                            }
+                        }]
+                    };
+
+                    expect(summary).to.deep.equal(expected);
+                    done();
+                }
+            }
+        });
+        router.get([['videos', [1, 2], 'title']])
+            .subscribe();
+    });
+
+    it('should fire the methodSummary hook properly if you subscribe twice', function (done) {
+        var i = 0;
+
+         var expected = function (t) {
+             return {
+                start: t + 0,
+                routes: [
+                    {
+                        route: 'videos[{integers:ids}].title',
+                        start: t + 1,
+                        end: t + 2,
+                        responses: [
+                            {path: ['videos', 1, 'title'], value: 'Orange Is The New Black'},
+                            {path: ['videos', 2, 'title'], value: 'Whatever'}
+                        ],
+                        paths: ['videos', [1, 2], 'title']
+                    }
+                ],
+                end: t + 3,
+                responses: [{
+                    jsonGraph: {
+                        videos: {
+                            '1': {title: 'Orange Is The New Black'},
+                            '2': {title: 'Whatever'}
+                        }
+                    }
+                }]
+            }
+        };
+
+        var router = new R([{
+            route: 'videos[{integers:ids}].title',
+            get: function (alias) {
+                return Observable.of({
+                    path: ['videos', 1, 'title'],
+                    value: 'Orange Is The New Black'
+                }, {
+                    path: ['videos', 2, 'title'],
+                    value: 'Whatever'
+                });
+            }
+        }],
+        {
+            now: function () {
+                return i++;
+            },
+            hooks: {
+                methodSummary: function (summary) {
+                    expect(summary).to.deep.equal(expected(i - 4));
+                    if (i === 8) {
+                        done();
+                    }
+                }
+            }
+        });
+
+        var source$ = router.get([['videos', [1, 2], 'title']]);
+
+        source$.subscribe();
+        source$.subscribe();
+    });
+
     it('should fire the methodSummary hook, if the route returns path values', function (done) {
         var i = 0;
 
