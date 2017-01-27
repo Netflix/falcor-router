@@ -19,31 +19,21 @@ function getAction(routerInstance, matchAndPath, jsongCache, methodSummary) {
         if (methodSummary) {
             var _out = out;
             out = Observable.defer(function () {
-                var start = routerInstance._now();
-                var responses = [];
+                var route = {
+                    start: routerInstance._now(),
+                    route: matchAndPath.match.prettyRoute,
+                    paths: matchAndPath.path
+                };
+                methodSummary.routes = methodSummary.routes || [];
+                methodSummary.routes.push(route);
                 return _out.do(function (response) {
-                    responses.push(response);
+                    route.responses = route.responses || [];
+                    route.responses.push(response);
                 }, function (err) {
-                    responses.push({ error: err });
-                    var end = routerInstance._now();
-                    methodSummary.routes = methodSummary.routes || [];
-                    methodSummary.routes.push({
-                        route: matchAndPath.match.prettyRoute,
-                        start: start,
-                        end: end,
-                        error: err,
-                        paths: matchAndPath.path
-                    });
+                    route.error = err;
+                    route.end = routerInstance._now();
                 }, function () {
-                    var end = routerInstance._now();
-                    methodSummary.routes = methodSummary.routes || [];
-                    methodSummary.routes.push({
-                        route: matchAndPath.match.prettyRoute,
-                        start: start,
-                        end: end,
-                        responses: responses,
-                        paths: matchAndPath.path
-                    });
+                    route.end = routerInstance._now();
                 });
             })
         }

@@ -57,6 +57,89 @@ describe('Call', function() {
             subscribe(noOp, done, done);
     });
 
+    it('should call the methodSummary hook for path value returns', function (done) {
+        var i = 0;
+        var router = new R([
+            {
+                route: "genrelist.myList",
+                get: function(pathSet) {
+                    return [{
+                        path: ['genrelist', 'myList'],
+                        value: $ref(['genrelist', 10])
+                    }];
+                }
+            },
+            {
+                route: 'genrelist[10].titles.push',
+                call: function(callPath, args) {
+                    return [
+                        {
+                            path: ['genrelist', 10, 'titles', 100],
+                            value: "title100"
+                        },
+                        {
+                            path: ['genrelist',10, 'titles', 'length'],
+                            value: 101
+                        }
+                    ];
+                }
+            }
+        ], {
+            now: function ()  {
+                return i++;
+            },
+            hooks: {
+                methodSummary: function (summary) {
+                    var expected = {
+                        method: 'call',
+                        start: 0,
+                        callPath: ['genrelist', 'myList', 'titles', 'push'],
+                        refPaths: undefined,
+                        thisPaths: undefined,
+                        args: ['title100'],
+                        routes: [
+                            {
+                                start: 1,
+                                end: 2,
+                                paths: ['genrelist', 10, 'titles', 'push'],
+                                route: 'genrelist[10].titles.push',
+                                responses: [
+                                    [
+                                        {
+                                            path: ['genrelist', 10, 'titles', 100],
+                                            value: 'title100'
+                                        },
+                                        { path: ['genrelist', 10, 'titles', 'length'], value: 101 }
+                                    ]
+                                ]
+                            }
+                        ],
+                        responses: [
+                            {
+                                jsonGraph: {
+                                    genrelist: {
+                                        '10': { titles: { '100': 'title100', length: 101 } },
+                                        myList: { $type: 'ref', value: ['genrelist', 10] }
+                                    }
+                                },
+                                paths: [['genrelist', 10, 'titles', [100, 'length']]]
+                            }
+                        ],
+                        end: 3
+                    };
+
+
+                    expect(summary).to.deep.equal(expected);
+                    done();
+                }
+            }
+        });
+
+        router.testValue = 1;
+        router.call(['genrelist', 'myList', 'titles', 'push'], ["title100"]).
+            subscribe();
+    });
+
     it('should bind "this" properly on a call that tranverses through a reference.', function(done) {
         var values = [];
         var router = new R([

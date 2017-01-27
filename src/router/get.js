@@ -79,12 +79,11 @@ module.exports = function routerGet(paths) {
         });
 
         if (router._methodSummaryHook || router._errorHook) {
-            var responses;
             result = result.
                 do(function (response) {
                     if (router._methodSummaryHook) {
-                        responses = responses || [];
-                        responses.push(response);
+                        methodSummary.responses = methodSummary.responses || [];
+                        methodSummary.responses.push(response);
                     }
                 }, function (err) {
                     if (router._methodSummaryHook) {
@@ -98,7 +97,6 @@ module.exports = function routerGet(paths) {
                 }, function () {
                     if (router._methodSummaryHook) {
                         methodSummary.end = router._now();
-                        methodSummary.responses = responses;
                         router._methodSummaryHook(methodSummary);
                     }
                 });

@@ -8,15 +8,15 @@ var Observable = require('../../RouterRx.js').Observable;
 module.exports =  outerRunCallAction;
 
 function outerRunCallAction(routerInstance, callPath, args,
-                            suffixes, paths, jsongCache) {
+                            suffixes, paths, jsongCache, methodSummary) {
     return function innerRunCallAction(matchAndPath) {
         return runCallAction(matchAndPath, routerInstance, callPath,
-                             args, suffixes, paths, jsongCache);
+                             args, suffixes, paths, jsongCache, methodSummary);
     };
 }
 
 function runCallAction(matchAndPath, routerInstance, callPath, args,
-                       suffixes, paths, jsongCache) {
+                       suffixes, paths, jsongCache, methodSummary) {
 
     var match = matchAndPath.match;
     var matchedPath = matchAndPath.path;
@@ -29,7 +29,7 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
         // This is where things get interesting
         out = Observable.
             defer(function() {
-            var next;
+                var next;
                 try {
                     next = match.
                         action.call(
@@ -38,8 +38,32 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
                     e.throwToNext = true;
                     throw e;
                 }
-                return outputToObservable(next).
-                    toArray();
+                var output = outputToObservable(next);
+
+                if (methodSummary) {
+                    var route = {
+                        start: routerInstance._now(),
+                        route: matchAndPath.match.prettyRoute,
+                        paths: matchAndPath.path
+                    };
+                    methodSummary.routes = methodSummary.routes || [];
+                    methodSummary.routes.push(route);
+
+                    output = output.do(
+                        function (response) {
+                            route.responses = route.responses || [];
+                            route.responses.push(response);
+                        },
+                        function (err) {
+                            route.error = err;
+                            route.end = routerInstance._now();
+                        },
+                        function () {
+                            route.end = routerInstance._now();
+                        }
+                    )
+                }
+                return output.toArray();
             }).
 
             // Required to get the references from the outputting jsong

@@ -309,6 +309,90 @@ describe('Set', function() {
             subscribe(noOp, done, done);
     });
 
+    it('should execute the methodSummary hook on a simple set.', function(done) {
+        var i = 0;
+        var router = new R([{
+            route: 'videos[{integers:id}].rating',
+            set: function(json) {
+                return [{
+                    path: ['videos', 1234, 'rating'],
+                    value: 5
+                }, {
+                    path: ['videos', 333, 'rating'],
+                    value: 5
+                }];
+            }
+        }], {
+            now: function () {
+                return i++;
+            },
+            hooks: {
+                methodSummary: function (summary) {
+                    var expected = {
+                        method: 'set',
+                        start: 0,
+                        jsonGraph: {
+                            jsonGraph: {
+                                videos: {
+                                    1234: {
+                                        rating: 5
+                                    },
+                                    333: {
+                                        rating: 5
+                                    }
+                                }
+                            },
+                            paths: [
+                                ['videos', [1234, 333], 'rating']
+                            ]
+                        },
+                        routes: [
+                            {
+                                route: 'videos[{integers:id}].rating',
+                                paths: ['videos', [1234, 333], 'rating'],
+                                start: 1,
+                                results: [
+                                    [
+                                        { path: ['videos', 1234, 'rating'], value: 5 },
+                                        { path: ['videos', 333, 'rating'], value: 5 }
+                                    ]
+                                ],
+                                end: 2
+                            }
+                        ],
+                        responses: [
+                            {
+                                jsonGraph: {
+                                    videos: { '333': { rating: 5 }, '1234': { rating: 5 } }
+                                }
+                            }
+                        ],
+                        end: 3
+                    };
+                    expect(summary).to.deep.equal(expected);
+                    done();
+                }
+            }
+        });
+        router.
+            set({
+                jsonGraph: {
+                    videos: {
+                        1234: {
+                            rating: 5
+                        },
+                        333: {
+                            rating: 5
+                        }
+                    }
+                },
+                paths: [
+                    ['videos', [1234, 333], 'rating']
+                ]
+            }).
+            subscribe();
+    });
+
 
     it('should perform a simple set.', function(done) {
         var did = false;

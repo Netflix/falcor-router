@@ -11,14 +11,15 @@ var Observable = require('../../RouterRx.js').Observable;
 /* eslint-enable max-len */
 
 module.exports = function outerRunSetAction(routerInstance, modelContext,
-                                            jsongCache) {
+                                            jsongCache, methodSummary) {
     return function innerRunSetAction(matchAndPath) {
         return runSetAction(routerInstance, modelContext,
-                            matchAndPath, jsongCache);
+                            matchAndPath, jsongCache, methodSummary);
     };
 };
 
-function runSetAction(routerInstance, jsongMessage, matchAndPath, jsongCache) {
+function runSetAction(routerInstance, jsongMessage, matchAndPath,
+    jsongCache, methodSummary) {
     var match = matchAndPath.match;
     var out;
     var arg = matchAndPath.path;
@@ -72,6 +73,33 @@ function runSetAction(routerInstance, jsongMessage, matchAndPath, jsongCache) {
     try {
         out = match.action.call(routerInstance, arg);
         out = outputToObservable(out);
+
+        if (methodSummary) {
+            var _out = out;
+            out = Observable.defer(function () {
+                var route = {
+                    route: matchAndPath.match.prettyRoute,
+                    paths: matchAndPath.path,
+                    start: routerInstance._now()
+                };
+                methodSummary.routes = methodSummary.routes || [];
+                methodSummary.routes.push(route);
+
+                return _out.do(
+                    function (result) {
+                        route.results = route.results || [];
+                        route.results.push(result);
+                    },
+                    function (err) {
+                        route.error = err;
+                        route.end = routerInstance._now();
+                    },
+                    function () {
+                        route.end = routerInstance._now();
+                    }
+                )
+            });
+        }
     } catch (e) {
         out = Observable.throw(e);
     }
