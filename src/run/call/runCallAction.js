@@ -208,8 +208,11 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
                 throw e;
             });
     } else {
-        out = match.action.call(routerInstance, matchAndPath.path);
-        out = outputToObservable(out);
+        out = Observable.defer(function () {
+            return outputToObservable(
+                match.action.call(routerInstance, matchAndPath.path)
+            );
+        });
 
         if (methodSummary) {
             var route = {

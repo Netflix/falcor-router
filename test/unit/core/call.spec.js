@@ -57,6 +57,120 @@ describe('Call', function() {
             subscribe(noOp, done, done);
     });
 
+    it('should call the methodSummary hook when there are errors', function (done) {
+        var i = 0;
+        var router = new R([
+            {
+                route: "titlesById[{integers:id}].name",
+                get: function(pathSet) {
+                    throw new Error('Live or die? Too bad! <HONK>');
+                }
+            },
+            {
+                route: 'genrelist[10].titles.push',
+                call: function(callPath, args) {
+                    return [
+                        {
+                            path: ['genrelist', 10, 'titles', 100],
+                            value: { $type: 'ref', value: ['titlesById', 54] }
+                        }
+                    ];
+                }
+            },
+            {
+                route: 'genrelist[10].titles.length',
+                get: function (pathSet) {
+                    return [{
+                        path: ['genrelist', 10, 'titles', 'length'],
+                        value: 50
+                    }]
+                }
+            }
+        ], {
+            now: function ()  {
+                return i++;
+            },
+            hooks: {
+                methodSummary: function (summary) {
+                    var expected = {
+                        method: 'call',
+                        start: 0,
+                        end: 7,
+                        callPath: ['genrelist', 10, 'titles', 'push'],
+                        args: ['title100'],
+                        refPaths: [['name']],
+                        thisPaths: [['length']],
+                        routes: [
+                            {
+                                start: 1,
+                                route: 'genrelist[10].titles.push',
+                                paths: ['genrelist', 10, 'titles', 'push'],
+                                responses: [
+                                    [
+                                        {
+                                            path: ['genrelist', 10, 'titles', 100],
+                                            value: { $type: 'ref', value: ['titlesById', 54] }
+                                        }
+                                    ]
+                                ],
+                                end: 2
+                            },
+                            {
+                                start: 3,
+                                end: 4,
+                                route: 'titlesById[{integers:id}].name',
+                                paths: ['titlesById', 54, 'name'],
+                                error: new Error('Live or die? Too bad! <HONK>')
+                            },
+                            {
+                                start: 5,
+                                end: 6,
+                                route: 'genrelist[10].titles.length',
+                                paths: ['genrelist', 10, 'titles', 'length'],
+                                responses: [
+                                    [{ path: ['genrelist', 10, 'titles', 'length'], value: 50 }]
+                                ]
+                            }
+                        ],
+                        responses: [
+                            {
+                                jsonGraph: {
+                                    genrelist: {
+                                        '10': {
+                                            titles: {
+                                                '100': { $type: 'ref', value: ['titlesById', 54] },
+                                                length: 50
+                                            }
+                                        }
+                                    },
+                                    titlesById: {
+                                        '54': {
+                                            name: {
+                                                $type: 'error',
+                                                value: { message: 'Live or die? Too bad! <HONK>' }
+                                            }
+                                        }
+                                    }
+                                },
+                                paths: [
+                                    ['genrelist', 10, 'titles', 'length'],
+                                    ['genrelist', 10, 'titles', 100, 'name']
+                                ]
+                            }
+                        ]
+                    };
+
+                    expect(summary).to.deep.equal(expected);
+                    done();
+                }
+            }
+        });
+
+        router.testValue = 1;
+        router.call(['genrelist', 10, 'titles', 'push'], ["title100"], [['name']], [['length']]).
+            subscribe();
+    });
+
     it('should call the methodSummary hook for path value returns', function (done) {
         var i = 0;
         var router = new R([
