@@ -7,7 +7,6 @@ var pathCount = require('falcor-path-utils').pathCount;
 describe('MaxPaths', function() {
 
     it('should fail if number of get paths is greater than maxPaths.', function(done) {
-
         var r = new Router([]);
 
         r.get([["lomo", {length: 9001}, "name"]]).

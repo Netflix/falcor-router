@@ -18,7 +18,6 @@ var rxNewToRxNewAndOld = require('../run/conversion/rxNewToRxNewAndOld');
 module.exports = function routerCall(callPath, args,
                                      refPathsArg, thisPathsArg) {
     var router = this;
-    var methodSummary;
 
     var source = Observable.defer(function() {
 
@@ -37,7 +36,7 @@ module.exports = function routerCall(callPath, args,
         }
 
         return recurseMatchAndExecute(router._matcher, action, callPaths, call,
-                                      router, jsongCache, methodSummary).
+                                      router, jsongCache).
 
             // Take that
             map(function(jsongResult) {
@@ -81,34 +80,10 @@ module.exports = function routerCall(callPath, args,
     });
 
 
-    if (router._methodSummaryHook || router._errorHook) {
-        if (router._methodSummaryHook) {
-            methodSummary = {
-                method: 'call',
-                start: router._now(),
-                callPath: callPath,
-                args: args,
-                refPaths: refPathsArg,
-                thisPaths: thisPathsArg
-            };
-        }
-
+    if (router._errorHook) {
         source = source.
-            do(function summaryHookHandler(response) {
-                if (router._methodSummaryHook) {
-                    methodSummary.end = router._now();
-                    methodSummary.response = response;
-                    router._methodSummaryHook(methodSummary);
-                }
-            }, function summaryHookErrorHandler(err) {
-                if (router._methodSummaryHook) {
-                    methodSummary.end = router._now();
-                    methodSummary.error = err;
-                    router._methodSummaryHook(methodSummary);
-                }
-                if (router._errorHook) {
-                    router._errorHook(err);
-                }
+            do(null, function summaryHookErrorHandler(err) {
+                router._errorHook(err);
             });
     }
 

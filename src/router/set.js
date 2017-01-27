@@ -24,7 +24,6 @@ var rxNewToRxNewAndOld = require('../run/conversion/rxNewToRxNewAndOld');
 module.exports = function routerSet(jsonGraph) {
 
     var router = this;
-    var methodSummary = null;
 
     var source = Observable.defer(function() {
         var jsongCache = {};
@@ -36,7 +35,7 @@ module.exports = function routerSet(jsonGraph) {
         }
 
         return recurseMatchAndExecute(router._matcher, action, jsonGraph.paths,
-                                      set, router, jsongCache, methodSummary).
+                                      set, router, jsongCache).
 
             // Takes the jsonGraphEnvelope and extra details that comes out
             // of the recursive matching algorithm and either attempts the
@@ -156,31 +155,10 @@ module.exports = function routerSet(jsonGraph) {
             });
     });
 
-    if (router._methodSummaryHook || router._errorHook) {
-        if (router._methodSummaryHook) {
-            methodSummary = {
-                method: 'set',
-                start: router._now(),
-                jsonGraph: jsonGraph
-            };
-        }
-
+    if (router._errorHook) {
         source = source.
-            do(function summaryHookHandler(response) {
-                if (router._methodSummaryHook) {
-                    methodSummary.end = router._now();
-                    methodSummary.response = response;
-                    router._methodSummaryHook(methodSummary);
-                }
-            }, function summaryHookErrorHandler(err) {
-                if (router._methodSummaryHook) {
-                    methodSummary.end = router._now();
-                    methodSummary.error = err;
-                    router._methodSummaryHook(methodSummary);
-                }
-                if (router._errorHook) {
-                    router._errorHook(err);
-                }
+            do(null, function summaryHookErrorHandler(err) {
+                router._errorHook(err);
             })
     }
 

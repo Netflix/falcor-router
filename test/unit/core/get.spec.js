@@ -619,20 +619,18 @@ describe('Get', function() {
             subscribe(noOp, done, done);
     });
 
-    it('should fire the methodSummary hook if there is an error', function (done) {
+    it('should fire the methodSummary hook, if the route returns path values', function (done) {
         var i = 0;
 
         var router = new R([{
             route: 'videos[{integers:ids}].title',
             get: function (alias) {
                 return Observable.of({
-                    jsonGraph: {
-                        videos: {
-                            1: {
-                                title: { $type: 'error', value: { message: 'bad luck for you' } }
-                            }
-                        }
-                    }
+                    path: ['videos', 1, 'title'],
+                    value: 'Orange Is The New Black'
+                }, {
+                    path: ['videos', 2, 'title'],
+                    value: 'Whatever'
                 });
             }
         }],
@@ -642,49 +640,84 @@ describe('Get', function() {
             },
             hooks: {
                 methodSummary: function (summary) {
-                    expect(summary).to.deep.equal({
-                        method: 'get',
+                    var expected = {
                         start: 0,
-                        end: 3,
-                        paths: [['videos', 1, 'title']],
                         routes: [
                             {
+                                route: 'videos[{integers:ids}].title',
                                 start: 1,
                                 end: 2,
-                                paths: ['videos', [1], 'title'],
-                                route: 'videos[{integers:ids}].title',
-                                response: {
-                                    jsonGraph: {
-                                        videos: {
-                                            1: {
-                                                title: {
-                                                    $type: 'error',
-                                                    value: {
-                                                        message: 'bad luck for you'
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    },
-                                    paths: [['videos', 1, 'title']]
-                                }
+                                responses: [
+                                    {path: ['videos', 1, 'title'], value: 'Orange Is The New Black'},
+                                    {path: ['videos', 2, 'title'], value: 'Whatever'}
+                                ],
+                                paths: ['videos', [1, 2], 'title']
                             }
                         ],
-                        response: {
+                        end: 3,
+                        responses: [{
                             jsonGraph: {
                                 videos: {
-                                    1: {
+                                    '1': {title: 'Orange Is The New Black'},
+                                    '2': {title: 'Whatever'}
+                                }
+                            }
+                        }]
+                    };
+
+                    expect(summary).to.deep.equal(expected);
+                    done();
+                }
+            }
+        });
+        router.get([['videos', [1, 2], 'title']])
+            .subscribe();
+    });
+
+
+    it('should fire the methodSummary hook if there is an error', function (done) {
+        var i = 0;
+
+        var router = new R([{
+            route: 'videos[{integers:ids}].title',
+            get: function (alias) {
+                return Observable.throw(new Error('bad luck for you'));
+            }
+        }],
+        {
+            now: function () {
+                return i++;
+            },
+            hooks: {
+                methodSummary: function (summary) {
+                    var expected = {
+                        start: 0,
+                        routes: [
+                            {
+                                route: 'videos[{integers:ids}].title',
+                                start: 1,
+                                end: 2,
+                                error: new Error('bad luck for you'),
+                                paths: ['videos', 1, 'title']
+                            }
+                        ],
+                        end: 3,
+                        responses: [{
+                            jsonGraph: {
+                                videos: {
+                                    '1': {
                                         title: {
                                             $type: 'error',
-                                            value: {
-                                                message: 'bad luck for you'
-                                            }
+                                            value: {message: 'bad luck for you'}
                                         }
                                     }
                                 }
                             }
-                        }
-                    });
+                        }]
+                    };
+
+
+                    expect(summary).to.deep.equal(expected);
                     done();
                 }
             }
@@ -693,88 +726,6 @@ describe('Get', function() {
             .subscribe();
     });
 
-    it('should fire the methodSummary hook if one is provided', function (done) {
-        var i = 0;
-        var router = getPrecedenceRouter(null, null, {
-            now: function () {
-                return i++;
-            },
-            hooks: {
-                methodSummary: function methodSummaryHook(e) {
-                    expect(e).to.deep.equal({
-                        method: 'get',
-                        start: 0,
-                        paths : [
-                            ['videos', 123, [ 'title', 'rating' ]],
-                            ['videos', 124, [ 'title', 'rating' ]]
-                        ],
-                        routes: [
-                            {
-                                start: 1,
-                                end: 2,
-                                route: 'videos[{integers:ids}].title',
-                                paths: ['videos', [123], 'title'],
-                                response: {
-                                    path: ['videos', 123, 'title'],
-                                    value: 'title 123'
-                                }
-                            },
-                            {
-                                start: 1,
-                                end: 3,
-                                route: 'videos[{integers:ids}].rating',
-                                paths: ['videos', [123], 'rating'],
-                                response: {
-                                    path: ['videos', 123, 'rating'],
-                                    value: 'rating 123'
-                                }
-                            },
-                            {
-                                start: 4,
-                                end: 5,
-                                route: 'videos[{integers:ids}].title',
-                                paths: ['videos', [124], 'title'],
-                                response: {
-                                    path: ['videos', 124, 'title'],
-                                    value: 'title 124'
-                                }
-                            },
-                            {
-                                start: 4,
-                                end: 6,
-                                route: 'videos[{integers:ids}].rating',
-                                paths: ['videos', [124], 'rating'],
-                                response: {
-                                    path: ['videos', 124, 'rating'],
-                                    value: 'rating 124'
-                                }
-                            }
-                        ],
-                        end: 7,
-                        response: {
-                            jsonGraph: {
-                                videos: {
-                                    123: {
-                                        title: 'title 123',
-                                        rating: 'rating 123'
-                                    },
-                                    124: {
-                                        title: 'title 124',
-                                        rating: 'rating 124'
-                                    }
-                                }
-                            }
-                        }
-                    });
-
-                    done();
-                }
-            }
-        });
-
-        router.get([['videos', 123, ['title', 'rating']], ['videos', 124, ['title', 'rating']]])
-            .subscribe();
-    });
 
     it('should fire the pathError hook if the graph has a $type: "error" node in it', function (done) {
         var callCount = 0;

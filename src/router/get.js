@@ -15,91 +15,95 @@ var rxNewToRxNewAndOld = require('../run/conversion/rxNewToRxNewAndOld');
 module.exports = function routerGet(paths) {
 
     var router = this;
-    var methodSummary = null;
 
-    var source = Observable.defer(function() {
-
-        var jsongCache = {};
-        var action = runGetAction(router, jsongCache);
-        var normPS = normalizePathSets(paths);
-
-        if (getPathsCount(normPS) > router.maxPaths) {
-            throw new MaxPathsExceededError();
+    return rxNewToRxNewAndOld(Observable.defer(function() {
+        var methodSummary;
+        if (router._methodSummaryHook) {
+            methodSummary = {
+                start: router._now()
+            };
         }
 
-        return recurseMatchAndExecute(router._matcher, action, normPS,
-                                      get, router, jsongCache, methodSummary).
+        var result = Observable.defer(function () {
+            var jsongCache = {};
+            var action = runGetAction(router, jsongCache, methodSummary);
+            var normPS = normalizePathSets(paths);
 
-            // Turn it(jsongGraph, invalidations, missing, etc.) into a
-            // jsonGraph envelope
-            flatMap(function flatMapAfterRouterGet(details) {
-                var out = {
-                    jsonGraph: details.jsonGraph
-                };
+            if (getPathsCount(normPS) > router.maxPaths) {
+                throw new MaxPathsExceededError();
+            }
+
+            return recurseMatchAndExecute(router._matcher, action, normPS,
+                                        get, router, jsongCache).
+
+                // Turn it(jsongGraph, invalidations, missing, etc.) into a
+                // jsonGraph envelope
+                flatMap(function flatMapAfterRouterGet(details) {
+                    var out = {
+                        jsonGraph: details.jsonGraph
+                    };
 
 
-                // If the unhandledPaths are present then we need to
-                // call the backup method for generating materialized.
-                if (details.unhandledPaths.length && router._unhandled) {
-                    var unhandledPaths = details.unhandledPaths;
+                    // If the unhandledPaths are present then we need to
+                    // call the backup method for generating materialized.
+                    if (details.unhandledPaths.length && router._unhandled) {
+                        var unhandledPaths = details.unhandledPaths;
 
-                    // The 3rd argument is the beginning of the actions
-                    // arguments, which for get is the same as the
-                    // unhandledPaths.
-                    return router._unhandled.
-                        get(unhandledPaths).
+                        // The 3rd argument is the beginning of the actions
+                        // arguments, which for get is the same as the
+                        // unhandledPaths.
+                        return router._unhandled.
+                            get(unhandledPaths).
 
-                        // Merge the solution back into the overall message.
-                        map(function(jsonGraphFragment) {
-                            mCGRI(out.jsonGraph, [{
-                                jsonGraph: jsonGraphFragment.jsonGraph,
-                                paths: unhandledPaths
-                            }], router);
-                            return out;
-                        }).
-                        defaultIfEmpty(out);
-                }
+                            // Merge the solution back into the overall message.
+                            map(function(jsonGraphFragment) {
+                                mCGRI(out.jsonGraph, [{
+                                    jsonGraph: jsonGraphFragment.jsonGraph,
+                                    paths: unhandledPaths
+                                }], router);
+                                return out;
+                            }).
+                            defaultIfEmpty(out);
+                    }
 
-                return Observable.of(out);
-            }).
+                    return Observable.of(out);
+                }).
 
             // We will continue to materialize over the whole jsonGraph message.
             // This makes sense if you think about pathValues and an API that if
             // ask for a range of 10 and only 8 were returned, it would not
             // materialize for you, instead, allow the router to do that.
-            map(function(jsonGraphEnvelope) {
-                return materialize(router, normPS, jsonGraphEnvelope);
-            });
-    });
+                map(function(jsonGraphEnvelope) {
+                    return materialize(router, normPS, jsonGraphEnvelope);
+                });
+        });
 
-    if (router._methodSummaryHook || router._errorHook) {
-
-        if(router._methodSummaryHook) {
-            methodSummary = {
-                method: 'get',
-                start: router._now(),
-                paths: paths
-            };
+        if (router._methodSummaryHook || router._errorHook) {
+            var responses;
+            result = result.
+                do(function (response) {
+                    if (router._methodSummaryHook) {
+                        responses = responses || [];
+                        responses.push(response);
+                    }
+                }, function (err) {
+                    if (router._methodSummaryHook) {
+                        methodSummary.end = router._now();
+                        methodSummary.error = err;
+                        router._methodSummaryHook(methodSummary);
+                    }
+                    if (router._errorHook) {
+                        router._errorHook(err)
+                    }
+                }, function () {
+                    if (router._methodSummaryHook) {
+                        methodSummary.end = router._now();
+                        methodSummary.responses = responses;
+                        router._methodSummaryHook(methodSummary);
+                    }
+                });
         }
 
-        source = source.
-            do(function summaryHookHandler(response) {
-                if (router._methodSummaryHook) {
-                    methodSummary.end = router._now();
-                    methodSummary.response = response;
-                    router._methodSummaryHook(methodSummary);
-                }
-            }, function summaryHookErrorHandler(err) {
-                if (router._methodSummaryHook) {
-                    methodSummary.end = router._now();
-                    methodSummary.error = err;
-                    router._methodSummaryHook(methodSummary);
-                }
-                if (router._errorHook) {
-                    router._errorHook(err)
-                }
-            });
-    }
-
-    return rxNewToRxNewAndOld(source);
+        return result;
+    }));
 };
