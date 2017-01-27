@@ -25,7 +25,7 @@ module.exports = function routerSet(jsonGraph) {
 
     var router = this;
 
-    return rxNewToRxNewAndOld(Observable.defer(function() {
+    var source = Observable.defer(function() {
         var jsongCache = {};
         var action = runSetAction(router, jsonGraph, jsongCache);
         jsonGraph.paths = normalizePathSets(jsonGraph.paths);
@@ -153,8 +153,14 @@ module.exports = function routerSet(jsonGraph) {
             map(function(jsonGraphEnvelope) {
                 return materialize(router, jsonGraph.paths, jsonGraphEnvelope);
             });
-    }).
-    do(null, function errorHookHandler(err) {
-      router._errorHook(err);
-    }));
+    });
+
+    if (router._errorHook) {
+        source = source.
+            do(null, function summaryHookErrorHandler(err) {
+                router._errorHook(err);
+            })
+    }
+
+    return rxNewToRxNewAndOld(source);
 };

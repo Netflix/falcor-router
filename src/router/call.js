@@ -19,7 +19,7 @@ module.exports = function routerCall(callPath, args,
                                      refPathsArg, thisPathsArg) {
     var router = this;
 
-    return rxNewToRxNewAndOld(Observable.defer(function() {
+    var source = Observable.defer(function() {
 
         var refPaths = normalizePathSets(refPathsArg || []);
         var thisPaths = normalizePathSets(thisPathsArg || []);
@@ -77,8 +77,15 @@ module.exports = function routerCall(callPath, args,
                 }
                 throw e;
             });
-    })
-    .do(null, function errorHookHandler(err) {
-      router._errorHook(err);
-    }));
+    });
+
+
+    if (router._errorHook) {
+        source = source.
+            do(null, function summaryHookErrorHandler(err) {
+                router._errorHook(err);
+            });
+    }
+
+    return rxNewToRxNewAndOld(source);
 };

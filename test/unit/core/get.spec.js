@@ -619,129 +619,113 @@ describe('Get', function() {
             subscribe(noOp, done, done);
     });
 
-    it('should fire the routeSummary hook if one is provided', function (done) {
+    it('should fire the methodSummary hook, if the route returns path values', function (done) {
         var i = 0;
-        var router = getPrecedenceRouter(null, null, {
+
+        var router = new R([{
+            route: 'videos[{integers:ids}].title',
+            get: function (alias) {
+                return Observable.of({
+                    path: ['videos', 1, 'title'],
+                    value: 'Orange Is The New Black'
+                }, {
+                    path: ['videos', 2, 'title'],
+                    value: 'Whatever'
+                });
+            }
+        }],
+        {
             now: function () {
                 return i++;
             },
             hooks: {
-                routeSummary: function routeSummaryHook(e) {
-
-                    expect(e).to.deep.equal({
-                        type: 'get',
+                methodSummary: function (summary) {
+                    var expected = {
                         start: 0,
-                        pathsArgument: [
-                            ['videos', 123, [ 'title', 'rating' ]],
-                            ['videos', 124, [ 'title', 'rating' ]]
-                        ],
-                        paths: [
+                        routes: [
                             {
-                                path: ['videos', 123, ['title', 'rating']],
-                                routes: [
-                                    {
-                                        end: 2,
-                                        requested: ['videos', [123], 'title'],
-                                        virtual: [
-                                            'videos',
-                                            {
-                                                type: '\u001eintegers',
-                                                named: true,
-                                                name: 'ids'
-                                            },
-                                            'title'
-                                        ],
-                                        value: {
-                                            path: ['videos', 123, 'title'],
-                                            value: 'title 123'
-                                        }
-                                    },
-                                    {
-                                        end: 3,
-                                        requested: ['videos', [123], 'rating'],
-                                        virtual: [
-                                            'videos',
-                                            {
-                                                type: '\u001eintegers',
-                                                named: true,
-                                                name: 'ids'
-                                            },
-                                            'rating'
-                                        ],
-                                        value: {
-                                            path: ['videos', 123, 'rating'],
-                                            value: 'rating 123'
-                                        }
-                                    }
+                                route: 'videos[{integers:ids}].title',
+                                start: 1,
+                                end: 2,
+                                responses: [
+                                    {path: ['videos', 1, 'title'], value: 'Orange Is The New Black'},
+                                    {path: ['videos', 2, 'title'], value: 'Whatever'}
                                 ],
-                                start: 1
-                            },
-                            {
-                                path: ['videos', 124, ['title', 'rating']],
-                                routes: [
-                                    {
-                                    end: 5,
-                                    requested: [ 'videos', [124], 'title' ],
-                                    virtual: [
-                                        'videos',
-                                        {
-                                            type: '\u001eintegers',
-                                            named: true,
-                                            name: 'ids'
-                                        },
-                                        'title'
-                                    ],
-                                    value: {
-                                        path: ['videos', 124, 'title'],
-                                        value: 'title 124'
-                                    }
-                                    },
-                                    {
-                                    end: 6,
-                                    requested: ['videos', [124], 'rating'],
-                                    virtual: [
-                                        'videos',
-                                        {
-                                            type: '\u001eintegers',
-                                            named: true,
-                                            name: 'ids'
-                                        },
-                                        'rating'
-                                    ],
-                                    value: {
-                                        path: ['videos', 124, 'rating'],
-                                        value: 'rating 124'
-                                    }
-                                }
-                            ],
-                            start: 4
+                                paths: ['videos', [1, 2], 'title']
                             }
                         ],
-                        end: 7,
-                        response: {
+                        end: 3,
+                        responses: [{
                             jsonGraph: {
                                 videos: {
-                                    123: {
-                                        title: 'title 123',
-                                        rating: 'rating 123'
-                                    },
-                                    124: {
-                                        title: 'title 124',
-                                        rating: 'rating 124'
-                                    }
+                                    '1': {title: 'Orange Is The New Black'},
+                                    '2': {title: 'Whatever'}
                                 }
                             }
-                        }
-                    });
+                        }]
+                    };
 
+                    expect(summary).to.deep.equal(expected);
                     done();
                 }
             }
         });
-
-        router.get([['videos', 123, ['title', 'rating']], ['videos', 124, ['title', 'rating']]])
+        router.get([['videos', [1, 2], 'title']])
             .subscribe();
     });
+
+
+    it('should fire the methodSummary hook if there is an error', function (done) {
+        var i = 0;
+
+        var router = new R([{
+            route: 'videos[{integers:ids}].title',
+            get: function (alias) {
+                return Observable.throw(new Error('bad luck for you'));
+            }
+        }],
+        {
+            now: function () {
+                return i++;
+            },
+            hooks: {
+                methodSummary: function (summary) {
+                    var expected = {
+                        start: 0,
+                        routes: [
+                            {
+                                route: 'videos[{integers:ids}].title',
+                                start: 1,
+                                end: 2,
+                                error: new Error('bad luck for you'),
+                                paths: ['videos', 1, 'title']
+                            }
+                        ],
+                        end: 3,
+                        responses: [{
+                            jsonGraph: {
+                                videos: {
+                                    '1': {
+                                        title: {
+                                            $type: 'error',
+                                            value: {message: 'bad luck for you'}
+                                        }
+                                    }
+                                }
+                            }
+                        }]
+                    };
+
+
+                    expect(summary).to.deep.equal(expected);
+                    done();
+                }
+            }
+        });
+        router.get([['videos', 1, 'title']])
+            .subscribe();
+    });
+
 
     it('should fire the pathError hook if the graph has a $type: "error" node in it', function (done) {
         var callCount = 0;

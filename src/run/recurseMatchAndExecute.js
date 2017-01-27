@@ -16,13 +16,11 @@ var isArray = Array.isArray;
  */
 module.exports = function recurseMatchAndExecute(
         match, actionRunner, paths,
-        method, routerInstance, jsongCache,
-        summaryContext) {
+        method, routerInstance, jsongCache) {
 
     return _recurseMatchAndExecute(
         match, actionRunner, paths,
-        method, routerInstance, jsongCache,
-        summaryContext);
+        method, routerInstance, jsongCache);
 };
 
 /**
@@ -30,8 +28,7 @@ module.exports = function recurseMatchAndExecute(
  */
 function _recurseMatchAndExecute(
         match, actionRunner, paths,
-        method, routerInstance, jsongCache,
-        summaryContext) {
+        method, routerInstance, jsongCache) {
     var unhandledPaths = [];
     var invalidated = [];
     var reportedPaths = [];
@@ -45,18 +42,6 @@ function _recurseMatchAndExecute(
         expand(function(nextPaths) {
             if (!nextPaths.length) {
                 return Observable.empty();
-            }
-
-            var pathSummary;
-            if (routerInstance._routeSummaryHook) {
-                summaryContext.paths = summaryContext.paths || [];
-                var now = routerInstance._now();
-                pathSummary = {
-                    path: nextPaths,
-                    routes: [],
-                    start: now
-                };
-                summaryContext.paths.push(pathSummary);
             }
 
             // We have to return an Observable of error instead of just
@@ -75,16 +60,6 @@ function _recurseMatchAndExecute(
                 return Observable.empty();
             }
             return runByPrecedence(nextPaths, matchedResults, actionRunner).
-                do(function routeSummaryHookHandler(results) {
-                    if (pathSummary) {
-                        pathSummary.routes.push({
-                            end: routerInstance._now(),
-                            requested: results.match.requested,
-                            virtual: results.match.virtual,
-                            value: results.value
-                        });
-                    }
-                }).
                 // Generate from the combined results the next requestable paths
                 // and insert errors / values into the cache.
                 flatMap(function(results) {
