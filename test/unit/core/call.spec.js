@@ -61,11 +61,11 @@ describe('Call', function() {
         var i = 0;
         var router = new R([
             {
-                route: "genrelist.myList",
+                route: "titlesById[{integers:id}].name",
                 get: function(pathSet) {
                     return [{
-                        path: ['genrelist', 'myList'],
-                        value: $ref(['genrelist', 10])
+                        path: ['titlesById', 54, 'name'],
+                        value: 'Die Hard'
                     }];
                 }
             },
@@ -75,13 +75,18 @@ describe('Call', function() {
                     return [
                         {
                             path: ['genrelist', 10, 'titles', 100],
-                            value: "title100"
-                        },
-                        {
-                            path: ['genrelist',10, 'titles', 'length'],
-                            value: 101
+                            value: { $type: 'ref', value: ['titlesById', 54] }
                         }
                     ];
+                }
+            },
+            {
+                route: 'genrelist[10].titles.length',
+                get: function (pathSet) {
+                    return [{
+                        path: ['genrelist', 10, 'titles', 'length'],
+                        value: 50
+                    }]
                 }
             }
         ], {
@@ -93,24 +98,42 @@ describe('Call', function() {
                     var expected = {
                         method: 'call',
                         start: 0,
-                        callPath: ['genrelist', 'myList', 'titles', 'push'],
-                        refPaths: undefined,
-                        thisPaths: undefined,
+                        end: 7,
+                        callPath: ['genrelist', 10, 'titles', 'push'],
                         args: ['title100'],
+                        refPaths: [['name']],
+                        thisPaths: [['length']],
                         routes: [
                             {
                                 start: 1,
-                                end: 2,
-                                paths: ['genrelist', 10, 'titles', 'push'],
                                 route: 'genrelist[10].titles.push',
+                                paths: ['genrelist', 10, 'titles', 'push'],
                                 responses: [
                                     [
                                         {
                                             path: ['genrelist', 10, 'titles', 100],
-                                            value: 'title100'
-                                        },
-                                        { path: ['genrelist', 10, 'titles', 'length'], value: 101 }
+                                            value: { $type: 'ref', value: ['titlesById', 54] }
+                                        }
                                     ]
+                                ],
+                                end: 2
+                            },
+                            {
+                                start: 3,
+                                end: 4,
+                                route: 'titlesById[{integers:id}].name',
+                                paths: ['titlesById', 54, 'name'],
+                                responses: [
+                                    [{ path: ['titlesById', 54, 'name'], value: 'Die Hard'}]
+                                ]
+                            },
+                            {
+                                start: 5,
+                                end: 6,
+                                route: 'genrelist[10].titles.length',
+                                paths: ['genrelist', 10, 'titles', 'length'],
+                                responses: [
+                                    [{ path: ['genrelist', 10, 'titles', 'length'], value: 50 }]
                                 ]
                             }
                         ],
@@ -118,14 +141,21 @@ describe('Call', function() {
                             {
                                 jsonGraph: {
                                     genrelist: {
-                                        '10': { titles: { '100': 'title100', length: 101 } },
-                                        myList: { $type: 'ref', value: ['genrelist', 10] }
-                                    }
+                                        '10': {
+                                            titles: {
+                                                '100': { $type: 'ref', value: ['titlesById', 54] },
+                                                length: 50
+                                            }
+                                        }
+                                    },
+                                    titlesById: { '54': { name: 'Die Hard' } }
                                 },
-                                paths: [['genrelist', 10, 'titles', [100, 'length']]]
+                                paths: [
+                                    ['genrelist', 10, 'titles', 'length'],
+                                    ['genrelist', 10, 'titles', 100, 'name']
+                                ]
                             }
-                        ],
-                        end: 3
+                        ]
                     };
 
 
@@ -136,7 +166,7 @@ describe('Call', function() {
         });
 
         router.testValue = 1;
-        router.call(['genrelist', 'myList', 'titles', 'push'], ["title100"]).
+        router.call(['genrelist', 10, 'titles', 'push'], ["title100"], [['name']], [['length']]).
             subscribe();
     });
 

@@ -210,6 +210,30 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
     } else {
         out = match.action.call(routerInstance, matchAndPath.path);
         out = outputToObservable(out);
+
+        if (methodSummary) {
+            var route = {
+                start: routerInstance._now(),
+                route: matchAndPath.match.prettyRoute,
+                paths: matchAndPath.path
+            };
+            methodSummary.routes = methodSummary.routes || [];
+            methodSummary.routes.push(route);
+
+            out = out.do(
+                function (response) {
+                    route.responses = route.responses || [];
+                    route.responses.push(response);
+                },
+                function (err) {
+                    route.error = err;
+                    route.end = routerInstance._now();
+                },
+                function () {
+                    route.end = routerInstance._now();
+                }
+            )
+        }
     }
 
     return out.
