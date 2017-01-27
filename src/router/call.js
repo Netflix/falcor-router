@@ -19,73 +19,112 @@ module.exports = function routerCall(callPath, args,
                                      refPathsArg, thisPathsArg) {
     var router = this;
 
-    var source = Observable.defer(function() {
-
-        var refPaths = normalizePathSets(refPathsArg || []);
-        var thisPaths = normalizePathSets(thisPathsArg || []);
-        var jsongCache = {};
-        var action = runCallAction(router, callPath, args,
-                                   refPaths, thisPaths, jsongCache);
-        var callPaths = [callPath];
-
-        if (getPathsCount(refPaths) +
-            getPathsCount(thisPaths) +
-            getPathsCount(callPaths) >
-            router.maxPaths) {
-            throw new MaxPathsExceededError();
+    var source = Observable.defer(function () {
+        var methodSummary;
+        if (router._methodSummaryHook) {
+            methodSummary = {
+                method: 'call',
+                start: router._now(),
+                callPath: callPath,
+                args: args,
+                refPaths: refPathsArg,
+                thisPaths: thisPathsArg
+            };
         }
 
-        return recurseMatchAndExecute(router._matcher, action, callPaths, call,
-                                      router, jsongCache).
+        var innerSource = Observable.defer(function() {
 
-            // Take that
-            map(function(jsongResult) {
-                var reportedPaths = jsongResult.reportedPaths;
-                var jsongEnv = {
-                    jsonGraph: jsongResult.jsonGraph
-                };
+            var refPaths = normalizePathSets(refPathsArg || []);
+            var thisPaths = normalizePathSets(thisPathsArg || []);
+            var jsongCache = {};
+            var action = runCallAction(router, callPath, args,
+                refPaths, thisPaths, jsongCache, methodSummary);
+            var callPaths = [callPath];
 
-                // Call must report the paths that have been produced.
-                if (reportedPaths.length) {
+            if (getPathsCount(refPaths) +
+                getPathsCount(thisPaths) +
+                getPathsCount(callPaths) >
+                router.maxPaths) {
+                throw new MaxPathsExceededError();
+            }
+
+            return recurseMatchAndExecute(router._matcher, action,
+                callPaths, call,
+                router, jsongCache).
+
+                // Take that
+                map(function(jsongResult) {
+                    var reportedPaths = jsongResult.reportedPaths;
+                    var jsongEnv = {
+                        jsonGraph: jsongResult.jsonGraph
+                    };
+
+                    // Call must report the paths that have been produced.
+                    if (reportedPaths.length) {
                     // Collapse the reported paths as they may be inefficient
                     // to send across the wire.
-                    jsongEnv.paths = collapse(reportedPaths);
-                }
-                else {
-                    jsongEnv.paths = [];
-                    jsongEnv.jsonGraph = {};
-                }
+                        jsongEnv.paths = collapse(reportedPaths);
+                    }
+                    else {
+                        jsongEnv.paths = [];
+                        jsongEnv.jsonGraph = {};
+                    }
 
-                // add the invalidated paths to the jsonGraph Envelope
-                var invalidated = jsongResult.invalidated;
-                if (invalidated && invalidated.length) {
-                    jsongEnv.invalidated = invalidated;
-                }
+                    // add the invalidated paths to the jsonGraph Envelope
+                    var invalidated = jsongResult.invalidated;
+                    if (invalidated && invalidated.length) {
+                        jsongEnv.invalidated = invalidated;
+                    }
 
-                // Calls are currently materialized.
-                materialize(router, reportedPaths, jsongEnv);
-                return jsongEnv;
-            }).
+                    // Calls are currently materialized.
+                    materialize(router, reportedPaths, jsongEnv);
+                    return jsongEnv;
+                }).
 
             // For us to be able to chain call requests then the error that is
             // caught has to be a 'function does not exist.' error.  From that
             // we will try the next dataSource in the line.
-            catch(function catchException(e) {
-                if (e instanceof CallNotFoundError && router._unhandled) {
-                    return router._unhandled.
-                        call(callPath, args, refPaths, thisPaths);
-                }
-                throw e;
-            });
+                catch(function catchException(e) {
+                    if (e instanceof CallNotFoundError && router._unhandled) {
+                        return router._unhandled.
+                            call(callPath, args, refPaths, thisPaths);
+                    }
+                    throw e;
+                });
+        });
+
+        if (router._methodSummaryHook || router._errorHook) {
+            innerSource = innerSource.
+                do(function (response) {
+                    if (router._methodSummaryHook) {
+                        methodSummary.responses = methodSummary.responses || [];
+                        methodSummary.responses.push(response);
+                    }
+                }, function (err) {
+                    if (router._methodSummaryHook) {
+                        methodSummary.error = err;
+                        methodSummary.end = router._now();
+                        router._methodSummaryHook(methodSummary);
+                    }
+                    if (router._errorHook) {
+                        router._errorHook(err);
+                    }
+                }, function () {
+                    if (router._methodSummaryHook) {
+                        methodSummary.end = router._now();
+                        router._methodSummaryHook(methodSummary);
+                    }
+                });
+        }
+
+        return innerSource
     });
 
 
-    if (router._errorHook) {
-        source = source.
-            do(null, function summaryHookErrorHandler(err) {
-                router._errorHook(err);
-            });
-    }
 
-    return rxNewToRxNewAndOld(source);
+
+
+
+
+        return rxNewToRxNewAndOld(source);
 };

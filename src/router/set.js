@@ -27,15 +27,25 @@ module.exports = function routerSet(jsonGraph) {
 
     var source = Observable.defer(function() {
         var jsongCache = {};
-        var action = runSetAction(router, jsonGraph, jsongCache);
+
+        var methodSummary;
+        if (router._methodSummaryHook) {
+            methodSummary = {
+                method: 'set',
+                jsonGraphEnvelope: jsonGraph,
+                start: router._now()
+            };
+        }
+
+        var action = runSetAction(router, jsonGraph, jsongCache, methodSummary);
         jsonGraph.paths = normalizePathSets(jsonGraph.paths);
 
         if (getPathsCount(jsonGraph.paths) > router.maxPaths) {
             throw new MaxPathsExceededError();
         }
 
-        return recurseMatchAndExecute(router._matcher, action, jsonGraph.paths,
-                                      set, router, jsongCache).
+        var innerSource = recurseMatchAndExecute(router._matcher, action,
+            jsonGraph.paths, set, router, jsongCache).
 
             // Takes the jsonGraphEnvelope and extra details that comes out
             // of the recursive matching algorithm and either attempts the
@@ -153,6 +163,34 @@ module.exports = function routerSet(jsonGraph) {
             map(function(jsonGraphEnvelope) {
                 return materialize(router, jsonGraph.paths, jsonGraphEnvelope);
             });
+
+            if (router._errorHook || router._methodSummaryHook) {
+                innerSource = innerSource.
+                    do(
+                        function (response) {
+                            if (router._methodSummaryHook) {
+                                methodSummary.responses =
+                                    methodSummary.responses || [];
+                                methodSummary.responses.push(response);
+                            }
+                        }, function (err) {
+                            if (router._methodSummaryHook) {
+                                methodSummary.end = router._now();
+                                methodSummary.error = err;
+                                router._methodSummaryHook(methodSummary);
+                            }
+                            if (router._errorHook) {
+                                router._errorHook(err)
+                            }
+                        }, function () {
+                            if (router._methodSummaryHook) {
+                                methodSummary.end = router._now();
+                                router._methodSummaryHook(methodSummary);
+                            }
+                        }
+                    );
+            }
+            return innerSource;
     });
 
     if (router._errorHook) {
