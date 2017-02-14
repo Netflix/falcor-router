@@ -1,3 +1,11 @@
+<a name="0.8.0"></a>
+# 0.8.0 (2017-02-14)
+
+* refactor(methodSummary): rename `responses` to `results` and nest under `value` along with `time`. ([26bbe63](https://github.com/Netflix/falcor-router/commit/26bbe63))
+* Update rxjs ([b8aab6c](https://github.com/Netflix/falcor-router/commit/b8aab6c))
+
+
+
 <a name="0.7.0"></a>
 # [0.7.0](https://github.com/Netflix/falcor-router/compare/0.6.1...v0.7.0) (2017-01-27)
 
