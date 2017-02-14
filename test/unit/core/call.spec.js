@@ -95,7 +95,7 @@ describe('Call', function() {
                     var expected = {
                         method: 'call',
                         start: 0,
-                        end: 7,
+                        end: 10,
                         callPath: ['genrelist', 10, 'titles', 'push'],
                         args: ['title100'],
                         refPaths: [['name']],
@@ -105,35 +105,39 @@ describe('Call', function() {
                                 start: 1,
                                 route: 'genrelist[10].titles.push',
                                 pathSet: ['genrelist', 10, 'titles', 'push'],
-                                responses: [
-                                    [
+                                results: [{
+                                    time: 2,
+                                    value: [
                                         {
                                             path: ['genrelist', 10, 'titles', 100],
                                             value: { $type: 'ref', value: ['titlesById', 54] }
                                         }
                                     ]
-                                ],
-                                end: 2
+                                }],
+                                end: 3
                             },
                             {
-                                start: 3,
-                                end: 4,
+                                start: 4,
+                                end: 5,
                                 route: 'titlesById[{integers:id}].name',
                                 pathSet: ['titlesById', 54, 'name'],
+                                results: [],
                                 error: new Error('Live or die? Too bad! <HONK>')
                             },
                             {
-                                start: 5,
-                                end: 6,
+                                start: 6,
+                                end: 8,
                                 route: 'genrelist[10].titles.length',
                                 pathSet: ['genrelist', 10, 'titles', 'length'],
-                                responses: [
-                                    [{ path: ['genrelist', 10, 'titles', 'length'], value: 50 }]
-                                ]
+                                results: [{
+                                    time: 7,
+                                    value: [{ path: ['genrelist', 10, 'titles', 'length'], value: 50 }]
+                                }]
                             }
                         ],
-                        responses: [
-                            {
+                        results: [{
+                            time: 9,
+                            value: {
                                 jsonGraph: {
                                     genrelist: {
                                         '10': {
@@ -157,7 +161,7 @@ describe('Call', function() {
                                     ['genrelist', 10, 'titles', 100, 'name']
                                 ]
                             }
-                        ]
+                        }]
                     };
 
                     expect(summary).to.deep.equal(expected);
@@ -212,7 +216,7 @@ describe('Call', function() {
                     var expected = {
                         method: 'call',
                         start: 0,
-                        end: 7,
+                        end: 11,
                         callPath: ['genrelist', 10, 'titles', 'push'],
                         args: ['title100'],
                         refPaths: [['name']],
@@ -222,37 +226,41 @@ describe('Call', function() {
                                 start: 1,
                                 route: 'genrelist[10].titles.push',
                                 pathSet: ['genrelist', 10, 'titles', 'push'],
-                                responses: [
-                                    [
+                                results: [{
+                                    time: 2,
+                                    value: [
                                         {
                                             path: ['genrelist', 10, 'titles', 100],
                                             value: { $type: 'ref', value: ['titlesById', 54] }
                                         }
                                     ]
-                                ],
-                                end: 2
+                                }],
+                                end: 3
                             },
                             {
-                                start: 3,
-                                end: 4,
+                                start: 4,
+                                end: 6,
                                 route: 'titlesById[{integers:id}].name',
                                 pathSet: ['titlesById', 54, 'name'],
-                                responses: [
-                                    [{ path: ['titlesById', 54, 'name'], value: 'Die Hard'}]
-                                ]
+                                results: [{
+                                    time: 5,
+                                    value: [{ path: ['titlesById', 54, 'name'], value: 'Die Hard'}]
+                                }]
                             },
                             {
-                                start: 5,
-                                end: 6,
+                                start: 7,
+                                end: 9,
                                 route: 'genrelist[10].titles.length',
                                 pathSet: ['genrelist', 10, 'titles', 'length'],
-                                responses: [
-                                    [{ path: ['genrelist', 10, 'titles', 'length'], value: 50 }]
-                                ]
+                                results: [{
+                                    time: 8,
+                                    value: [{ path: ['genrelist', 10, 'titles', 'length'], value: 50 }]
+                                }]
                             }
                         ],
-                        responses: [
-                            {
+                        results: [{
+                            time: 10,
+                            value: {
                                 jsonGraph: {
                                     genrelist: {
                                         '10': {
@@ -269,7 +277,7 @@ describe('Call', function() {
                                     ['genrelist', 10, 'titles', 100, 'name']
                                 ]
                             }
-                        ]
+                        }]
                     };
 
 
