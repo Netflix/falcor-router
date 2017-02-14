@@ -20,7 +20,11 @@ module.exports = function routerGet(paths) {
         var methodSummary;
         if (router._methodSummaryHook) {
             methodSummary = {
-                start: router._now()
+                method: 'get',
+                pathSets: paths,
+                start: router._now(),
+                results: [],
+                routes: []
             };
         }
 
@@ -82,8 +86,10 @@ module.exports = function routerGet(paths) {
             result = result.
                 do(function (response) {
                     if (router._methodSummaryHook) {
-                        methodSummary.responses = methodSummary.responses || [];
-                        methodSummary.responses.push(response);
+                        methodSummary.results.push({
+                            time: router._now(),
+                            value: response
+                        });
                     }
                 }, function (err) {
                     if (router._methodSummaryHook) {

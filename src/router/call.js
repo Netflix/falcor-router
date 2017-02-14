@@ -28,7 +28,9 @@ module.exports = function routerCall(callPath, args,
                 callPath: callPath,
                 args: args,
                 refPaths: refPathsArg,
-                thisPaths: thisPathsArg
+                thisPaths: thisPathsArg,
+                results: [],
+                routes: []
             };
         }
 
@@ -97,8 +99,10 @@ module.exports = function routerCall(callPath, args,
             innerSource = innerSource.
                 do(function (response) {
                     if (router._methodSummaryHook) {
-                        methodSummary.responses = methodSummary.responses || [];
-                        methodSummary.responses.push(response);
+                        methodSummary.results.push({
+                            time: router._now(),
+                            value: response
+                        });
                     }
                 }, function (err) {
                     if (router._methodSummaryHook) {

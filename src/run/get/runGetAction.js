@@ -22,13 +22,15 @@ function getAction(routerInstance, matchAndPath, jsongCache, methodSummary) {
                 var route = {
                     start: routerInstance._now(),
                     route: matchAndPath.match.prettyRoute,
-                    pathSet: matchAndPath.path
+                    pathSet: matchAndPath.path,
+                    results: []
                 };
-                methodSummary.routes = methodSummary.routes || [];
                 methodSummary.routes.push(route);
                 return _out.do(function (response) {
-                    route.responses = route.responses || [];
-                    route.responses.push(response);
+                    route.results.push({
+                        time: routerInstance._now(),
+                        value: response
+                    });
                 }, function (err) {
                     route.error = err;
                     route.end = routerInstance._now();

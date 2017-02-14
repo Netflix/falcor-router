@@ -44,15 +44,17 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
                     var route = {
                         start: routerInstance._now(),
                         route: matchAndPath.match.prettyRoute,
-                        pathSet: matchAndPath.path
+                        pathSet: matchAndPath.path,
+                        results: []
                     };
-                    methodSummary.routes = methodSummary.routes || [];
                     methodSummary.routes.push(route);
 
                     output = output.do(
                         function (response) {
-                            route.responses = route.responses || [];
-                            route.responses.push(response);
+                            route.results.push({
+                                time: routerInstance._now(),
+                                value: response
+                            });
                         },
                         function (err) {
                             route.error = err;
@@ -218,15 +220,17 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
             var route = {
                 start: routerInstance._now(),
                 route: matchAndPath.match.prettyRoute,
-                pathSet: matchAndPath.path
+                pathSet: matchAndPath.path,
+                results: []
             };
-            methodSummary.routes = methodSummary.routes || [];
             methodSummary.routes.push(route);
 
             out = out.do(
                 function (response) {
-                    route.responses = route.responses || [];
-                    route.responses.push(response);
+                    route.results.push({
+                        time: routerInstance._now(),
+                        value: response
+                    });
                 },
                 function (err) {
                     route.error = err;

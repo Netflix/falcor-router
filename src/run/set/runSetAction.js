@@ -82,13 +82,15 @@ function runSetAction(routerInstance, jsongMessage, matchAndPath,
                     pathSet: matchAndPath.path,
                     start: routerInstance._now()
                 };
-                methodSummary.routes = methodSummary.routes || [];
                 methodSummary.routes.push(route);
 
                 return _out.do(
                     function (result) {
                         route.results = route.results || [];
-                        route.results.push(result);
+                        route.results.push({
+                            time: routerInstance._now(),
+                            value: result
+                        });
                     },
                     function (err) {
                         route.error = err;

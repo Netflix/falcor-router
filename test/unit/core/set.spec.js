@@ -351,23 +351,25 @@ describe('Set', function() {
                                 route: 'videos[{integers:id}].rating',
                                 pathSet: ['videos', [1234, 333], 'rating'],
                                 start: 1,
-                                results: [
-                                    [
+                                results: [{
+                                    time: 2,
+                                    value: [
                                         { path: ['videos', 1234, 'rating'], value: 5 },
                                         { path: ['videos', 333, 'rating'], value: 5 }
                                     ]
-                                ],
-                                end: 2
+                                }],
+                                end: 3
                             }
                         ],
-                        responses: [
-                            {
+                        results: [{
+                            time: 4,
+                            value: {
                                 jsonGraph: {
                                     videos: { '333': { rating: 5 }, '1234': { rating: 5 } }
                                 }
                             }
-                        ],
-                        end: 3
+                        }],
+                        end: 5
                     };
                     expect(summary).to.deep.equal(expected);
                     done();

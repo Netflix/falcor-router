@@ -651,27 +651,35 @@ describe('Get', function() {
             hooks: {
                 methodSummary: function (summary) {
                     var expected = {
+                        method: 'get',
+                        pathSets: [['videos', [1, 2], 'title']],
                         start: 0,
                         routes: [
                             {
                                 route: 'videos[{integers:ids}].title',
                                 start: 1,
-                                end: 2,
-                                responses: [
+                                end: 4,
+                                results: [
                                     {
-                                        jsonGraph: {
-                                            videos: {
-                                                1: {
-                                                    title: 'Orange Is The New Black'
+                                        time: 2,
+                                        value: {
+                                            jsonGraph: {
+                                                videos: {
+                                                    1: {
+                                                        title: 'Orange Is The New Black'
+                                                    }
                                                 }
                                             }
                                         }
                                     },
                                     {
-                                        jsonGraph: {
-                                            videos: {
-                                                2: {
-                                                    title: 'Whatever'
+                                        time: 3,
+                                        value: {
+                                            jsonGraph: {
+                                                videos: {
+                                                    2: {
+                                                        title: 'Whatever'
+                                                    }
                                                 }
                                             }
                                         }
@@ -680,12 +688,15 @@ describe('Get', function() {
                                 pathSet: ['videos', [1, 2], 'title']
                             }
                         ],
-                        end: 3,
-                        responses: [{
-                            jsonGraph: {
-                                videos: {
-                                    '1': {title: 'Orange Is The New Black'},
-                                    '2': {title: 'Whatever'}
+                        end: 6,
+                        results: [{
+                            time: 5,
+                            value: {
+                                jsonGraph: {
+                                    videos: {
+                                        '1': {title: 'Orange Is The New Black'},
+                                        '2': {title: 'Whatever'}
+                                    }
                                 }
                             }
                         }]
@@ -705,25 +716,36 @@ describe('Get', function() {
 
          var expected = function (t) {
              return {
+                method: 'get',
+                pathSets: [['videos', [1, 2], 'title']],
                 start: t + 0,
                 routes: [
                     {
                         route: 'videos[{integers:ids}].title',
                         start: t + 1,
-                        end: t + 2,
-                        responses: [
-                            {path: ['videos', 1, 'title'], value: 'Orange Is The New Black'},
-                            {path: ['videos', 2, 'title'], value: 'Whatever'}
+                        end: t + 4,
+                        results: [
+                            {
+                                time: t + 2,
+                                value: {path: ['videos', 1, 'title'], value: 'Orange Is The New Black'}
+                            },
+                            {
+                                time: t + 3,
+                                value: {path: ['videos', 2, 'title'], value: 'Whatever'}
+                            }
                         ],
                         pathSet: ['videos', [1, 2], 'title']
                     }
                 ],
-                end: t + 3,
-                responses: [{
-                    jsonGraph: {
-                        videos: {
-                            '1': {title: 'Orange Is The New Black'},
-                            '2': {title: 'Whatever'}
+                end: t + 6,
+                results: [{
+                    time: t + 5,
+                    value: {
+                        jsonGraph: {
+                            videos: {
+                                '1': {title: 'Orange Is The New Black'},
+                                '2': {title: 'Whatever'}
+                            }
                         }
                     }
                 }]
@@ -748,8 +770,8 @@ describe('Get', function() {
             },
             hooks: {
                 methodSummary: function (summary) {
-                    expect(summary).to.deep.equal(expected(i - 4));
-                    if (i === 8) {
+                    expect(summary).to.deep.equal(expected(i - 7));
+                    if (i === 14) {
                         done();
                     }
                 }
@@ -784,25 +806,36 @@ describe('Get', function() {
             hooks: {
                 methodSummary: function (summary) {
                     var expected = {
+                        method: 'get',
+                        pathSets: [['videos', [1, 2], 'title']],
                         start: 0,
                         routes: [
                             {
                                 route: 'videos[{integers:ids}].title',
                                 start: 1,
-                                end: 2,
-                                responses: [
-                                    {path: ['videos', 1, 'title'], value: 'Orange Is The New Black'},
-                                    {path: ['videos', 2, 'title'], value: 'Whatever'}
+                                end: 4,
+                                results: [
+                                    {
+                                        time: 2,
+                                        value: {path: ['videos', 1, 'title'], value: 'Orange Is The New Black'}
+                                    },
+                                    {
+                                        time: 3,
+                                        value: {path: ['videos', 2, 'title'], value: 'Whatever'}
+                                    }
                                 ],
                                 pathSet: ['videos', [1, 2], 'title']
                             }
                         ],
-                        end: 3,
-                        responses: [{
-                            jsonGraph: {
-                                videos: {
-                                    '1': {title: 'Orange Is The New Black'},
-                                    '2': {title: 'Whatever'}
+                        end: 6,
+                        results: [{
+                            time: 5,
+                            value: {
+                                jsonGraph: {
+                                    videos: {
+                                        '1': {title: 'Orange Is The New Black'},
+                                        '2': {title: 'Whatever'}
+                                    }
                                 }
                             }
                         }]
@@ -834,24 +867,30 @@ describe('Get', function() {
             hooks: {
                 methodSummary: function (summary) {
                     var expected = {
+                        method: 'get',
+                        pathSets: [['videos', 1, 'title']],
                         start: 0,
                         routes: [
                             {
                                 route: 'videos[{integers:ids}].title',
                                 start: 1,
                                 end: 2,
+                                results: [],
                                 error: new Error('bad luck for you'),
                                 pathSet: ['videos', 1, 'title']
                             }
                         ],
-                        end: 3,
-                        responses: [{
-                            jsonGraph: {
-                                videos: {
-                                    '1': {
-                                        title: {
-                                            $type: 'error',
-                                            value: {message: 'bad luck for you'}
+                        end: 4,
+                        results: [{
+                            time: 3,
+                            value: {
+                                jsonGraph: {
+                                    videos: {
+                                        '1': {
+                                            title: {
+                                                $type: 'error',
+                                                value: {message: 'bad luck for you'}
+                                            }
                                         }
                                     }
                                 }
