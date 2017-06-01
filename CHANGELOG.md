@@ -1,3 +1,15 @@
+
+<a name="0.8.1"></a>
+## 0.8.1 (2017-06-01)
+
+
+### Bug Fixes
+
+* Handle Falcor style observables from unhandled path datasource. ([07ce5ff](https://github.com/Netflix/falcor-router/commit/07ce5ff))
+* Make rxNewToRxNewAndOld work with old observers missing onNext. ([f407745](https://github.com/Netflix/falcor-router/commit/f407745))
+
+
+
 <a name="0.8.0"></a>
 # 0.8.0 (2017-02-14)
 
