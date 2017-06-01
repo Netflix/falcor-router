@@ -7,6 +7,7 @@ var Observable = require('../RouterRx.js').Observable;
 var mCGRI = require('./../run/mergeCacheAndGatherRefsAndInvalidations');
 var MaxPathsExceededError = require('../errors/MaxPathsExceededError');
 var getPathsCount = require('./getPathsCount');
+var outputToObservable = require('../run/conversion/outputToObservable');
 var rxNewToRxNewAndOld = require('../run/conversion/rxNewToRxNewAndOld');
 
 /**
@@ -56,8 +57,8 @@ module.exports = function routerGet(paths) {
                         // The 3rd argument is the beginning of the actions
                         // arguments, which for get is the same as the
                         // unhandledPaths.
-                        return router._unhandled.
-                            get(unhandledPaths).
+                        return outputToObservable(
+                            router._unhandled.get(unhandledPaths)).
 
                             // Merge the solution back into the overall message.
                             map(function(jsonGraphFragment) {

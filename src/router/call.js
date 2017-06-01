@@ -9,6 +9,7 @@ var collapse = pathUtils.collapse;
 var Observable = require('../RouterRx.js').Observable;
 var MaxPathsExceededError = require('../errors/MaxPathsExceededError');
 var getPathsCount = require('./getPathsCount');
+var outputToObservable = require('../run/conversion/outputToObservable');
 var rxNewToRxNewAndOld = require('../run/conversion/rxNewToRxNewAndOld');
 
 /**
@@ -88,8 +89,9 @@ module.exports = function routerCall(callPath, args,
             // we will try the next dataSource in the line.
                 catch(function catchException(e) {
                     if (e instanceof CallNotFoundError && router._unhandled) {
-                        return router._unhandled.
-                            call(callPath, args, refPaths, thisPaths);
+                        return outputToObservable(
+                            router._unhandled.
+                            call(callPath, args, refPaths, thisPaths));
                     }
                     throw e;
                 });

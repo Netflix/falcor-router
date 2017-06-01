@@ -4,7 +4,7 @@ var chai = require('chai');
 var expect = chai.expect;
 var sinon = require('sinon');
 var pathValueMerge = require('./../../../src/cache/pathValueMerge');
-var Observable = require('../../../src/RouterRx').Observable;
+var FalcorObservable = require('../../FalcorObservable');
 var $atom = require('./../../../src/support/types').$atom;
 var $ref = require('./../../../src/support/types').$ref;
 
@@ -12,7 +12,7 @@ describe('#set', function() {
     it('should return an empty Observable and just materialize values.', function(done) {
         var router = new R([]);
         var onUnhandledPaths = sinon.spy(function convert(paths) {
-            return Observable.empty();
+            return FalcorObservable.empty();
         });
         router.routeUnhandledPathsTo({set: onUnhandledPaths});
 
@@ -63,7 +63,7 @@ describe('#set', function() {
                 return jsonGraph;
             }, {jsonGraph: {}});
 
-            return Observable.of(returnValue);
+            return FalcorObservable.of(returnValue);
         });
         router.routeUnhandledPathsTo({set: onUnhandledPaths});
 
@@ -122,7 +122,7 @@ describe('#set', function() {
                 });
                 return jsonGraph;
             }, {jsonGraph: {}});
-            return Observable.of(returnValue);
+            return FalcorObservable.of(returnValue);
         });
         router.routeUnhandledPathsTo({set: onUnhandledPaths});
 
@@ -202,7 +202,7 @@ describe('#set', function() {
                 path: unicorn,
                 value: 'missing'
             });
-            return Observable.of(next);
+            return FalcorObservable.of(next);
         });
         router.routeUnhandledPathsTo({set: onUnhandledPaths});
 
