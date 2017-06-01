@@ -27,6 +27,21 @@ describe('rxNewToRxNewAndOld', function () {
         expect(results).to.deep.equal([1, 2, 3, 'done']);
     });
 
+    it('should work with partial "old" observers', function () {
+        var source = Observable.of(1, 2, 3);
+        var results = [];
+
+        var sub = rxNewToRxNewAndOld(source).subscribe({
+            onCompleted: function () {
+                results.push('done');
+            }
+        });
+
+        expect(sub.dispose).to.be.a('function');
+        expect(sub.unsubscribe).to.be.a('function');
+        expect(results).to.deep.equal(['done']);
+    });
+
     it('should work with "new" observers', function () {
         var source = Observable.of(1, 2, 3);
         var results = [];
