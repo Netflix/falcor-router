@@ -1,6 +1,7 @@
-var Observable = require('../../../../src/RouterRx').Observable;
+var Observable = require('../../../src/RouterRx').Observable;
+var Subject = require('rxjs/Subject').Subject;
 var rxNewToRxNewAndOld =
-    require('../../../../src/run/conversion/rxNewToRxNewAndOld');
+    require('../../../src/run/conversion/rxNewToRxNewAndOld');
 var chai = require('chai');
 var expect = chai.expect;
 
@@ -24,6 +25,21 @@ describe('rxNewToRxNewAndOld', function () {
         expect(sub.dispose).to.be.a('function');
         expect(sub.unsubscribe).to.be.a('function');
         expect(results).to.deep.equal([1, 2, 3, 'done']);
+    });
+
+    it('should work with partial "old" observers', function () {
+        var source = Observable.of(1, 2, 3);
+        var results = [];
+
+        var sub = rxNewToRxNewAndOld(source).subscribe({
+            onCompleted: function () {
+                results.push('done');
+            }
+        });
+
+        expect(sub.dispose).to.be.a('function');
+        expect(sub.unsubscribe).to.be.a('function');
+        expect(results).to.deep.equal(['done']);
     });
 
     it('should work with "new" observers', function () {
@@ -76,11 +92,11 @@ describe('rxNewToRxNewAndOld', function () {
 
         expect(sub.dispose).to.be.a('function');
         expect(sub.unsubscribe).to.be.a('function');
-        expect(results).to.deep.equal([1, 2, 3, 'done']);
+        expect(results).to.deep.equal([]);
     });
 
     it('should unsubscribe with `dispose`', function () {
-        var source = Observable.of('hello');
+        var source = new Subject();
         var results = [];
 
         var sub = rxNewToRxNewAndOld(source).subscribe(
@@ -95,15 +111,17 @@ describe('rxNewToRxNewAndOld', function () {
             }
         );
 
+        source.next('hello');
         sub.dispose();
+        source.next('world');
 
-        expect(sub.closed).to.be(true);
-        expect(sub.isDisposed).to.be(true);
-        expect(results).to.deep.equal([]);
+        expect(sub.closed).to.equal(true);
+        expect(sub.isDisposed).to.equal(true);
+        expect(results).to.deep.equal(['hello']);
     });
 
     it('should unsubscribe with `unsubscribe`', function () {
-        var source = Observable.of('hello');
+        var source = new Subject();
         var results = [];
 
         var sub = rxNewToRxNewAndOld(source).subscribe(
@@ -118,10 +136,12 @@ describe('rxNewToRxNewAndOld', function () {
             }
         );
 
+        source.next('hello');
         sub.unsubscribe();
+        source.next('world');
 
-        expect(sub.closed).to.be(true);
-        expect(sub.isDisposed).to.be(true);
-        expect(results).to.deep.equal([]);
+        expect(sub.closed).to.equal(true);
+        expect(sub.isDisposed).to.equal(true);
+        expect(results).to.deep.equal(['hello']);
     });
 })
