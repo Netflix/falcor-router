@@ -3,13 +3,13 @@ var noOp = function() {};
 var chai = require('chai');
 var expect = chai.expect;
 var sinon = require('sinon');
-var Observable = require('../../../src/RouterRx').Observable;
+var FalcorObservable = require('../../FalcorObservable');
 
 describe('#call', function() {
     it('should ensure a missing function gets chained.', function(done) {
         var router = new R([]);
         var onCall = sinon.spy(function() {
-            return Observable.of({
+            return FalcorObservable.of({
                 jsonGraph: {
                     videos: {
                         summary: 5
@@ -45,7 +45,7 @@ describe('#call', function() {
     it('should ensure a missing function gets chained and will not materialize properly.', function(done) {
         var router = new R([]);
         var onCall = sinon.spy(function() {
-            return Observable.of({
+            return FalcorObservable.of({
                 jsonGraph: { },
                 paths: [
                     ['videos', 'summary']

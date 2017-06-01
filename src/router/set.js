@@ -15,6 +15,7 @@ var collapse = pathUtils.collapse;
 var mCGRI = require('./../run/mergeCacheAndGatherRefsAndInvalidations');
 var MaxPathsExceededError = require('../errors/MaxPathsExceededError');
 var getPathsCount = require('./getPathsCount');
+var outputToObservable = require('../run/conversion/outputToObservable');
 var rxNewToRxNewAndOld = require('../run/conversion/rxNewToRxNewAndOld');
 
 /**
@@ -141,8 +142,8 @@ module.exports = function routerSet(jsonGraph) {
                             return pV.path;
                         }));
 
-                    return router._unhandled.
-                        set(jsonGraphEnvelope).
+                    return outputToObservable(
+                        router._unhandled.set(jsonGraphEnvelope)).
 
                         // Merge the solution back into the overall message.
                         map(function(unhandledJsonGraphEnv) {
