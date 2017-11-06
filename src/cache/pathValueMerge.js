@@ -18,6 +18,11 @@ module.exports = function pathValueMerge(cache, pathValue) {
         valueType = false;
     }
 
+    // Replace "Cannot read property '$type' of undefined" by a more specific error for troubleshooting
+    else if (pathValue.value === undefined) {
+        throw new Error(`pathValue can't be undefined. Path : ${JSON.stringify(pathValue)}`);
+    }
+
     // References.  Needed for evaluationg suffixes in all three types, get,
     // call and set.
     else if ((pathValue.value !== null) && (pathValue.value.$type === $ref)) {
