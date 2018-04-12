@@ -11,26 +11,15 @@ var defaultNow = function defaultNow() {
 };
 
 var Router = function(routes, options) {
-    var opts = options || {};
-
     this._routes = routes;
     this._rst = parseTree(routes);
     this._matcher = matcher(this._rst);
-    this._debug = opts.debug;
-    this._pathErrorHook = (opts.hooks && opts.hooks.pathError) || noOp;
-    this._errorHook = opts.hooks && opts.hooks.error;
-    this._methodSummaryHook = opts.hooks && opts.hooks.methodSummary;
-    this._now = opts.now || defaultNow;
-    this.maxRefFollow = opts.maxRefFollow || MAX_REF_FOLLOW;
-    this.maxPaths = opts.maxPaths || MAX_PATHS;
+    this._setOptions(options);
 };
 
 Router.createClass = function(routes) {
     function C(options) {
-        var opts = options || {};
-        this._debug = opts.debug;
-        this.maxRefFollow = opts.maxRefFollow || MAX_REF_FOLLOW;
-        this.maxPaths = opts.maxPaths || MAX_PATHS;
+        this._setOptions(options);
     }
 
     C.prototype = new Router(routes);
@@ -81,6 +70,17 @@ Router.prototype = {
      */
     routeUnhandledPathsTo: function routeUnhandledPathsTo(dataSource) {
         this._unhandled = dataSource;
+    },
+
+    _setOptions: function _setOptions(options) {
+        var opts = options || {};
+        this._debug = opts.debug;
+        this._pathErrorHook = (opts.hooks && opts.hooks.pathError) || noOp;
+        this._errorHook = opts.hooks && opts.hooks.error;
+        this._methodSummaryHook = opts.hooks && opts.hooks.methodSummary;
+        this._now = opts.now || defaultNow;
+        this.maxRefFollow = opts.maxRefFollow || MAX_REF_FOLLOW;
+        this.maxPaths = opts.maxPaths || MAX_PATHS;
     }
 };
 
