@@ -78,7 +78,7 @@ Router.prototype = {
         this._pathErrorHook = (opts.hooks && opts.hooks.pathError) || noOp;
         this._errorHook = opts.hooks && opts.hooks.error;
         this._methodSummaryHook = opts.hooks && opts.hooks.methodSummary;
-        this._now = opts.now || defaultNow;
+        this._now = (opts.hooks && opts.hooks.now) || opts.now || defaultNow;
         this.maxRefFollow = opts.maxRefFollow || MAX_REF_FOLLOW;
         this.maxPaths = opts.maxPaths || MAX_PATHS;
     }
