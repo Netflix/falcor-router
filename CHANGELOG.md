@@ -1,3 +1,10 @@
+<a name="0.8.3"></a>
+## 0.8.3 (2018-04-12)
+
+* fix: use hooks.now if available ([3ff0df4](https://github.com/Netflix/falcor-router/commit/3ff0df4))
+
+
+
 <a name="0.8.2"></a>
 ## 0.8.2 (2018-04-12)
 
