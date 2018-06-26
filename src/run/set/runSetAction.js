@@ -4,7 +4,7 @@ var noteToJsongOrPV = require('../conversion/noteToJsongOrPV');
 var spreadPaths = require('./../../support/spreadPaths');
 var getValue = require('./../../cache/getValue');
 var jsongMerge = require('./../../cache/jsongMerge');
-var optimizePathSets = require('./../../cache/optimizePathSets');
+var optimizePathSets = require('falcor-path-utils').optimizePathSets;
 var hasIntersection = require('./../../operations/matcher/intersection/hasIntersection');
 var pathValueMerge = require('./../../cache/pathValueMerge');
 var Observable = require('falcor-observable').Observable;
@@ -32,29 +32,28 @@ function runSetAction(routerInstance, jsongMessage, matchAndPath,
     // the pathValues from the
     if (match.isSet) {
         var paths = spreadPaths(jsongMessage.paths);
+        var optimizedPaths = [];
+        var subSetPaths = [];
 
         // We have to ensure that the paths maps in order
         // to the optimized paths array.
-        var optimizedPathsAndPaths =
-            paths.
-                // Optimizes each path.
-                map(function(path) {
-                    return [optimizePathSets(
-                        jsongCache, [path], routerInstance.maxRefFollow)[0],
-                        path];
-                }).
-                // only includes the paths from the set that intersect
-                // the virtual path
-                filter(function(optimizedAndPath) {
-                    return optimizedAndPath[0] &&
-                        hasIntersection(optimizedAndPath[0], match.virtual);
-                });
-        var optimizedPaths = optimizedPathsAndPaths.map(function(opp) {
-            return opp[0];
-        });
-        var subSetPaths = optimizedPathsAndPaths.map(function(opp) {
-            return opp[1];
-        });
+        for (var j = 0; j < paths.length; j++) {
+            var uPath = paths[j];
+            // Optimizes each path.
+            var optimizeResult = optimizePathSets(
+                jsongCache, [uPath], routerInstance.maxRefFollow);
+            if (optimizeResult.error) {
+                return Observable.throw(optimizeResult.error);
+            }
+            var oPath = optimizeResult.paths[0];
+            // only includes the paths from the set that intersect
+            // the virtual path
+            if (!oPath || !hasIntersection(oPath, match.virtual)) {
+                continue;
+            }
+            optimizedPaths.push(oPath);
+            subSetPaths.push(uPath);
+        }
         var tmpJsonGraph = subSetPaths.
             reduce(function(json, path, i) {
                 pathValueMerge(json, {

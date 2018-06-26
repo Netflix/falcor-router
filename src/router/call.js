@@ -8,7 +8,7 @@ var pathUtils = require('falcor-path-utils');
 var collapse = pathUtils.collapse;
 var Observable = require('falcor-observable').Observable;
 var catchError = require('falcor-observable').catchError;
-var map = require('falcor-observable').map;
+var mergeMap = require('falcor-observable').mergeMap;
 var tap = require('falcor-observable').tap;
 var MaxPathsExceededError = require('../errors/MaxPathsExceededError');
 var getPathsCount = require('./getPathsCount');
@@ -58,7 +58,7 @@ module.exports = function routerCall(callPath, args,
                 router, jsongCache).pipe(
 
                 // Take that
-                map(function(jsongResult) {
+                mergeMap(function(jsongResult) {
                     var reportedPaths = jsongResult.reportedPaths;
                     var jsongEnv = {
                         jsonGraph: jsongResult.jsonGraph
@@ -82,8 +82,7 @@ module.exports = function routerCall(callPath, args,
                     }
 
                     // Calls are currently materialized.
-                    materialize(router, reportedPaths, jsongEnv);
-                    return jsongEnv;
+                    return materialize(router, reportedPaths, jsongEnv);
                 }),
 
             // For us to be able to chain call requests then the error that is

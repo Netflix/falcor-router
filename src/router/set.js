@@ -9,7 +9,7 @@ var mergeMap = require('falcor-observable').mergeMap;
 var tap = require('falcor-observable').tap;
 var spreadPaths = require('./../support/spreadPaths');
 var pathValueMerge = require('./../cache/pathValueMerge');
-var optimizePathSets = require('./../cache/optimizePathSets');
+var optimizePathSets = require('falcor-path-utils').optimizePathSets;
 var hasIntersectionWithTree =
     require('./../operations/matcher/intersection/hasIntersectionWithTree');
 var getValue = require('./../cache/getValue');
@@ -89,56 +89,50 @@ module.exports = function routerSet(jsonGraph) {
                             return acc;
                         }, {});
 
+                    var pathIntersection = [];
                     // 1. Spread
-                    var pathIntersection = spreadPaths(jsonGraph.paths).
-
+                    var spread = spreadPaths(jsonGraph.paths);
+                    for (var i = 0; i < spread.length; i++) {
+                        var path = spread[i];
                         // 2.1 Optimize.  We know its one at a time therefore we
                         // just pluck [0] out.
-                        map(function(path) {
-                            return [
-                                // full path
-                                path,
-
-                                // optimized path
-                                optimizePathSets(details.jsonGraph, [path],
-                                                    router.maxRefFollow)[0]]
-                        }).
+                        var result = optimizePathSets(
+                            details.jsonGraph, [path], router.maxRefFollow);
+                        if (result.error) {
+                            return Observable.throw(result.error);
+                        }
+                        var oPath = result.paths[0];
 
                         // 2.2 Remove all the optimized paths that were found in
                         // the cache.
-                        filter(function(x) { return x[1]; }).
+                        if (!oPath) {
+                            continue;
+                        }
 
                         // 3.1 test intersection.
-                        map(function(pathAndOPath) {
-                            var oPath = pathAndOPath[1];
-                            var hasIntersection = hasIntersectionWithTree(
-                                oPath, unhandledPathsTree);
+                        var hasIntersection = hasIntersectionWithTree(
+                            oPath, unhandledPathsTree);
 
-                            // Creates the pathValue if there are a path
-                            // intersection
-                            if (hasIntersection) {
-                                var value =
-                                    getValue(jsonGraph.jsonGraph,
-                                        pathAndOPath[0]);
+                        // 3.2 strip out the non-intersection paths.
+                        if (!hasIntersection) {
+                            continue;
+                        }
+                        // Creates the pathValue if there are a path
+                        // intersection
+                        var value = getValue(jsonGraph.jsonGraph, path);
 
-                                return {
-                                    path: oPath,
-                                    value: value
-                                };
-                            }
+                        pathIntersection.push({
+                            path: oPath,
+                            value: value
+                        });
+                    }
 
-                            return null;
-                        }).
-
-                        // 3.2 strip out nulls (the non-intersection paths).
-                        filter(function(x) { return x !== null; });
-
-                        // 4. build the optimized JSONGraph envelope.
-                        pathIntersection.
-                            reduce(function(acc, pathValue) {
-                                pathValueMerge(acc, pathValue);
-                                return acc;
-                            }, jsonGraphFragment);
+                    // 4. build the optimized JSONGraph envelope.
+                    pathIntersection.
+                        reduce(function(acc, pathValue) {
+                            pathValueMerge(acc, pathValue);
+                            return acc;
+                        }, jsonGraphFragment);
 
                     jsonGraphEnvelope.paths = collapse(
                         pathIntersection.map(function(pV) {
@@ -166,7 +160,7 @@ module.exports = function routerSet(jsonGraph) {
             // This makes sense if you think about pathValues and an API that
             // if ask for a range of 10 and only 8 were returned, it would not
             // materialize for you, instead, allow the router to do that.
-            map(function(jsonGraphEnvelope) {
+            mergeMap(function(jsonGraphEnvelope) {
                 return materialize(router, jsonGraph.paths, jsonGraphEnvelope);
             })
         );

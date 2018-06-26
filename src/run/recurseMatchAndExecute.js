@@ -7,7 +7,7 @@ var reduce = require('falcor-observable').reduce;
 var runByPrecedence = require('./precedence/runByPrecedence');
 var pathUtils = require('falcor-path-utils');
 var collapse = pathUtils.collapse;
-var optimizePathSets = require('./../cache/optimizePathSets');
+var optimizePathSets = require('falcor-path-utils').optimizePathSets;
 var mCGRI = require('./mergeCacheAndGatherRefsAndInvalidations');
 var isArray = Array.isArray;
 
@@ -138,8 +138,12 @@ function _recurseMatchAndExecute(
                     // Explodes and collapse the tree to remove
                     // redundants and get optimized next set of
                     // paths to evaluate.
-                    pathsToExpand = optimizePathSets(
+                    var optimizeResult = optimizePathSets(
                         jsongCache, pathsToExpand, routerInstance.maxRefFollow);
+                    if (optimizeResult.error) {
+                        return Observable.throw(optimizeResult.error);
+                    }
+                    pathsToExpand = optimizeResult.paths;
 
                     if (pathsToExpand.length) {
                         pathsToExpand = collapse(pathsToExpand);

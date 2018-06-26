@@ -82,7 +82,7 @@ module.exports = function routerGet(paths) {
             // This makes sense if you think about pathValues and an API that if
             // ask for a range of 10 and only 8 were returned, it would not
             // materialize for you, instead, allow the router to do that.
-                map(function(jsonGraphEnvelope) {
+                mergeMap(function(jsonGraphEnvelope) {
                     return materialize(router, normPS, jsonGraphEnvelope);
                 })
             );

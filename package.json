@@ -15,7 +15,7 @@
   "dependencies": {
     "falcor-observable": "^1.3.0",
     "falcor-path-syntax": "0.2.4",
-    "falcor-path-utils": "~0.5.0",
+    "falcor-path-utils": "^0.7.0",
     "symbol-observable": "^1.0.4"
   },
   "devDependencies": {

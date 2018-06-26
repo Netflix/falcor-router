@@ -1,5 +1,6 @@
+var Observable = require('falcor-observable').Observable;
 var pathValueMerge = require('./../cache/pathValueMerge');
-var optimizePathSets = require('./../cache/optimizePathSets');
+var optimizePathSets = require('falcor-path-utils').optimizePathSets;
 var $atom = require('./../support/types').$atom;
 
 /**
@@ -13,7 +14,11 @@ module.exports = function materializeMissing(router, paths, jsongEnv) {
 
     // Optimizes the pathSets from the jsong then
     // inserts atoms of undefined.
-    optimizePathSets(jsonGraph, paths, router.maxRefFollow).
+    var result = optimizePathSets(jsonGraph, paths, router.maxRefFollow);
+    if (result.error) {
+        return Observable.throw(result.error);
+    }
+    result.paths.
         forEach(function(optMissingPath) {
             pathValueMerge(jsonGraph, {
                 path: optMissingPath,
@@ -21,5 +26,5 @@ module.exports = function materializeMissing(router, paths, jsongEnv) {
             });
         });
 
-    return {jsonGraph: jsonGraph};
+    return Observable.of(jsongEnv);
 }
