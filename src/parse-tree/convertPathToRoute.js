@@ -33,9 +33,7 @@ module.exports = function convertPathToRoute(path, route) {
                         convertPathKeyToKeys(path[i]);
                     break;
                 default:
-                    var err = new Error('Unknown route type.');
-                    err.throwToNext = true;
-                    break;
+                    throw new Error('Unknown route type.');
             }
             if (virt.named) {
                 matched[virt.name] = matched[matched.length - 1];

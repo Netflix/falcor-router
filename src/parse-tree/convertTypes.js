@@ -1,7 +1,7 @@
 var Keys = require('./../Keys');
 module.exports = function convertTypes(virtualPath) {
     virtualPath.route = virtualPath.route.map(function(key) {
-        if (typeof key === 'object') {
+        if (typeof key === 'object' && key !== null && !Array.isArray(key)) {
             switch (key.type) {
                 case 'keys':
                     key.type = Keys.keys;
@@ -13,9 +13,7 @@ module.exports = function convertTypes(virtualPath) {
                     key.type = Keys.ranges;
                     break;
                 default:
-                    var err = new Error('Unknown route type.');
-                    err.throwToNext = true;
-                    break;
+                    throw new Error('Unknown route type.');
             }
         }
         return key;
