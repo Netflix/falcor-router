@@ -46,9 +46,7 @@ module.exports = function matcher(rst) {
         // call.  Therefore we are going to throw an informative error.
         if (method === call && matched.length === 0) {
             var err = new CallNotFoundError();
-            err.throwToNext = true;
-
-            throw err;
+            return { error: err };
         }
 
         // Reduce into groups multiple matched routes into route sets where
@@ -106,7 +104,7 @@ module.exports = function matcher(rst) {
                     collapsedMatched.push(reducedMatch[i]);
                 });
             });
-        return collapsedMatched;
+        return { error: null, value: collapsedMatched };
     };
 };
 

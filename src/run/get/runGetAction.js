@@ -1,6 +1,8 @@
 var outputToObservable = require('../conversion/outputToObservable');
-var noteToJsongOrPV = require('../conversion/noteToJsongOrPV');
-var Observable = require('../../RouterRx.js').Observable;
+var normalizeJsongOrPV = require('../conversion/normalizeJsongOrPV');
+var Observable = require('falcor-observable').Observable;
+var map = require('falcor-observable').map;
+var tap = require('falcor-observable').tap;
 
 module.exports = function runGetAction(routerInstance, jsongCache,
     methodSummary) {
@@ -13,43 +15,36 @@ module.exports = function runGetAction(routerInstance, jsongCache,
 function getAction(routerInstance, matchAndPath, jsongCache, methodSummary) {
     var match = matchAndPath.match;
     var out;
-    try {
-        out = match.action.call(routerInstance, matchAndPath.path);
-        out = outputToObservable(out);
-        if (methodSummary) {
-            var _out = out;
-            out = Observable.defer(function () {
-                var route = {
-                    start: routerInstance._now(),
-                    route: matchAndPath.match.prettyRoute,
-                    pathSet: matchAndPath.path,
-                    results: []
-                };
-                methodSummary.routes.push(route);
-                return _out.do(function (response) {
-                    route.results.push({
-                        time: routerInstance._now(),
-                        value: response
-                    });
-                }, function (err) {
-                    route.error = err;
-                    route.end = routerInstance._now();
-                }, function () {
-                    route.end = routerInstance._now();
+    out = match.action.call(routerInstance, matchAndPath.path);
+    out = outputToObservable(out);
+    if (methodSummary) {
+        var _out = out;
+        out = Observable.defer(function () {
+            var route = {
+                start: routerInstance._now(),
+                route: matchAndPath.match.prettyRoute,
+                pathSet: matchAndPath.path,
+                results: []
+            };
+            methodSummary.routes.push(route);
+            return _out.pipe(tap(function (response) {
+                route.results.push({
+                    time: routerInstance._now(),
+                    value: response
                 });
-            })
-        }
-    } catch (e) {
-        out = Observable.throw(e);
+            }, function (err) {
+                route.error = err;
+                route.end = routerInstance._now();
+            }, function () {
+                route.end = routerInstance._now();
+            }));
+        })
     }
 
-    return out.
-        materialize().
-        filter(function(note) {
-            return note.kind !== 'C';
-        }).
-        map(noteToJsongOrPV(matchAndPath.path, false, routerInstance)).
+    return out.pipe(
+        map(normalizeJsongOrPV(matchAndPath.path, false)),
         map(function(jsonGraphOrPV) {
             return [matchAndPath.match, jsonGraphOrPV];
-        });
+        })
+    );
 }

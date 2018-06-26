@@ -1,5 +1,5 @@
-var Rx = require('../../src/RouterRx');
-var Observable = Rx.Observable;
+var Observable = require('falcor-observable').Observable;
+var map = require('falcor-observable').map;
 var R = require('../../src/Router');
 var TestRunner = require('./../TestRunner');
 var Model = require('falcor').Model;
@@ -29,11 +29,11 @@ module.exports = function() {
                     route: 'videos[{keys}].summary',
                     get: function (path) {
                         fn && fn(path);
-                        return Observable.
-                            from(path[1]).
+                        return Observable.from(path[1]).pipe(
                             map(function(id) {
                                 return generateVideoJSONG(id);
-                            });
+                            })
+                        );
                     }
                 }];
             }
@@ -44,11 +44,11 @@ module.exports = function() {
                     route: ['videos', R.integers, 'summary'],
                     get: function (path) {
                         fn && fn(path);
-                        return Observable.
-                            from(path[1]).
+                        return Observable.from(path[1]).pipe(
                             map(function(id) {
                                 return generateVideoJSONG(id);
-                            });
+                            })
+                        );
                     }
                 }];
             }
@@ -60,11 +60,13 @@ module.exports = function() {
                     route: ['videos', R.ranges, 'summary'],
                     get: function (path) {
                         fn && fn(path);
-                        return Observable.
-                            from(TestRunner.rangeToArray(path[1])).
+                        return Observable.from(
+                            TestRunner.rangeToArray(path[1])
+                        ).pipe(
                             map(function(id) {
                                 return generateVideoJSONG(id);
-                            });
+                            })
+                        );
                     }
                 }];
             }
@@ -75,11 +77,11 @@ module.exports = function() {
                     route: ['videos', 'state', R.keys],
                     get: function (path) {
                         fn && fn(path);
-                        return Observable.
-                            from(path[2]).
+                        return Observable.from(path[2]).pipe(
                             map(function(key) {
                                 return generateVideoStateJSONG(key);
-                            });
+                            })
+                        );
                     }
                 }];
             },
@@ -88,11 +90,11 @@ module.exports = function() {
                     route: ['videos', 'state', R.integers],
                     get: function (path) {
                         fn && fn(path);
-                        return Observable.
-                            from(path[2]).
+                        return Observable.from(path[2]).pipe(
                             map(function(key) {
                                 return generateVideoStateJSONG(key);
-                            });
+                            })
+                        );
                     }
                 }];
             },
@@ -101,11 +103,13 @@ module.exports = function() {
                     route: ['videos', 'state', R.ranges],
                     get: function (path) {
                         fn && fn(path);
-                        return Observable.
-                            from(TestRunner.rangeToArray(path[2])).
+                        return Observable.from(
+                            TestRunner.rangeToArray(path[2])
+                        ).pipe(
                             map(function(key) {
                                 return generateVideoStateJSONG(key);
-                            });
+                            })
+                        );
                     }
                 }];
             }

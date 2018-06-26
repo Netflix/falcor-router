@@ -1,5 +1,6 @@
 var TestRunner = require('./../../TestRunner');
 var R = require('../../../src/Router');
+var tap = require('falcor-observable').tap;
 var Routes = require('./../../data');
 var Expected = require('./../../data/expected');
 var noOp = function() {};
@@ -86,8 +87,8 @@ describe('Integers', function() {
 
         router.
             get([['titlesById', {from: 1, to: 1}, ["name", "rating"]]]).
-            do(onNext).
-            do(noOp, noOp, function(x) {
+            pipe(tap(onNext)).
+            pipe(tap(noOp, noOp, function(x) {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -99,7 +100,7 @@ describe('Integers', function() {
                         }
                     }
                 });
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 

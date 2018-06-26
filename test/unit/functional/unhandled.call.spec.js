@@ -1,15 +1,16 @@
 var R = require('../../../src/Router');
+var tap = require('falcor-observable').tap;
 var noOp = function() {};
 var chai = require('chai');
 var expect = chai.expect;
 var sinon = require('sinon');
-var FalcorObservable = require('../../FalcorObservable');
+var LegacyObservable = require('../../LegacyObservable');
 
 describe('#call', function() {
     it('should ensure a missing function gets chained.', function(done) {
         var router = new R([]);
         var onCall = sinon.spy(function() {
-            return FalcorObservable.of({
+            return LegacyObservable.of({
                 jsonGraph: {
                     videos: {
                         summary: 5
@@ -26,7 +27,7 @@ describe('#call', function() {
         var onNext = sinon.spy();
         router.
             call(['test'], []).
-            do(onNext, noOp, function() {
+            pipe(tap(onNext, noOp, function() {
                 expect(onNext.callCount).to.equals(1);
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -38,14 +39,14 @@ describe('#call', function() {
                         ['videos', 'summary']
                     ]
                 });
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 
     it('should ensure a missing function gets chained and will not materialize properly.', function(done) {
         var router = new R([]);
         var onCall = sinon.spy(function() {
-            return FalcorObservable.of({
+            return LegacyObservable.of({
                 jsonGraph: { },
                 paths: [
                     ['videos', 'summary']
@@ -58,7 +59,7 @@ describe('#call', function() {
         var onNext = sinon.spy();
         router.
             call(['test'], []).
-            do(onNext, noOp, function() {
+            pipe(tap(onNext, noOp, function() {
                 expect(onNext.callCount).to.equals(1);
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: { },
@@ -66,7 +67,7 @@ describe('#call', function() {
                         ['videos', 'summary']
                     ]
                 });
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 });

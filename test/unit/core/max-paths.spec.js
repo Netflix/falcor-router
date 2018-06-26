@@ -3,6 +3,11 @@ var expect = chai.expect;
 var Router = require('../../../src/Router');
 var MaxPathsExceededError = require('../../../src/errors/MaxPathsExceededError');
 var pathCount = require('falcor-path-utils').pathCount;
+var Observable = require('falcor-observable').Observable;
+
+function unreachable() {
+    throw new Error("should no reach here");
+}
 
 describe('MaxPaths', function() {
 
@@ -10,14 +15,14 @@ describe('MaxPaths', function() {
         var r = new Router([]);
 
         r.get([["lomo", {length: 9001}, "name"]]).
-        subscribe({
-            next: function(x) {},
-            error: function(e) {
+        subscribe(
+            function(x) {},
+            function(e) {
                 expect(e).to.be.an.instanceof(MaxPathsExceededError);
                 done();
             },
-            complete: function() {}
-        });
+            unreachable
+        );
 
     });
 
@@ -35,15 +40,15 @@ describe('MaxPaths', function() {
         });
 
         r.get([["lomo", {length: 9001}, "name"]]).
-        subscribe({
-            next: function(x) {},
-            error: function(e) {
+        subscribe(
+            function(x) {},
+            function(e) {
                 expect(callCount).to.equal(1);
                 expect(callArgs).to.deep.equal([e]);
                 done();
             },
-            complete: function() {}
-        });
+            unreachable
+        );
 
     });
 
@@ -55,14 +60,14 @@ describe('MaxPaths', function() {
             jsonGraph: {},
             paths: [["lomo", {length: 9001}, "name"]]
         }).
-        subscribe({
-            next: function(x) {},
-            error: function(e) {
+        subscribe(
+            function(x) {},
+            function(e) {
                 expect(e).to.be.an.instanceof(MaxPathsExceededError);
                 done();
             },
-            complete: function() {}
-        });
+            unreachable
+        );
     });
 
     it('should call error hook on MaxPathsExceededError in set.', function(done) {
@@ -81,15 +86,15 @@ describe('MaxPaths', function() {
             jsonGraph: {},
             paths: [["lomo", {length: 9001}, "name"]]
         }).
-        subscribe({
-            next: function(x) {},
-            error: function(e) {
+        subscribe(
+            function(x) {},
+            function(e) {
                 expect(callCount).to.equal(1);
                 expect(callArgs).to.deep.equal([e]);
                 done();
             },
-            complete: function() {}
-        });
+            unreachable
+        );
     });
 
     it('should fail if number of call paths is greater than maxPaths.', function(done) {
@@ -97,14 +102,14 @@ describe('MaxPaths', function() {
         var r = new Router([]);
 
         r.call(["lomo", {length: 9001}, "name"], [], [], []).
-            subscribe({
-                next: function(x) {},
-                error: function(e) {
+            subscribe(
+                function(x) {},
+                function(e) {
                     expect(e).to.be.an.instanceof(MaxPathsExceededError);
                     done();
                 },
-                complete: function() {}
-            });
+                unreachable
+            );
     });
 
     it('should call the error hook on MaxPathsExceededError during call.', function(done) {
@@ -121,15 +126,15 @@ describe('MaxPaths', function() {
         });
 
         r.call(["lomo", {length: 9001}, "name"], [], [], []).
-            subscribe({
-                next: function(x) {},
-                error: function(e) {
+            subscribe(
+                function(x) {},
+                function(e) {
                     expect(callCount).to.equal(1);
                     expect(callArgs).to.deep.equal([e]);
                     done();
                 },
-                complete: function() {}
-            });
+                unreachable
+            );
     });
 
     it('should fail number of refPaths is greater than maxPaths.', function(done) {
@@ -137,14 +142,14 @@ describe('MaxPaths', function() {
         var r = new Router([]);
 
         r.call(["lomo", 0, "name"], [], [[{ length: 9001 }]], []).
-            subscribe({
-                next: function(x) {},
-                error: function(e) {
+            subscribe(
+                function(x) {},
+                function(e) {
                     expect(e).to.be.an.instanceof(MaxPathsExceededError);
                     done();
                 },
-                complete: function() {}
-            });
+                unreachable
+            );
     });
 
     it('should fail number of thisPaths is greater than maxPaths.', function(done) {
@@ -152,14 +157,14 @@ describe('MaxPaths', function() {
         var r = new Router([]);
 
         r.call(["lomo", 0, "name"], [], [], [[{ length: 9001 }]]).
-            subscribe({
-                next: function(x) {},
-                error: function(e) {
+            subscribe(
+                function(x) {},
+                function(e) {
                     expect(e).to.be.an.instanceof(MaxPathsExceededError);
                     done();
                 },
-                complete: function() {}
-            });
+                unreachable
+            );
     });
 
     it('should fail if number of thisPaths + refPaths + callPaths is greater than maxPaths.', function(done) {
@@ -167,14 +172,14 @@ describe('MaxPaths', function() {
         var r = new Router([]);
 
         r.call(["lomo", { length: 3001 }, "name"], [], [[{ length: 3000 }]], [[{ length: 3000 }]]).
-            subscribe({
-                next: function(x) {},
-                error: function(e) {
+            subscribe(
+                function(x) {},
+                function(e) {
                     expect(e).to.be.an.instanceof(MaxPathsExceededError);
                     done();
                 },
-                complete: function() {}
-            });
+                unreachable
+            );
     });
 
     it('should rethrow MaxPathsExceededError on get.', function(done) {
@@ -183,21 +188,21 @@ describe('MaxPaths', function() {
             route: "titlesById[{integers:titleIds}].name",
             get: function(pathSet) {
                 if (pathSet[1].length > 20) {
-                    throw new MaxPathsExceededError();
+                    return Observable.throw(new MaxPathsExceededError());
                 }
                 return [];
             }
         }]);
 
         r.get([["titlesById", {length: 21}, "name"]]).
-            subscribe({
-                next: function(x) {},
-                error: function(e) {
+            subscribe(
+                function(x) {},
+                function(e) {
                     expect(e).to.be.an.instanceof(MaxPathsExceededError);
                     done();
                 },
-                complete: function() {}
-            });
+                unreachable
+            );
     });
 
     it('should rethrow MaxPathsExceededError on set.', function(done) {
@@ -207,7 +212,7 @@ describe('MaxPaths', function() {
             set: function(jsonGraphArg) {
                 var ids = Object.keys(jsonGraphArg.titlesById);
                 if (ids.length > 1) {
-                    throw new MaxPathsExceededError();
+                    return Observable.throw(new MaxPathsExceededError());
                 }
                 return [];
             }
@@ -226,14 +231,14 @@ describe('MaxPaths', function() {
             },
             paths: [["titlesById", [0, 1], "name"]]
         }).
-        subscribe({
-            next: function(x) {},
-            error: function(e) {
+        subscribe(
+            function(x) {},
+            function(e) {
                 expect(e).to.be.an.instanceof(MaxPathsExceededError);
                 done();
             },
-            complete: function() {}
-        });
+            unreachable
+        );
     });
 
     it('should rethrow MaxPathsExceededError on call.', function(done) {
@@ -241,25 +246,26 @@ describe('MaxPaths', function() {
         var r = new Router([{
             route: 'genrelist[{integers:indices}].push',
             call: function(callPath, args, refPaths) {
-                refPaths.forEach(function(pathSet) {
-                    if (pathCount(pathSet) > 200) {
-                        throw new MaxPathsExceededError("You requested too many refPaths from the new list.");
-                    }
-                });
+                var total = refPaths.reduce(function(acc, pathSet) {
+                    return acc + pathCount(pathSet);
+                }, 0);
+                return total > 200 ? Observable.throw(
+                    new MaxPathsExceededError("You requested too many refPaths from the new list.")
+                ) : Observable.empty();
             }
         }]);
 
         r.call(["genrelist", 23, "push"],
             [{ $type: "ref", value: ["genrelistsById", 296] }],
             [[{ to: 500 }, "name"]]).
-            subscribe({
-                next: function(x) {},
-                error: function(e) {
+            subscribe(
+                function(x) {},
+                function(e) {
                     expect(e).to.be.an.instanceof(MaxPathsExceededError);
                     done();
                 },
-                complete: function() {}
-            });
+                unreachable
+            );
 
     });
 

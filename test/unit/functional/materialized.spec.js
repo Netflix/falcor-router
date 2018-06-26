@@ -6,18 +6,19 @@ var chai = require('chai');
 var expect = chai.expect;
 var falcor = require('falcor');
 var $ref = falcor.Model.ref;
-var Observable = require('../../../src/RouterRx').Observable;
-var delay = require('rxjs/operator/delay').delay;
+var Observable = require('falcor-observable').Observable;
+var tap = require('falcor-observable').tap;
+var delay = require('../../delay').delay;
 
 describe('Materialized Paths.', function() {
     function partialRouter() {
         return new R([{
             route: 'one[{integers:ids}]',
             get: function(aliasMap) {
-                return delay.call(Observable.of({
+                return Observable.of({
                     path: ['one', 0],
                     value: $ref(['two', 'be', 956])
-                }), 100);
+                }).pipe(delay(100));
             }
         }]);
     }
@@ -27,7 +28,7 @@ describe('Materialized Paths.', function() {
             var onNext = sinon.spy();
             router.
                 get([['one', [0, 1], 'summary']]).
-                do(onNext, noOp, function() {
+                pipe(tap(onNext, noOp, function() {
                     expect(onNext.calledOnce).to.be.ok;
                     expect(onNext.getCall(0).args[0]).to.deep.equals({
                         jsonGraph: {
@@ -50,7 +51,7 @@ describe('Materialized Paths.', function() {
                             }
                         }
                     });
-                }).
+                })).
                 subscribe(noOp, done, done);
         });
 
@@ -60,7 +61,7 @@ describe('Materialized Paths.', function() {
             var onNext = sinon.spy();
             router.
                 get([['one', [0, 1], 'summary']]).
-                do(onNext, noOp, function() {
+                pipe(tap(onNext, noOp, function() {
                     expect(onNext.calledOnce).to.be.ok;
                     expect(onNext.getCall(0).args[0]).to.deep.equals({
                         jsonGraph: {
@@ -78,7 +79,7 @@ describe('Materialized Paths.', function() {
                             }
                         }
                     });
-                }).
+                })).
                 subscribe(noOp, done, done);
         });
     });

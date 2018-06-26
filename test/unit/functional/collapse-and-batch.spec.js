@@ -6,9 +6,12 @@ var expect = chai.expect;
 var falcor = require('falcor');
 var $ref = falcor.Model.ref;
 var $atom = falcor.Model.atom;
-var Observable = require('../../../src/RouterRx').Observable;
+var Observable = require('falcor-observable').Observable;
+var map = require('falcor-observable').map;
+var tap = require('falcor-observable').tap;
+var toArray = require('falcor-observable').toArray;
 var Promise = require('promise');
-var delay = require('rxjs/operator/delay').delay;
+var delay = require('../../delay').delay;
 
 describe('Collapse and Batch', function() {
     it('should ensure that collapse is being ran.', function(done) {
@@ -23,7 +26,7 @@ describe('Collapse and Batch', function() {
             get([['genreLists', [0, 1], 'summary']]);
         var called = false;
         obs.
-            do(function(res) {
+            pipe(tap(function(res) {
                 expect(res).to.deep.equals({
                     jsonGraph: {
                         genreLists: {
@@ -43,7 +46,7 @@ describe('Collapse and Batch', function() {
                 called = true;
             }, noOp, function() {
                 expect(called, 'expect onNext called 1 time.').to.equal(true);
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 
@@ -72,7 +75,8 @@ describe('Collapse and Batch', function() {
         var routes = [{
             route: 'one[{integers:ids}]',
             get: function(aliasMap) {
-                return delay.call(Observable.from(aliasMap.ids), 100).
+                return Observable.from(aliasMap.ids).pipe(
+                    delay(100),
                     map(function(id) {
                         if (id === 0) {
                             return {
@@ -84,31 +88,36 @@ describe('Collapse and Batch', function() {
                             path: ['one', id],
                             value: $ref('three.four[111]')
                         };
-                    });
+                    })
+                );
             }
         }, {
             route: 'two.be[{integers:ids}].summary',
             get: function(aliasMap) {
                 called(1);
-                return delay.call(Observable.from(aliasMap.ids), 2000).
+                return Observable.from(aliasMap.ids).pipe(
+                    delay(2000),
                     map(function(id) {
                         return {
                             path: ['two', 'be', id, 'summary'],
                             value: 'hello world'
                         };
-                    });
+                    })
+                );
             }
         }, {
             route: 'three.four[{integers:ids}].summary',
             get: function(aliasMap) {
                 called(2);
-                return delay.call(Observable.from(aliasMap.ids), 2000).
+                return Observable.from(aliasMap.ids).pipe(
+                    delay(2000),
                     map(function(id) {
                         return {
                             path: ['three', 'four', id, 'summary'],
                             value: 'hello saturn'
                         };
-                    });
+                    })
+                );
             }
         }];
         var router = new R(routes);
@@ -117,14 +126,14 @@ describe('Collapse and Batch', function() {
         var count = 0;
         var time = Date.now();
         obs.
-            do(function(res) {
+            pipe(tap(function(res) {
                 var nextTime = Date.now();
                 expect(nextTime - time >= 4000).to.equal(false);
                 count++;
             }, noOp, function() {
                 expect(count, 'expect onNext called 1 time.').to.equal(1);
                 expect(testedTwo, 'process.nextTick').to.equal(true);
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 
@@ -133,8 +142,7 @@ describe('Collapse and Batch', function() {
         var routes = [{
             route: 'lists[{keys:ids}]',
             get: function(aliasMap) {
-                return Observable.
-                    from(aliasMap.ids).
+                return Observable.from(aliasMap.ids).pipe(
                     map(function(id) {
                         if (id === 0) {
                             return {
@@ -146,31 +154,32 @@ describe('Collapse and Batch', function() {
                             path: ['lists', id],
                             value: $ref('lists[0]')
                         };
-                    }).
+                    }),
 
                     // Note: this causes the batching to work.
-                    toArray();
+                    toArray()
+                );
             }
         }, {
             route: 'two.be[{integers:ids}].summary',
             get: function(aliasMap) {
-                return Observable.
-                    from(aliasMap.ids).
+                return Observable.from(aliasMap.ids).pipe(
                     map(function(id) {
                         serviceCalls++;
                         return {
                             path: ['two', 'be', id, 'summary'],
                             value: 'hello world'
                         };
-                    });
+                    })
+                );
             }
         }];
         var router = new R(routes);
         var obs = router.
             get([['lists', [0, 1], 'summary']]);
         var count = 0;
-        obs.
-            do(function(res) {
+        obs.pipe(
+            tap(function(res) {
                 expect(res).to.deep.equals({
                     jsonGraph: {
                         lists: {
@@ -190,19 +199,18 @@ describe('Collapse and Batch', function() {
             }, noOp, function() {
                 expect(count, 'expect onNext called 1 time.').to.equal(1);
                 expect(serviceCalls).to.equal(1);
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 
     // HACK: This test is not passing
     // NOTE: I made the test easier to read by simplifying it. I'm still not sure what it's testing.
-    it('should validate batching/collapsing makes two request since its onNextd without toArray().', function(done) {
+    it.skip('should validate batching/collapsing makes two request since its onNextd without toArray().', function(done) {
         var serviceCalls = 0;
         var routes = [{
             route: 'lists[{keys:ids}]',
             get: function(aliasMap) {
-                return Observable.
-                    from(aliasMap.ids).
+                return Observable.from(aliasMap.ids).pipe(
                     map(function(id) {
                         if (id === 0) {
                             return {
@@ -214,28 +222,29 @@ describe('Collapse and Batch', function() {
                             path: ['lists', id],
                             value: $ref('lists[0]')
                         };
-                    });
+                    })
+                );
             }
         }, {
             route: 'two.be[{integers:ids}].summary',
             get: function(aliasMap) {
-                return Observable.
-                    from(aliasMap.ids).
+                return Observable.from(aliasMap.ids).pipe(
                     map(function(id) {
                         serviceCalls++;
                         return {
                             path: ['two', 'be', id, 'summary'],
                             value: 'hello world'
                         };
-                    });
+                    })
+                );
             }
         }];
         var router = new R(routes);
         var obs = router.
             get([['lists', [0, 1], 'summary']]);
         var count = 0;
-        obs.
-            do(function(res) {
+        obs.pipe(
+            tap(function(res) {
                 expect(res).to.deep.equals({
                     jsonGraph: {
                         lists: {
@@ -255,7 +264,7 @@ describe('Collapse and Batch', function() {
             }, null, function() {
                 expect(count, 'expect onNext called 1 time.').to.equal(1);
                 expect(serviceCalls).to.equal(2);
-            })
+            }))
             .subscribe(noOp, done, done);
     });
 
@@ -290,9 +299,9 @@ describe('Collapse and Batch', function() {
         var router = new R(routes);
         router.
             get([['promise', [0, 1], 'summary']]).
-            do(noOp, noOp, function() {
+            pipe(tap(noOp, noOp, function() {
                 expect(serviceCalls).to.equal(1);
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 });

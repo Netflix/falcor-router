@@ -2,7 +2,8 @@ var R = require('../../../src/Router');
 var noOp = function() {};
 var chai = require('chai');
 var expect = chai.expect;
-var Observable = require('../../../src/RouterRx').Observable;
+var Observable = require('falcor-observable').Observable;
+var tap = require('falcor-observable').tap;
 var Promise = require('promise');
 
 describe('return-types', function() {
@@ -125,12 +126,12 @@ describe('return-types', function() {
         var called = false;
         getRouter(dataFn).
             get([['videos', ids, 'title']]).
-            do(function(x) {
+            pipe(tap(function(x) {
                 expect(x).to.deep.equals(getExpected(ids));
                 called = true;
             }, noOp, function() {
                 expect(called).to.be.ok;
-            }).
+            })).
             subscribe(noOp, done, done);
     }
 });

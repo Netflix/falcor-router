@@ -1,5 +1,4 @@
-var Rx = require('../../src/RouterRx');
-var Observable = Rx.Observable;
+var Observable = require('falcor-observable').Observable;
 var TestRunner = require('./../TestRunner');
 var falcor = require('falcor');
 var $ref = falcor.Model.ref;

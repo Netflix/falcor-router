@@ -6,11 +6,13 @@ var CallNotFoundError = require('./../errors/CallNotFoundError');
 var materialize = require('../run/materialize');
 var pathUtils = require('falcor-path-utils');
 var collapse = pathUtils.collapse;
-var Observable = require('../RouterRx.js').Observable;
+var Observable = require('falcor-observable').Observable;
+var catchError = require('falcor-observable').catchError;
+var mergeMap = require('falcor-observable').mergeMap;
+var tap = require('falcor-observable').tap;
 var MaxPathsExceededError = require('../errors/MaxPathsExceededError');
 var getPathsCount = require('./getPathsCount');
 var outputToObservable = require('../run/conversion/outputToObservable');
-var rxNewToRxNewAndOld = require('../run/conversion/rxNewToRxNewAndOld');
 
 /**
  * Performs the call mutation.  If a call is unhandled, IE throws error, then
@@ -20,7 +22,7 @@ module.exports = function routerCall(callPath, args,
                                      refPathsArg, thisPathsArg) {
     var router = this;
 
-    var source = Observable.defer(function () {
+    return Observable.defer(function () {
         var methodSummary;
         if (router._methodSummaryHook) {
             methodSummary = {
@@ -44,19 +46,17 @@ module.exports = function routerCall(callPath, args,
                 refPaths, thisPaths, jsongCache, methodSummary);
             var callPaths = [callPath];
 
-            if (getPathsCount(refPaths) +
+            return (getPathsCount(refPaths) +
                 getPathsCount(thisPaths) +
                 getPathsCount(callPaths) >
-                router.maxPaths) {
-                throw new MaxPathsExceededError();
-            }
-
-            return recurseMatchAndExecute(router._matcher, action,
+                router.maxPaths)
+                ? Observable.throw(new MaxPathsExceededError())
+                : recurseMatchAndExecute(router._matcher, action,
                 callPaths, call,
-                router, jsongCache).
+                router, jsongCache).pipe(
 
                 // Take that
-                map(function(jsongResult) {
+                mergeMap(function(jsongResult) {
                     var reportedPaths = jsongResult.reportedPaths;
                     var jsongEnv = {
                         jsonGraph: jsongResult.jsonGraph
@@ -80,26 +80,26 @@ module.exports = function routerCall(callPath, args,
                     }
 
                     // Calls are currently materialized.
-                    materialize(router, reportedPaths, jsongEnv);
-                    return jsongEnv;
-                }).
+                    return materialize(router, reportedPaths, jsongEnv);
+                }),
 
             // For us to be able to chain call requests then the error that is
             // caught has to be a 'function does not exist.' error.  From that
             // we will try the next dataSource in the line.
-                catch(function catchException(e) {
+                catchError(function catchException(e) {
                     if (e instanceof CallNotFoundError && router._unhandled) {
                         return outputToObservable(
                             router._unhandled.
                             call(callPath, args, refPaths, thisPaths));
                     }
-                    throw e;
-                });
+                    return Observable.throw(e);
+                })
+            );
         });
 
         if (router._methodSummaryHook || router._errorHook) {
-            innerSource = innerSource.
-                do(function (response) {
+            innerSource = innerSource.pipe(
+                tap(function (response) {
                     if (router._methodSummaryHook) {
                         methodSummary.results.push({
                             time: router._now(),
@@ -120,17 +120,9 @@ module.exports = function routerCall(callPath, args,
                         methodSummary.end = router._now();
                         router._methodSummaryHook(methodSummary);
                     }
-                });
+                }));
         }
 
         return innerSource
     });
-
-
-
-
-
-
-
-        return rxNewToRxNewAndOld(source);
 };

@@ -1,9 +1,13 @@
-var Rx = require('../RouterRx.js');
-var Observable = Rx.Observable;
+var Observable = require('falcor-observable').Observable;
+var defaultIfEmpty = require('falcor-observable').defaultIfEmpty;
+var expand = require('falcor-observable').expand;
+var map = require('falcor-observable').map;
+var mergeMap = require('falcor-observable').mergeMap;
+var reduce = require('falcor-observable').reduce;
 var runByPrecedence = require('./precedence/runByPrecedence');
 var pathUtils = require('falcor-path-utils');
 var collapse = pathUtils.collapse;
-var optimizePathSets = require('./../cache/optimizePathSets');
+var optimizePathSets = require('falcor-path-utils').optimizePathSets;
 var mCGRI = require('./mergeCacheAndGatherRefsAndInvalidations');
 var isArray = Array.isArray;
 
@@ -33,25 +37,21 @@ function _recurseMatchAndExecute(
     var invalidated = [];
     var reportedPaths = [];
     var currentMethod = method;
-    return Observable.
+    return Observable.from(paths).pipe(
 
         // Each pathSet (some form of collapsed path) need to be sent
         // independently.  for each collapsed pathSet will, if producing
         // refs, be the highest likelihood of collapsibility.
-        from(paths).
         expand(function(nextPaths) {
             if (!nextPaths.length) {
                 return Observable.empty();
             }
 
-            // We have to return an Observable of error instead of just
-            // throwing.
-            var matchedResults;
-            try {
-                matchedResults = match(currentMethod, nextPaths);
-            } catch (e) {
-                return Observable.throw(e);
+            var result = match(currentMethod, nextPaths);
+            if (result.error) {
+                return Observable.throw(result.error);
             }
+            var matchedResults = result.value;
 
             // When there is explicitly not a match then we need to handle
             // the unhandled paths.
@@ -59,10 +59,12 @@ function _recurseMatchAndExecute(
                 unhandledPaths.push(nextPaths);
                 return Observable.empty();
             }
-            return runByPrecedence(nextPaths, matchedResults, actionRunner).
+            return runByPrecedence(
+                nextPaths, matchedResults, actionRunner
+            ).pipe(
                 // Generate from the combined results the next requestable paths
                 // and insert errors / values into the cache.
-                flatMap(function(results) {
+                mergeMap(function(results) {
                     var value = results.value;
                     var suffix = results.match.suffix;
 
@@ -133,8 +135,12 @@ function _recurseMatchAndExecute(
                     // Explodes and collapse the tree to remove
                     // redundants and get optimized next set of
                     // paths to evaluate.
-                    pathsToExpand = optimizePathSets(
+                    var optimizeResult = optimizePathSets(
                         jsongCache, pathsToExpand, routerInstance.maxRefFollow);
+                    if (optimizeResult.error) {
+                        return Observable.throw(optimizeResult.error);
+                    }
+                    pathsToExpand = optimizeResult.paths;
 
                     if (pathsToExpand.length) {
                         pathsToExpand = collapse(pathsToExpand);
@@ -142,13 +148,14 @@ function _recurseMatchAndExecute(
 
                     return Observable.
                         from(pathsToExpand);
-                }).
-                defaultIfEmpty([]);
+                }),
+                defaultIfEmpty([])
+            );
 
-        }, Number.POSITIVE_INFINITY, Rx.Scheduler.queue).
+        }/* TODO: , Number.POSITIVE_INFINITY, Rx.Scheduler.queue*/),
         reduce(function(acc, x) {
             return acc;
-        }, null).
+        }, null),
         map(function() {
             return {
                 unhandledPaths: unhandledPaths,
@@ -156,5 +163,6 @@ function _recurseMatchAndExecute(
                 jsonGraph: jsongCache,
                 reportedPaths: reportedPaths
             };
-        });
+        })
+    );
 }

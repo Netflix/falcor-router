@@ -1,4 +1,7 @@
-var Observable = require('../../RouterRx.js').Observable;
+var Observable = require('falcor-observable').Observable;
+var concat = require('falcor-observable').concat;
+var map = require('falcor-observable').map;
+var mergeMap = require('falcor-observable').mergeMap;
 var getExecutableMatches = require('./getExecutableMatches');
 
 /**
@@ -20,9 +23,8 @@ module.exports = function runByPrecedence(pathSet, matches, actionRunner) {
 
     var execs = getExecutableMatches(sortedMatches, [pathSet]);
 
-    var setOfMatchedPaths = Observable.
-        from(execs.matchAndPaths).
-        flatMap(actionRunner).
+    var setOfMatchedPaths = Observable.from(execs.matchAndPaths).pipe(
+        mergeMap(actionRunner),
 
         // Note: We do not wait for each observable to finish,
         // but repeat the cycle per onNext.
@@ -32,17 +34,19 @@ module.exports = function runByPrecedence(pathSet, matches, actionRunner) {
                 match: actionTuple[0],
                 value: actionTuple[1]
             };
-        });
+        })
+    );
 
     if (execs.unhandledPaths) {
-        setOfMatchedPaths = setOfMatchedPaths.
+        setOfMatchedPaths = setOfMatchedPaths.pipe(
             concat(Observable.of({
                 match: {suffix: []},
                 value: {
                     isMessage: true,
                     unhandledPaths: execs.unhandledPaths
                 }
-            }));
+            }))
+        );
     }
 
     return setOfMatchedPaths;

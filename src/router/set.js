@@ -2,10 +2,14 @@ var set = 'set';
 var recurseMatchAndExecute = require('./../run/recurseMatchAndExecute');
 var runSetAction = require('./../run/set/runSetAction');
 var materialize = require('../run/materialize');
-var Observable = require('../RouterRx.js').Observable;
+var Observable = require('falcor-observable').Observable;
+var defaultIfEmpty = require('falcor-observable').defaultIfEmpty;
+var map = require('falcor-observable').map;
+var mergeMap = require('falcor-observable').mergeMap;
+var tap = require('falcor-observable').tap;
 var spreadPaths = require('./../support/spreadPaths');
 var pathValueMerge = require('./../cache/pathValueMerge');
-var optimizePathSets = require('./../cache/optimizePathSets');
+var optimizePathSets = require('falcor-path-utils').optimizePathSets;
 var hasIntersectionWithTree =
     require('./../operations/matcher/intersection/hasIntersectionWithTree');
 var getValue = require('./../cache/getValue');
@@ -16,7 +20,6 @@ var mCGRI = require('./../run/mergeCacheAndGatherRefsAndInvalidations');
 var MaxPathsExceededError = require('../errors/MaxPathsExceededError');
 var getPathsCount = require('./getPathsCount');
 var outputToObservable = require('../run/conversion/outputToObservable');
-var rxNewToRxNewAndOld = require('../run/conversion/rxNewToRxNewAndOld');
 
 /**
  * @returns {Observable.<JSONGraph>}
@@ -43,17 +46,15 @@ module.exports = function routerSet(jsonGraph) {
         var action = runSetAction(router, jsonGraph, jsongCache, methodSummary);
         jsonGraph.paths = normalizePathSets(jsonGraph.paths);
 
-        if (getPathsCount(jsonGraph.paths) > router.maxPaths) {
-            throw new MaxPathsExceededError();
-        }
-
-        var innerSource = recurseMatchAndExecute(router._matcher, action,
-            jsonGraph.paths, set, router, jsongCache).
+        var innerSource = getPathsCount(jsonGraph.paths) > router.maxPaths ?
+            Observable.throw(new MaxPathsExceededError())
+            : recurseMatchAndExecute(router._matcher, action,
+                jsonGraph.paths, set, router, jsongCache).pipe(
 
             // Takes the jsonGraphEnvelope and extra details that comes out
             // of the recursive matching algorithm and either attempts the
             // fallback options or returns the built jsonGraph.
-            flatMap(function(details) {
+            mergeMap(function(details) {
                 var out = {
                     jsonGraph: details.jsonGraph
                 };
@@ -86,56 +87,50 @@ module.exports = function routerSet(jsonGraph) {
                             return acc;
                         }, {});
 
+                    var pathIntersection = [];
                     // 1. Spread
-                    var pathIntersection = spreadPaths(jsonGraph.paths).
-
+                    var spread = spreadPaths(jsonGraph.paths);
+                    for (var i = 0; i < spread.length; i++) {
+                        var path = spread[i];
                         // 2.1 Optimize.  We know its one at a time therefore we
                         // just pluck [0] out.
-                        map(function(path) {
-                            return [
-                                // full path
-                                path,
-
-                                // optimized path
-                                optimizePathSets(details.jsonGraph, [path],
-                                                    router.maxRefFollow)[0]]
-                        }).
+                        var result = optimizePathSets(
+                            details.jsonGraph, [path], router.maxRefFollow);
+                        if (result.error) {
+                            return Observable.throw(result.error);
+                        }
+                        var oPath = result.paths[0];
 
                         // 2.2 Remove all the optimized paths that were found in
                         // the cache.
-                        filter(function(x) { return x[1]; }).
+                        if (!oPath) {
+                            continue;
+                        }
 
                         // 3.1 test intersection.
-                        map(function(pathAndOPath) {
-                            var oPath = pathAndOPath[1];
-                            var hasIntersection = hasIntersectionWithTree(
-                                oPath, unhandledPathsTree);
+                        var hasIntersection = hasIntersectionWithTree(
+                            oPath, unhandledPathsTree);
 
-                            // Creates the pathValue if there are a path
-                            // intersection
-                            if (hasIntersection) {
-                                var value =
-                                    getValue(jsonGraph.jsonGraph,
-                                        pathAndOPath[0]);
+                        // 3.2 strip out the non-intersection paths.
+                        if (!hasIntersection) {
+                            continue;
+                        }
+                        // Creates the pathValue if there are a path
+                        // intersection
+                        var value = getValue(jsonGraph.jsonGraph, path);
 
-                                return {
-                                    path: oPath,
-                                    value: value
-                                };
-                            }
+                        pathIntersection.push({
+                            path: oPath,
+                            value: value
+                        });
+                    }
 
-                            return null;
-                        }).
-
-                        // 3.2 strip out nulls (the non-intersection paths).
-                        filter(function(x) { return x !== null; });
-
-                        // 4. build the optimized JSONGraph envelope.
-                        pathIntersection.
-                            reduce(function(acc, pathValue) {
-                                pathValueMerge(acc, pathValue);
-                                return acc;
-                            }, jsonGraphFragment);
+                    // 4. build the optimized JSONGraph envelope.
+                    pathIntersection.
+                        reduce(function(acc, pathValue) {
+                            pathValueMerge(acc, pathValue);
+                            return acc;
+                        }, jsonGraphFragment);
 
                     jsonGraphEnvelope.paths = collapse(
                         pathIntersection.map(function(pV) {
@@ -143,7 +138,7 @@ module.exports = function routerSet(jsonGraph) {
                         }));
 
                     return outputToObservable(
-                        router._unhandled.set(jsonGraphEnvelope)).
+                        router._unhandled.set(jsonGraphEnvelope)).pipe(
 
                         // Merge the solution back into the overall message.
                         map(function(unhandledJsonGraphEnv) {
@@ -152,24 +147,26 @@ module.exports = function routerSet(jsonGraph) {
                                 paths: unhandledPaths
                             }], router);
                             return out;
-                        }).
-                        defaultIfEmpty(out);
+                        }),
+                        defaultIfEmpty(out));
                 }
 
                 return Observable.of(out);
-            }).
+            }),
 
             // We will continue to materialize over the whole jsonGraph message.
             // This makes sense if you think about pathValues and an API that
             // if ask for a range of 10 and only 8 were returned, it would not
             // materialize for you, instead, allow the router to do that.
-            map(function(jsonGraphEnvelope) {
+            mergeMap(function(jsonGraphEnvelope) {
                 return materialize(router, jsonGraph.paths, jsonGraphEnvelope);
-            });
+            })
+        );
 
-            if (router._errorHook || router._methodSummaryHook) {
-                innerSource = innerSource.
-                    do(
+        if (router._errorHook || router._methodSummaryHook) {
+            innerSource = innerSource.
+                pipe(
+                    tap(
                         function (response) {
                             if (router._methodSummaryHook) {
                                 methodSummary.results.push({
@@ -192,17 +189,11 @@ module.exports = function routerSet(jsonGraph) {
                                 router._methodSummaryHook(methodSummary);
                             }
                         }
-                    );
-            }
-            return innerSource;
+                    )
+                );
+        }
+        return innerSource;
     });
 
-    if (router._errorHook) {
-        source = source.
-            do(null, function summaryHookErrorHandler(err) {
-                router._errorHook(err);
-            })
-    }
-
-    return rxNewToRxNewAndOld(source);
+    return source;
 };
