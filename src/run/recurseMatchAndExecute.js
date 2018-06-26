@@ -47,14 +47,11 @@ function _recurseMatchAndExecute(
                 return Observable.empty();
             }
 
-            // We have to return an Observable of error instead of just
-            // throwing.
-            var matchedResults;
-            try {
-                matchedResults = match(currentMethod, nextPaths);
-            } catch (e) {
-                return Observable.throw(e);
+            var result = match(currentMethod, nextPaths);
+            if (result.error) {
+                return Observable.throw(result.error);
             }
+            var matchedResults = result.value;
 
             // When there is explicitly not a match then we need to handle
             // the unhandled paths.

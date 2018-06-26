@@ -3,6 +3,7 @@ var expect = chai.expect;
 var Router = require('../../../src/Router');
 var MaxPathsExceededError = require('../../../src/errors/MaxPathsExceededError');
 var pathCount = require('falcor-path-utils').pathCount;
+var Observable = require('falcor-observable').Observable;
 
 function unreachable() {
     throw new Error("should no reach here");
@@ -187,7 +188,7 @@ describe('MaxPaths', function() {
             route: "titlesById[{integers:titleIds}].name",
             get: function(pathSet) {
                 if (pathSet[1].length > 20) {
-                    throw new MaxPathsExceededError();
+                    return Observable.throw(new MaxPathsExceededError());
                 }
                 return [];
             }
@@ -211,7 +212,7 @@ describe('MaxPaths', function() {
             set: function(jsonGraphArg) {
                 var ids = Object.keys(jsonGraphArg.titlesById);
                 if (ids.length > 1) {
-                    throw new MaxPathsExceededError();
+                    return Observable.throw(new MaxPathsExceededError());
                 }
                 return [];
             }
@@ -245,11 +246,12 @@ describe('MaxPaths', function() {
         var r = new Router([{
             route: 'genrelist[{integers:indices}].push',
             call: function(callPath, args, refPaths) {
-                refPaths.forEach(function(pathSet) {
-                    if (pathCount(pathSet) > 200) {
-                        throw new MaxPathsExceededError("You requested too many refPaths from the new list.");
-                    }
-                });
+                var total = refPaths.reduce(function(acc, pathSet) {
+                    return acc + pathCount(pathSet);
+                }, 0);
+                return total > 200 ? Observable.throw(
+                    new MaxPathsExceededError("You requested too many refPaths from the new list.")
+                ) : Observable.empty();
             }
         }]);
 

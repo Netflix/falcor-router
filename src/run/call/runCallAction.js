@@ -1,12 +1,11 @@
 var isJSONG = require('./../../support/isJSONG');
 var outputToObservable = require('./../conversion/outputToObservable');
-var noteToJsongOrPV = require('./../conversion/noteToJsongOrPV');
+var normalizeJsongOrPV = require('./../conversion/normalizeJsongOrPV');
 var CallRequiresPathsError = require('./../../errors/CallRequiresPathsError');
 var mCGRI = require('./../mergeCacheAndGatherRefsAndInvalidations');
 var Observable = require('falcor-observable').Observable;
-var filter = require('falcor-observable').filter;
 var map = require('falcor-observable').map;
-var materialize = require('falcor-observable').materialize;
+var mergeMap = require('falcor-observable').mergeMap;
 var tap = require('falcor-observable').tap;
 var toArray = require('falcor-observable').toArray;
 
@@ -35,14 +34,9 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
         out = Observable.
             defer(function() {
                 var next;
-                try {
-                    next = match.
-                        action.call(
-                            routerInstance, matchedPath, args, suffixes, paths);
-                } catch (e) {
-                    e.throwToNext = true;
-                    throw e;
-                }
+                next = match.
+                    action.call(
+                        routerInstance, matchedPath, args, suffixes, paths);
                 var output = outputToObservable(next);
 
                 if (methodSummary) {
@@ -75,7 +69,7 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
 
             // Required to get the references from the outputting jsong
             // and pathValues.
-            map(function(res) {
+            mergeMap(function(res) {
 
                 // checks call for isJSONG and if there is jsong without paths
                 // throw errors.
@@ -99,21 +93,19 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
                 }
 
                 var refLen = -1;
-                callOutput.forEach(function(r) {
-
+                for (var i = 0; i < callOutput.length; i++) {
+                    var r = callOutput[i];
                     // its json graph.
                     if (isJSONG(r)) {
 
                         // This is a hard error and must fully stop the server
                         if (!r.paths) {
-                            var err =
-                                new CallRequiresPathsError();
-                            err.throwToNext = true;
-                            throw err;
+                            var err = new CallRequiresPathsError();
+                            return Observable.throw(err);
                         }
                     }
 
-                });
+                }
 
                 var invsRefsAndValues =
                     mCGRI(jsongCache, callOutput, routerInstance);
@@ -205,14 +197,7 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
                         });
                 }
 
-                return callOutput;
-            }),
-
-            // When call has an error it needs to be propagated to the next
-            // level instead of onCompleted'ing
-            tap(null, function(e) {
-                e.throwToNext = true;
-                throw e;
+                return [callOutput];
             })
         );
     } else {
@@ -250,11 +235,7 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
     }
 
     return out.pipe(
-        materialize(),
-        filter(function(note) {
-            return note.kind !== 'C';
-        }),
-        map(noteToJsongOrPV(matchAndPath.path, false, routerInstance)),
+        map(normalizeJsongOrPV(matchAndPath.path, false)),
         map(function(jsonGraphOrPV) {
             return [matchAndPath.match, jsonGraphOrPV];
         })

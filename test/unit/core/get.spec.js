@@ -883,22 +883,9 @@ describe('Get', function() {
                                 pathSet: ['videos', 1, 'title']
                             }
                         ],
-                        end: 4,
-                        results: [{
-                            time: 3,
-                            value: {
-                                jsonGraph: {
-                                    videos: {
-                                        '1': {
-                                            title: {
-                                                $type: 'error',
-                                                value: {message: 'bad luck for you'}
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }]
+                        results: [],
+                        error: new Error('bad luck for you'),
+                        end: 3
                     };
 
 
@@ -977,7 +964,7 @@ describe('Get', function() {
       var router = new R([{
           route: 'videos[{integers:ids}].title',
           get: function (alias) {
-              throw new Error('bad luck for you');
+              return Observable.throw(new Error('bad luck for you'));
           }
       }],
       {
@@ -990,33 +977,19 @@ describe('Get', function() {
           }
       });
 
-      router.get([['videos',1,'title']])
-          .pipe(tap(function (jsonGraph) {
-          expect(jsonGraph).to.deep.equal({
-              jsonGraph: {
-                  'videos': {
-                      1: {
-                          'title': {
-                              $type: 'error', value: {
-                                  message: 'bad luck for you'
-                              }
-                          }
-                      }
-                  }
-              }
-          })
-      }, noOp, function () {
+      router.get([['videos',1,'title']]).subscribe(
+        function (jsonGraph) {
+          throw new Error("should not reach here");
+      }, function (e) {
           expect(callCount).to.equal(1);
           expect(callArgs).to.deep.equal([
               new Error('bad luck for you')
           ]);
           expect(callContext).to.equal(router);
-      }))
-          .subscribe(
-              noOp,
-              done,
-              done
-          )
+          done();
+      }, function () {
+          throw new Error("should not reach here");
+      });
     });
 
     function getPrecedenceRouter(onTitle, onRating, options) {

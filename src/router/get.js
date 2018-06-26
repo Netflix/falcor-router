@@ -37,11 +37,9 @@ module.exports = function routerGet(paths) {
             var action = runGetAction(router, jsongCache, methodSummary);
             var normPS = normalizePathSets(paths);
 
-            if (getPathsCount(normPS) > router.maxPaths) {
-                throw new MaxPathsExceededError();
-            }
-
-            return recurseMatchAndExecute(router._matcher, action, normPS,
+            return (getPathsCount(normPS) > router.maxPaths)
+                ? Observable.throw(new MaxPathsExceededError())
+                : recurseMatchAndExecute(router._matcher, action, normPS,
                                         get, router, jsongCache).pipe(
 
                 // Turn it(jsongGraph, invalidations, missing, etc.) into a

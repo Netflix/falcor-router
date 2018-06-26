@@ -61,11 +61,12 @@ describe('Call', function() {
 
     it('should call the methodSummary hook when there are errors', function (done) {
         var i = 0;
+        var methodSummary = sinon.stub();
         var router = new R([
             {
                 route: "titlesById[{integers:id}].name",
                 get: function(pathSet) {
-                    throw new Error('Live or die? Too bad! <HONK>');
+                    return Observable.throw(new Error('Live or die? Too bad! <HONK>'));
                 }
             },
             {
@@ -93,88 +94,62 @@ describe('Call', function() {
                 return i++;
             },
             hooks: {
-                methodSummary: function (summary) {
-                    var expected = {
-                        method: 'call',
-                        start: 0,
-                        end: 10,
-                        callPath: ['genrelist', 10, 'titles', 'push'],
-                        args: ['title100'],
-                        refPaths: [['name']],
-                        thisPaths: [['length']],
-                        routes: [
-                            {
-                                start: 1,
-                                route: 'genrelist[10].titles.push',
-                                pathSet: ['genrelist', 10, 'titles', 'push'],
-                                results: [{
-                                    time: 2,
-                                    value: [
-                                        {
-                                            path: ['genrelist', 10, 'titles', 100],
-                                            value: { $type: 'ref', value: ['titlesById', 54] }
-                                        }
-                                    ]
-                                }],
-                                end: 3
-                            },
-                            {
-                                start: 4,
-                                end: 5,
-                                route: 'titlesById[{integers:id}].name',
-                                pathSet: ['titlesById', 54, 'name'],
-                                results: [],
-                                error: new Error('Live or die? Too bad! <HONK>')
-                            },
-                            {
-                                start: 6,
-                                end: 8,
-                                route: 'genrelist[10].titles.length',
-                                pathSet: ['genrelist', 10, 'titles', 'length'],
-                                results: [{
-                                    time: 7,
-                                    value: [{ path: ['genrelist', 10, 'titles', 'length'], value: 50 }]
-                                }]
-                            }
-                        ],
-                        results: [{
-                            time: 9,
-                            value: {
-                                jsonGraph: {
-                                    genrelist: {
-                                        '10': {
-                                            titles: {
-                                                '100': { $type: 'ref', value: ['titlesById', 54] },
-                                                length: 50
-                                            }
-                                        }
-                                    },
-                                    titlesById: {
-                                        '54': {
-                                            name: {
-                                                $type: 'error',
-                                                value: { message: 'Live or die? Too bad! <HONK>' }
-                                            }
-                                        }
-                                    }
-                                },
-                                paths: [
-                                    ['genrelist', 10, 'titles', 'length'],
-                                    ['genrelist', 10, 'titles', 100, 'name']
-                                ]
-                            }
-                        }]
-                    };
-
-                    expect(summary).to.deep.equal(expected);
-                    done();
-                }
+                methodSummary: methodSummary
             }
         });
 
+        var expected = {
+            method: 'call',
+            start: 0,
+            end: 6,
+            callPath: ['genrelist', 10, 'titles', 'push'],
+            args: ['title100'],
+            refPaths: [['name']],
+            thisPaths: [['length']],
+            routes: [
+                {
+                    start: 1,
+                    route: 'genrelist[10].titles.push',
+                    pathSet: ['genrelist', 10, 'titles', 'push'],
+                    results: [{
+                        time: 2,
+                        value: [
+                            {
+                                path: ['genrelist', 10, 'titles', 100],
+                                value: { $type: 'ref', value: ['titlesById', 54] }
+                            }
+                        ]
+                    }],
+                    end: 3
+                },
+                {
+                    start: 4,
+                    end: 5,
+                    route: 'titlesById[{integers:id}].name',
+                    pathSet: ['titlesById', 54, 'name'],
+                    results: [],
+                    error: new Error('Live or die? Too bad! <HONK>')
+                }
+            ],
+            results: [],
+            error: new Error('Live or die? Too bad! <HONK>')
+        };
+
         router.testValue = 1;
         router.call(['genrelist', 10, 'titles', 'push'], ["title100"], [['name']], [['length']]).
-            subscribe();
+            subscribe(
+                function (v) {
+                    throw new Error('should not reach here');
+                },
+                function (e) {
+                    expect(methodSummary.calledOnce).to.equal(true);
+                    expect(methodSummary.getCall(0).args[0]).to.deep.equal(expected);
+                    done();
+                },
+                function () {
+                    throw new Error('should not reach here');
+                }
+            );
     });
 
     it('should call the methodSummary hook for path value returns', function (done) {
@@ -875,7 +850,7 @@ describe('Call', function() {
             route: 'videos[{integers:id}].rating',
             call: function(callPath, args) {
                 if (throwError) {
-                    throw new Error('Oops?');
+                    return Observable.throw(new Error('Oops?'));
                 }
                 return {
                     jsonGraph: {

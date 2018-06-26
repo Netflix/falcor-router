@@ -1,4 +1,5 @@
 var R = require('../../../src/Router');
+var Observable = require('falcor-observable').Observable;
 var tap = require('falcor-observable').tap;
 var Routes = require('./../../data');
 var noOp = function() {};
@@ -239,12 +240,14 @@ describe('Set', function() {
       var router = new R([{
           route: ['im', 'a', 'route', 'yo'],
           set: function(jsonGraph) {
-              throw new Error('error lawl');
+              return Observable.throw(new Error('error lawl'));
           }
       }],
       {
           hooks: {
-              error: errorHook
+              error: function (e) {
+                  errorHook(e);
+                }
           }
       });
 
@@ -260,11 +263,18 @@ describe('Set', function() {
           },
           paths: [['im', 'a', 'route', 'yo']]
       })
-      .pipe(tap(function() {
-          expect(errorHook.callCount).to.equal(1);
-          expect(errorHook.calledWith(new Error('error lawl'))).to.be.ok;
-      }))
-      .subscribe(noOp, done, done);
+      .subscribe(
+          function(v) {
+              throw new Error('should not reach here');
+          },
+          function(e) {
+              expect(errorHook.callCount).to.equal(1);
+              expect(errorHook.calledWith(new Error('error lawl'))).to.be.ok;
+              done()
+          },
+          function() {
+              throw new Error('should not reach here');
+          });
     });
 
     it('should correctly collapse and pluck paths with jsonGraph and set.', function(done) {

@@ -46,12 +46,10 @@ module.exports = function routerSet(jsonGraph) {
         var action = runSetAction(router, jsonGraph, jsongCache, methodSummary);
         jsonGraph.paths = normalizePathSets(jsonGraph.paths);
 
-        if (getPathsCount(jsonGraph.paths) > router.maxPaths) {
-            throw new MaxPathsExceededError();
-        }
-
-        var innerSource = recurseMatchAndExecute(router._matcher, action,
-            jsonGraph.paths, set, router, jsongCache).pipe(
+        var innerSource = getPathsCount(jsonGraph.paths) > router.maxPaths ?
+            Observable.throw(new MaxPathsExceededError())
+            : recurseMatchAndExecute(router._matcher, action,
+                jsonGraph.paths, set, router, jsongCache).pipe(
 
             // Takes the jsonGraphEnvelope and extra details that comes out
             // of the recursive matching algorithm and either attempts the
@@ -196,14 +194,6 @@ module.exports = function routerSet(jsonGraph) {
         }
         return innerSource;
     });
-
-    if (router._errorHook) {
-        source = source.pipe(
-            tap(null, function summaryHookErrorHandler(err) {
-                router._errorHook(err);
-            })
-        );
-    }
 
     return source;
 };

@@ -46,14 +46,12 @@ module.exports = function routerCall(callPath, args,
                 refPaths, thisPaths, jsongCache, methodSummary);
             var callPaths = [callPath];
 
-            if (getPathsCount(refPaths) +
+            return (getPathsCount(refPaths) +
                 getPathsCount(thisPaths) +
                 getPathsCount(callPaths) >
-                router.maxPaths) {
-                throw new MaxPathsExceededError();
-            }
-
-            return recurseMatchAndExecute(router._matcher, action,
+                router.maxPaths)
+                ? Observable.throw(new MaxPathsExceededError())
+                : recurseMatchAndExecute(router._matcher, action,
                 callPaths, call,
                 router, jsongCache).pipe(
 
@@ -94,7 +92,7 @@ module.exports = function routerCall(callPath, args,
                             router._unhandled.
                             call(callPath, args, refPaths, thisPaths));
                     }
-                    throw e;
+                    return Observable.throw(e);
                 })
             );
         });

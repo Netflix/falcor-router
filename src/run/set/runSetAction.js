@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 var outputToObservable = require('../conversion/outputToObservable');
-var noteToJsongOrPV = require('../conversion/noteToJsongOrPV');
+var normalizeJsongOrPV = require('../conversion/normalizeJsongOrPV');
 var spreadPaths = require('./../../support/spreadPaths');
 var getValue = require('./../../cache/getValue');
 var jsongMerge = require('./../../cache/jsongMerge');
@@ -8,9 +8,7 @@ var optimizePathSets = require('falcor-path-utils').optimizePathSets;
 var hasIntersection = require('./../../operations/matcher/intersection/hasIntersection');
 var pathValueMerge = require('./../../cache/pathValueMerge');
 var Observable = require('falcor-observable').Observable;
-var filter = require('falcor-observable').filter;
 var map = require('falcor-observable').map;
-var materialize = require('falcor-observable').materialize;
 var tap = require('falcor-observable').tap;
 /* eslint-enable max-len */
 
@@ -73,48 +71,40 @@ function runSetAction(routerInstance, jsongMessage, matchAndPath,
         arg = {};
         jsongMerge(arg, subJsonGraphEnv, routerInstance);
     }
-    try {
-        out = match.action.call(routerInstance, arg);
-        out = outputToObservable(out);
+    out = match.action.call(routerInstance, arg);
+    out = outputToObservable(out);
 
-        if (methodSummary) {
-            var _out = out;
-            out = Observable.defer(function () {
-                var route = {
-                    route: matchAndPath.match.prettyRoute,
-                    pathSet: matchAndPath.path,
-                    start: routerInstance._now()
-                };
-                methodSummary.routes.push(route);
+    if (methodSummary) {
+        var _out = out;
+        out = Observable.defer(function () {
+            var route = {
+                route: matchAndPath.match.prettyRoute,
+                pathSet: matchAndPath.path,
+                start: routerInstance._now()
+            };
+            methodSummary.routes.push(route);
 
-                return _out.pipe(tap(
-                    function (result) {
-                        route.results = route.results || [];
-                        route.results.push({
-                            time: routerInstance._now(),
-                            value: result
-                        });
-                    },
-                    function (err) {
-                        route.error = err;
-                        route.end = routerInstance._now();
-                    },
-                    function () {
-                        route.end = routerInstance._now();
-                    }
-                ));
-            });
-        }
-    } catch (e) {
-        out = Observable.throw(e);
+            return _out.pipe(tap(
+                function (result) {
+                    route.results = route.results || [];
+                    route.results.push({
+                        time: routerInstance._now(),
+                        value: result
+                    });
+                },
+                function (err) {
+                    route.error = err;
+                    route.end = routerInstance._now();
+                },
+                function () {
+                    route.end = routerInstance._now();
+                }
+            ));
+        });
     }
 
     return out.pipe(
-        materialize(),
-        filter(function(note) {
-            return note.kind !== 'C';
-        }),
-        map(noteToJsongOrPV(matchAndPath.path, false, routerInstance)),
+        map(normalizeJsongOrPV(matchAndPath.path, false)),
         map(function(jsonGraphOrPV) {
             return [matchAndPath.match, jsonGraphOrPV];
         })

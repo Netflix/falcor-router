@@ -6,6 +6,5 @@ var MaxPathsExceededError = function MaxPathsExceededError(message) {
 };
 
 MaxPathsExceededError.prototype = new Error();
-MaxPathsExceededError.prototype.throwToNext = true;
 
 module.exports = MaxPathsExceededError;
