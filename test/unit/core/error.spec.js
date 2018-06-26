@@ -1,4 +1,5 @@
 var R = require('../../../src/Router');
+var tap = require('falcor-observable').tap;
 var noOp = function() {};
 var chai = require('chai');
 var expect = chai.expect;
@@ -22,8 +23,8 @@ describe('Error', function() {
 
         router.
             get([["videos", 1, "title"]]).
-            do(onNext).
-            do(noOp, noOp, function() {
+            pipe(tap(onNext)).
+            pipe(tap(noOp, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -35,7 +36,7 @@ describe('Error', function() {
                         }
                     }
                 });
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 
@@ -52,12 +53,10 @@ describe('Error', function() {
         var obs = router.get([["videos", 1, "title"]]);
         var err = false;
         obs.
-            do(
-                noOp,
-                function(e) {
-                    expect(e.message).to.equals(circularReference);
-                    err = true;
-                }).
+            pipe(tap(noOp, function(e) {
+            expect(e.message).to.equals(circularReference);
+            err = true;
+        })).
             subscribe(noOp, function(e) {
                 if (err) {
                     return done();
@@ -83,8 +82,8 @@ describe('Error', function() {
         var onNext = sinon.spy();
         router.
             get([['videos', [1234, 333], 'rating']]).
-            do(onNext).
-            do(noOp, noOp, function() {
+            pipe(tap(onNext)).
+            pipe(tap(noOp, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -104,7 +103,7 @@ describe('Error', function() {
                         }
                     }
                 });
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 
@@ -135,8 +134,8 @@ describe('Error', function() {
                     ['videos', [1234, 333], 'rating']
                 ]
             }).
-            do(onNext).
-            do(noOp, noOp, function() {
+            pipe(tap(onNext)).
+            pipe(tap(noOp, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -156,7 +155,7 @@ describe('Error', function() {
                         }
                     }
                 });
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 
@@ -189,8 +188,8 @@ describe('Error', function() {
                     ['videos', [1234, 333], 'rating']
                 ]
             }).
-            do(onNext).
-            do(noOp, noOp, function() {
+            pipe(tap(onNext)).
+            pipe(tap(noOp, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -210,7 +209,7 @@ describe('Error', function() {
                         }
                     }
                 });
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 

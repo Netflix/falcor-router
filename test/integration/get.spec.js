@@ -3,7 +3,6 @@ var R = require('./../../src/Router');
 var Routes = require('./../data');
 var chai = require('chai');
 var expect = chai.expect;
-var noOp = Function.prototype;
 
 describe('Get', function() {
     it('should take in a falcor model and get a value out.', function(done) {
@@ -14,8 +13,8 @@ describe('Get', function() {
         });
         var called = false;
 
-        model.get('videos.summary').
-            do(function (x) {
+        model.get(['videos', 'summary']).subscribe(
+            function (x) {
               called = true;
               expect(x).to.deep.equals({
                   json: {
@@ -24,10 +23,13 @@ describe('Get', function() {
                       }
                   }
               });
-            }, null, function() {
+            },
+            done,
+            function() {
                 expect(called).to.be.ok;
-            })
-            .subscribe(noOp, done, done);
+                done();
+            }
+        );
     });
 
     it('should perform reference following.', function(done) {
@@ -41,8 +43,8 @@ describe('Get', function() {
         });
         var called = false;
 
-        model.get('genreLists[0].summary').
-            do(function (x) {
+        model.get(['genreLists', 0, 'summary']).subscribe(
+            function (x) {
                 called = true;
                 expect(x).to.deep.equals({
                     json: {
@@ -55,9 +57,12 @@ describe('Get', function() {
                         }
                     }
                 });
-            }, null, function() {
+            },
+            done,
+            function() {
                 expect(called).to.be.ok;
-            })
-            .subscribe(noOp, done, done);
+                done();
+            }
+        );
     });
 });

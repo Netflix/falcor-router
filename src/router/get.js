@@ -3,12 +3,15 @@ var get = 'get';
 var recurseMatchAndExecute = require('../run/recurseMatchAndExecute');
 var normalizePathSets = require('../operations/ranges/normalizePathSets');
 var materialize = require('../run/materialize');
-var Observable = require('../RouterRx.js').Observable;
+var Observable = require('falcor-observable').Observable;
+var defaultIfEmpty = require('falcor-observable').defaultIfEmpty;
+var map = require('falcor-observable').map;
+var mergeMap = require('falcor-observable').mergeMap;
+var tap = require('falcor-observable').tap;
 var mCGRI = require('./../run/mergeCacheAndGatherRefsAndInvalidations');
 var MaxPathsExceededError = require('../errors/MaxPathsExceededError');
 var getPathsCount = require('./getPathsCount');
 var outputToObservable = require('../run/conversion/outputToObservable');
-var rxNewToRxNewAndOld = require('../run/conversion/rxNewToRxNewAndOld');
 
 /**
  * The router get function
@@ -17,7 +20,7 @@ module.exports = function routerGet(paths) {
 
     var router = this;
 
-    return rxNewToRxNewAndOld(Observable.defer(function() {
+    return Observable.defer(function() {
         var methodSummary;
         if (router._methodSummaryHook) {
             methodSummary = {
@@ -39,11 +42,11 @@ module.exports = function routerGet(paths) {
             }
 
             return recurseMatchAndExecute(router._matcher, action, normPS,
-                                        get, router, jsongCache).
+                                        get, router, jsongCache).pipe(
 
                 // Turn it(jsongGraph, invalidations, missing, etc.) into a
                 // jsonGraph envelope
-                flatMap(function flatMapAfterRouterGet(details) {
+                mergeMap(function mergeMapAfterRouterGet(details) {
                     var out = {
                         jsonGraph: details.jsonGraph
                     };
@@ -58,7 +61,7 @@ module.exports = function routerGet(paths) {
                         // arguments, which for get is the same as the
                         // unhandledPaths.
                         return outputToObservable(
-                            router._unhandled.get(unhandledPaths)).
+                            router._unhandled.get(unhandledPaths)).pipe(
 
                             // Merge the solution back into the overall message.
                             map(function(jsonGraphFragment) {
@@ -67,12 +70,13 @@ module.exports = function routerGet(paths) {
                                     paths: unhandledPaths
                                 }], router);
                                 return out;
-                            }).
-                            defaultIfEmpty(out);
+                            }),
+                            defaultIfEmpty(out)
+                        );
                     }
 
                     return Observable.of(out);
-                }).
+                }),
 
             // We will continue to materialize over the whole jsonGraph message.
             // This makes sense if you think about pathValues and an API that if
@@ -80,12 +84,13 @@ module.exports = function routerGet(paths) {
             // materialize for you, instead, allow the router to do that.
                 map(function(jsonGraphEnvelope) {
                     return materialize(router, normPS, jsonGraphEnvelope);
-                });
+                })
+            );
         });
 
         if (router._methodSummaryHook || router._errorHook) {
-            result = result.
-                do(function (response) {
+            result = result.pipe(
+                tap(function (response) {
                     if (router._methodSummaryHook) {
                         methodSummary.results.push({
                             time: router._now(),
@@ -106,9 +111,10 @@ module.exports = function routerGet(paths) {
                         methodSummary.end = router._now();
                         router._methodSummaryHook(methodSummary);
                     }
-                });
+                })
+            );
         }
 
         return result;
-    }));
+    });
 };

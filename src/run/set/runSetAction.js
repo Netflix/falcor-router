@@ -7,7 +7,11 @@ var jsongMerge = require('./../../cache/jsongMerge');
 var optimizePathSets = require('./../../cache/optimizePathSets');
 var hasIntersection = require('./../../operations/matcher/intersection/hasIntersection');
 var pathValueMerge = require('./../../cache/pathValueMerge');
-var Observable = require('../../RouterRx.js').Observable;
+var Observable = require('falcor-observable').Observable;
+var filter = require('falcor-observable').filter;
+var map = require('falcor-observable').map;
+var materialize = require('falcor-observable').materialize;
+var tap = require('falcor-observable').tap;
 /* eslint-enable max-len */
 
 module.exports = function outerRunSetAction(routerInstance, modelContext,
@@ -84,7 +88,7 @@ function runSetAction(routerInstance, jsongMessage, matchAndPath,
                 };
                 methodSummary.routes.push(route);
 
-                return _out.do(
+                return _out.pipe(tap(
                     function (result) {
                         route.results = route.results || [];
                         route.results.push({
@@ -99,20 +103,21 @@ function runSetAction(routerInstance, jsongMessage, matchAndPath,
                     function () {
                         route.end = routerInstance._now();
                     }
-                )
+                ));
             });
         }
     } catch (e) {
         out = Observable.throw(e);
     }
 
-    return out.
-        materialize().
+    return out.pipe(
+        materialize(),
         filter(function(note) {
             return note.kind !== 'C';
-        }).
-        map(noteToJsongOrPV(matchAndPath.path, false, routerInstance)).
+        }),
+        map(noteToJsongOrPV(matchAndPath.path, false, routerInstance)),
         map(function(jsonGraphOrPV) {
             return [matchAndPath.match, jsonGraphOrPV];
-        });
+        })
+    );
 }

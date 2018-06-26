@@ -1,4 +1,5 @@
 var R = require('../../../src/Router');
+var tap = require('falcor-observable').tap;
 var Routes = require('./../../data');
 var noOp = function() {};
 var chai = require('chai');
@@ -259,10 +260,10 @@ describe('Set', function() {
           },
           paths: [['im', 'a', 'route', 'yo']]
       })
-      .do(function() {
+      .pipe(tap(function() {
           expect(errorHook.callCount).to.equal(1);
           expect(errorHook.calledWith(new Error('error lawl'))).to.be.ok;
-      })
+      }))
       .subscribe(noOp, done, done);
     });
 
@@ -292,7 +293,7 @@ describe('Set', function() {
                     ['path', 'to', ['a', 'b', 'c']]
                 ]
             }).
-            do(onNext, noOp, function() {
+            pipe(tap(onNext, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -305,7 +306,7 @@ describe('Set', function() {
                         }
                     }
                 });
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 
@@ -438,7 +439,7 @@ describe('Set', function() {
                     ['videos', [1234, 333], 'rating']
                 ]
             }).
-            do(function(result) {
+            pipe(tap(function(result) {
                 expect(result).to.deep.equals({
                     jsonGraph: {
                         videos: {
@@ -452,7 +453,7 @@ describe('Set', function() {
                     }
                 });
                 called++;
-            }).
+            })).
             subscribe(noOp, done, function() {
                 if (!did) {
                     expect(called).to.equals(1);
@@ -498,8 +499,8 @@ describe('Set', function() {
                     ["genreLists", 10, "userRating"]
                 ]
             }).
-            do(onNext).
-            do(noOp, noOp, function() {
+            pipe(tap(onNext)).
+            pipe(tap(noOp, noOp, function() {
                 expect(onNext.calledOnce, 'onNext calledOnce').to.be.ok;
                 expect(routerSet.calledTwice, 'routerSet calledTwice').to.be.ok;
                 expect(routerSet.getCall(0).args[0]).to.deep.equals({
@@ -532,7 +533,7 @@ describe('Set', function() {
                         }
                     }
                 });
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 
@@ -578,7 +579,7 @@ describe('Set', function() {
                     ['genreLists', 0, 'rating']
                 ]
             }).
-            do(function(res) {
+            pipe(tap(function(res) {
                 expect(res).to.deep.equals({
                     jsonGraph: {
                         genreLists: {
@@ -591,7 +592,7 @@ describe('Set', function() {
                         }
                     }
                 });
-            }).
+            })).
             subscribe(noOp, done, function() {
                 if (!did) {
                     try {
@@ -626,8 +627,8 @@ describe('Set', function() {
                     }
                 }
             }).
-            do(onNext).
-            do(noOp, noOp, function(x) {
+            pipe(tap(onNext)).
+            pipe(tap(noOp, noOp, function(x) {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -638,7 +639,7 @@ describe('Set', function() {
                         }
                     }
                 });
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 });

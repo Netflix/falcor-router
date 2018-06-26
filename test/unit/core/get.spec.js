@@ -7,7 +7,11 @@ var expect = chai.expect;
 var falcor = require('falcor');
 var $ref = falcor.Model.ref;
 var $atom = falcor.Model.atom;
-var Observable = require('../../../src/RouterRx').Observable;
+var Observable = require('falcor-observable').Observable;
+var map = require('falcor-observable').map;
+var mergeMap = require('falcor-observable').mergeMap;
+var tap = require('falcor-observable').tap;
+var toArray = require('falcor-observable').toArray;
 var sinon = require('sinon');
 
 describe('Get', function() {
@@ -46,8 +50,8 @@ describe('Get', function() {
         var onNext = sinon.spy();
 
         router.get([['videos', 'falsey']]).
-            do(onNext).
-            do(noOp, noOp, function() {
+            pipe(tap(onNext)).
+            pipe(tap(noOp, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -56,7 +60,7 @@ describe('Get', function() {
                         }
                     }
                 });
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 
@@ -79,8 +83,8 @@ describe('Get', function() {
         var onNext = sinon.spy();
 
         router.get([['videos', 'falsey']]).
-            do(onNext).
-            do(noOp, noOp, function() {
+            pipe(tap(onNext)).
+            pipe(tap(noOp, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -89,7 +93,7 @@ describe('Get', function() {
                         }
                     }
                 });
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 
@@ -112,8 +116,8 @@ describe('Get', function() {
         var onNext = sinon.spy();
 
         router.get([['videos', 'falsey']]).
-            do(onNext).
-            do(noOp, noOp, function() {
+            pipe(tap(onNext)).
+            pipe(tap(noOp, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -122,7 +126,7 @@ describe('Get', function() {
                         }
                     }
                 });
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 
@@ -145,8 +149,8 @@ describe('Get', function() {
         var onNext = sinon.spy();
 
         router.get([['videos', 'falsey']]).
-            do(onNext).
-            do(noOp, noOp, function() {
+            pipe(tap(onNext)).
+            pipe(tap(noOp, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -155,7 +159,7 @@ describe('Get', function() {
                         }
                     }
                 });
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 
@@ -174,8 +178,8 @@ describe('Get', function() {
         var onNext = sinon.spy();
 
         router.get([['videos', 'falsey']]).
-            do(onNext).
-            do(noOp, noOp, function() {
+            pipe(tap(onNext)).
+            pipe(tap(noOp, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -184,7 +188,7 @@ describe('Get', function() {
                         }
                     }
                 });
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 
@@ -203,8 +207,8 @@ describe('Get', function() {
         var onNext = sinon.spy();
 
         router.get([['videos', 'falsey']]).
-            do(onNext).
-            do(noOp, noOp, function() {
+            pipe(tap(onNext)).
+            pipe(tap(noOp, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -213,7 +217,7 @@ describe('Get', function() {
                         }
                     }
                 });
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 
@@ -241,8 +245,8 @@ describe('Get', function() {
         var onNext = sinon.spy();
 
         router.get([['videos', 'falsey']]).
-            do(onNext).
-            do(noOp, noOp, function() {
+            pipe(tap(onNext)).
+            pipe(tap(noOp, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -251,7 +255,7 @@ describe('Get', function() {
                         }
                     }
                 });
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 
@@ -284,7 +288,6 @@ describe('Get', function() {
             });
 
         expect(sub.dispose).to.be.a('function');
-        expect(sub.unsubscribe).to.be.a('function');
         expect(completed).to.equal(true);
         expect(results).to.deep.equal([
           {
@@ -312,8 +315,8 @@ describe('Get', function() {
         var onNext = sinon.spy();
 
         router.get([['videos', 'falsey']]).
-            do(onNext).
-            do(noOp, noOp, function() {
+            pipe(tap(onNext)).
+            pipe(tap(noOp, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -322,7 +325,7 @@ describe('Get', function() {
                         }
                     }
                 });
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 
@@ -341,8 +344,8 @@ describe('Get', function() {
         var onNext = sinon.spy();
 
         router.get([['videos', 'falsey']]).
-            do(onNext).
-            do(noOp, noOp, function() {
+            pipe(tap(onNext)).
+            pipe(tap(noOp, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -351,7 +354,7 @@ describe('Get', function() {
                         }
                     }
                 });
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 
@@ -362,8 +365,7 @@ describe('Get', function() {
         var routes = [{
             route: 'lists[{keys:ids}]',
             get: function(aliasMap) {
-                return Observable.
-                    from(aliasMap.ids).
+                return Observable.from(aliasMap.ids).pipe(
                     map(function(id) {
                         if (id === 0) {
                             return {
@@ -375,30 +377,31 @@ describe('Get', function() {
                             path: ['lists', id],
                             value: $ref('lists[0]')
                         };
-                    }).
+                    }),
 
                     // Note: this causes the batching to work.
-                    toArray();
+                    toArray()
+                );
             }
         }, {
             route: 'two.be[{integers:ids}].summary',
             get: function(aliasMap) {
-                return Observable.
-                    from(aliasMap.ids).
+                return Observable.from(aliasMap.ids).pipe(
                     map(function(id) {
                         serviceCalls++;
                         return {
                             path: ['two', 'be', id, 'summary'],
                             value: 'hello world'
                         };
-                    });
+                    })
+                );
             }
         }];
         var router = new R(routes);
         router.
             get([['lists', [0, 1], 'summary']]).
-            do(onNext).
-            do(noOp, noOp, function() {
+            pipe(tap(onNext)).
+            pipe(tap(noOp, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -416,7 +419,7 @@ describe('Get', function() {
                     }
                 });
                 expect(serviceCalls).to.equal(1);
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 
@@ -440,7 +443,7 @@ describe('Get', function() {
 
         router.
             get([['videos', 123, ['title', 'rating']]]).
-            do(function(x) {
+            pipe(tap(function(x) {
                 expect(x).to.deep.equals({
                     jsonGraph: {
                         videos: {
@@ -456,7 +459,7 @@ describe('Get', function() {
                 expect(title).to.equals(1);
                 expect(rating).to.equals(1);
                 expect(called).to.equals(1);
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 
@@ -485,10 +488,10 @@ describe('Get', function() {
             get([
                 ['a', 'specific']
             ]).
-            do(noOp, noOp, function() {
+            pipe(tap(noOp, noOp, function() {
                 expect(getSpecific.calledOnce, 'getSpecific').to.be.ok;
                 expect(getKeys.calledOnce, 'getKeys').to.be.not.ok;
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 
@@ -497,7 +500,7 @@ describe('Get', function() {
         var router = getPrecedenceRouter();
         router.
             get([['lists', 'abc', 0]]).
-            do(function(x) {
+            pipe(tap(function(x) {
                 expect(x).to.deep.equals({
                     jsonGraph: {
                         lists: {
@@ -510,7 +513,7 @@ describe('Get', function() {
                 called++;
             }, noOp, function() {
                 expect(called).to.equals(1);
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 
@@ -558,12 +561,12 @@ describe('Get', function() {
         var obs = router.get([["ProffersById", 1, "ProductsList", {"from": 0, "to": 1}]]);
         var called = false;
         obs.
-            do(function (res) {
+            pipe(tap(function (res) {
                 expect(res).to.deep.equals(routeResponse);
                 called = true;
             }, noOp, function () {
                 expect(called, 'expect onNext called 1 time.').to.equal(true);
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 
@@ -578,12 +581,12 @@ describe('Get', function() {
         var onNext = sinon.spy();
 
         obs.
-            do(onNext, noOp, function() {
+            pipe(tap(onNext, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {videos: {1: {title: {$type: 'atom'}}}}
                 });
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 
@@ -599,7 +602,7 @@ describe('Get', function() {
 
         router.
             get([[['foo', 'bar'], ['name', 'rating']]]).
-            do(function(x) {
+            pipe(tap(function(x) {
                 expect(x).to.deep.equals({
                     jsonGraph: {
                         'foo': {
@@ -615,7 +618,7 @@ describe('Get', function() {
                 called++;
             }, noOp, function() {
                 expect(called).to.equals(1);
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 
@@ -938,32 +941,28 @@ describe('Get', function() {
         });
 
         router.get([['videos',1,'title']])
-            .do(
-                function (jsonGraph) {
-                    expect(jsonGraph).to.deep.equal({
-                        jsonGraph: {
-                            'videos': {
-                                1: {
-                                    'title': {
-                                        $type: 'error', value: {
-                                            message: 'bad luck for you'
-                                        }
-                                    }
+            .pipe(tap(function (jsonGraph) {
+            expect(jsonGraph).to.deep.equal({
+                jsonGraph: {
+                    'videos': {
+                        1: {
+                            'title': {
+                                $type: 'error', value: {
+                                    message: 'bad luck for you'
                                 }
                             }
                         }
-                    })
-                },
-                noOp,
-                function () {
-                    expect(callCount).to.equal(1);
-                    expect(callArgs).to.deep.equal([{
-                        path: ['videos', 1, 'title'],
-                        value: { $type: 'error', value: { message: 'bad luck for you' } }
-                    }]);
-                    expect(callContext).to.equal(router);
+                    }
                 }
-            )
+            })
+        }, noOp, function () {
+            expect(callCount).to.equal(1);
+            expect(callArgs).to.deep.equal([{
+                path: ['videos', 1, 'title'],
+                value: { $type: 'error', value: { message: 'bad luck for you' } }
+            }]);
+            expect(callContext).to.equal(router);
+        }))
             .subscribe(
                 noOp,
                 done,
@@ -992,31 +991,27 @@ describe('Get', function() {
       });
 
       router.get([['videos',1,'title']])
-          .do(
-              function (jsonGraph) {
-                  expect(jsonGraph).to.deep.equal({
-                      jsonGraph: {
-                          'videos': {
-                              1: {
-                                  'title': {
-                                      $type: 'error', value: {
-                                          message: 'bad luck for you'
-                                      }
-                                  }
+          .pipe(tap(function (jsonGraph) {
+          expect(jsonGraph).to.deep.equal({
+              jsonGraph: {
+                  'videos': {
+                      1: {
+                          'title': {
+                              $type: 'error', value: {
+                                  message: 'bad luck for you'
                               }
                           }
                       }
-                  })
-              },
-              noOp,
-              function () {
-                  expect(callCount).to.equal(1);
-                  expect(callArgs).to.deep.equal([
-                      new Error('bad luck for you')
-                  ]);
-                  expect(callContext).to.equal(router);
+                  }
               }
-          )
+          })
+      }, noOp, function () {
+          expect(callCount).to.equal(1);
+          expect(callArgs).to.deep.equal([
+              new Error('bad luck for you')
+          ]);
+          expect(callContext).to.equal(router);
+      }))
           .subscribe(
               noOp,
               done,
@@ -1030,48 +1025,48 @@ describe('Get', function() {
             get: function(alias) {
                 var ids = alias.ids;
                 onTitle && onTitle(alias);
-                return Observable.
-                    from(ids).
+                return Observable.from(ids).pipe(
                     map(function(id) {
                         return {
                             path: ['videos', id, 'title'],
                             value: 'title ' + id
                         };
-                    });
+                    })
+                );
             }
         }, {
             route: 'videos[{integers:ids}].rating',
             get: function(alias) {
                 var ids = alias.ids;
                 onRating && onRating(alias);
-                return Observable.
-                    from(ids).
+                return Observable.from(ids).pipe(
                     map(function(id) {
                         return {
                             path: ['videos', id, 'rating'],
                             value: 'rating ' + id
                         };
-                    });
+                    })
+                );
             }
 
         }, {
             route: 'lists[{keys:ids}][{integers:indices}]',
             get: function(alias) {
-                return Observable.
-                    from(alias.ids).
-                    flatMap(function(id) {
-                        return Observable.
-                            from(alias.indices).
+                return Observable.from(alias.ids).pipe(
+                    mergeMap(function(id) {
+                        return Observable.from(alias.indices).pipe(
                             map(function(idx) {
                                 return {id: id, idx: idx};
-                            });
-                    }).
+                            })
+                        );
+                    }),
                     map(function(data) {
                         return {
                             path: ['lists', data.id, data.idx],
                             value: $ref(['videos', data.idx])
                         };
-                    });
+                    })
+                );
             }
         }],
         options);

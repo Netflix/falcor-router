@@ -1,4 +1,5 @@
 var R = require('../../../src/Router');
+var tap = require('falcor-observable').tap;
 var noOp = function() {};
 var chai = require('chai');
 var expect = chai.expect;
@@ -23,8 +24,8 @@ describe('Multi-Indexer', function() {
 
         router.
             get([["test", ['one', 'two']]]).
-            do(onNext).
-            do(noOp, noOp, function() {
+            pipe(tap(onNext)).
+            pipe(tap(noOp, noOp, function() {
                 expect(onNext.called).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -35,7 +36,7 @@ describe('Multi-Indexer', function() {
                     }
                 });
                 expect(serviceCalls).to.equal(1);
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 
@@ -57,8 +58,8 @@ describe('Multi-Indexer', function() {
 
         router.
             get([['test', ['one', 'two'], 'summary']]).
-            do(onNext).
-            do(noOp, noOp, function() {
+            pipe(tap(onNext)).
+            pipe(tap(noOp, noOp, function() {
                 expect(onNext.called).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -69,7 +70,7 @@ describe('Multi-Indexer', function() {
                     }
                 });
                 expect(serviceCalls).to.equal(1);
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 
@@ -91,8 +92,8 @@ describe('Multi-Indexer', function() {
 
         router.
             get([['test', ['one', 'two'], 0, 0]]).
-            do(onNext).
-            do(noOp, noOp, function() {
+            pipe(tap(onNext)).
+            pipe(tap(noOp, noOp, function() {
                 expect(onNext.called).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -103,7 +104,7 @@ describe('Multi-Indexer', function() {
                     }
                 });
                 expect(serviceCalls).to.equal(1);
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 
@@ -125,8 +126,8 @@ describe('Multi-Indexer', function() {
 
         router.
             get([["test", ['one']]]).
-            do(onNext).
-            do(noOp, noOp, function() {
+            pipe(tap(onNext)).
+            pipe(tap(noOp, noOp, function() {
                 expect(onNext.called).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -136,7 +137,7 @@ describe('Multi-Indexer', function() {
                     }
                 });
                 expect(serviceCalls).to.equal(1);
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 
@@ -168,8 +169,8 @@ describe('Multi-Indexer', function() {
                 ["test", 'one', 'three'],
                 ["test", 'two', 'four']
             ]).
-            do(onNext).
-            do(noOp, noOp, function() {
+            pipe(tap(onNext)).
+            pipe(tap(noOp, noOp, function() {
                 expect(onNext.called).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     jsonGraph: {
@@ -180,7 +181,7 @@ describe('Multi-Indexer', function() {
                     }
                 });
                 expect(serviceCalls).to.equal(2);
-            }).
+            })).
             subscribe(noOp, done, done);
     });
 });

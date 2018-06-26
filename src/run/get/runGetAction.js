@@ -1,6 +1,10 @@
 var outputToObservable = require('../conversion/outputToObservable');
 var noteToJsongOrPV = require('../conversion/noteToJsongOrPV');
-var Observable = require('../../RouterRx.js').Observable;
+var Observable = require('falcor-observable').Observable;
+var filter = require('falcor-observable').filter;
+var map = require('falcor-observable').map;
+var materialize = require('falcor-observable').materialize;
+var tap = require('falcor-observable').tap;
 
 module.exports = function runGetAction(routerInstance, jsongCache,
     methodSummary) {
@@ -26,7 +30,7 @@ function getAction(routerInstance, matchAndPath, jsongCache, methodSummary) {
                     results: []
                 };
                 methodSummary.routes.push(route);
-                return _out.do(function (response) {
+                return _out.pipe(tap(function (response) {
                     route.results.push({
                         time: routerInstance._now(),
                         value: response
@@ -36,20 +40,21 @@ function getAction(routerInstance, matchAndPath, jsongCache, methodSummary) {
                     route.end = routerInstance._now();
                 }, function () {
                     route.end = routerInstance._now();
-                });
+                }));
             })
         }
     } catch (e) {
         out = Observable.throw(e);
     }
 
-    return out.
-        materialize().
+    return out.pipe(
+        materialize(),
         filter(function(note) {
             return note.kind !== 'C';
-        }).
-        map(noteToJsongOrPV(matchAndPath.path, false, routerInstance)).
+        }),
+        map(noteToJsongOrPV(matchAndPath.path, false, routerInstance)),
         map(function(jsonGraphOrPV) {
             return [matchAndPath.match, jsonGraphOrPV];
-        });
+        })
+    );
 }

@@ -2,7 +2,11 @@ var set = 'set';
 var recurseMatchAndExecute = require('./../run/recurseMatchAndExecute');
 var runSetAction = require('./../run/set/runSetAction');
 var materialize = require('../run/materialize');
-var Observable = require('../RouterRx.js').Observable;
+var Observable = require('falcor-observable').Observable;
+var defaultIfEmpty = require('falcor-observable').defaultIfEmpty;
+var map = require('falcor-observable').map;
+var mergeMap = require('falcor-observable').mergeMap;
+var tap = require('falcor-observable').tap;
 var spreadPaths = require('./../support/spreadPaths');
 var pathValueMerge = require('./../cache/pathValueMerge');
 var optimizePathSets = require('./../cache/optimizePathSets');
@@ -16,7 +20,6 @@ var mCGRI = require('./../run/mergeCacheAndGatherRefsAndInvalidations');
 var MaxPathsExceededError = require('../errors/MaxPathsExceededError');
 var getPathsCount = require('./getPathsCount');
 var outputToObservable = require('../run/conversion/outputToObservable');
-var rxNewToRxNewAndOld = require('../run/conversion/rxNewToRxNewAndOld');
 
 /**
  * @returns {Observable.<JSONGraph>}
@@ -48,12 +51,12 @@ module.exports = function routerSet(jsonGraph) {
         }
 
         var innerSource = recurseMatchAndExecute(router._matcher, action,
-            jsonGraph.paths, set, router, jsongCache).
+            jsonGraph.paths, set, router, jsongCache).pipe(
 
             // Takes the jsonGraphEnvelope and extra details that comes out
             // of the recursive matching algorithm and either attempts the
             // fallback options or returns the built jsonGraph.
-            flatMap(function(details) {
+            mergeMap(function(details) {
                 var out = {
                     jsonGraph: details.jsonGraph
                 };
@@ -143,7 +146,7 @@ module.exports = function routerSet(jsonGraph) {
                         }));
 
                     return outputToObservable(
-                        router._unhandled.set(jsonGraphEnvelope)).
+                        router._unhandled.set(jsonGraphEnvelope)).pipe(
 
                         // Merge the solution back into the overall message.
                         map(function(unhandledJsonGraphEnv) {
@@ -152,12 +155,12 @@ module.exports = function routerSet(jsonGraph) {
                                 paths: unhandledPaths
                             }], router);
                             return out;
-                        }).
-                        defaultIfEmpty(out);
+                        }),
+                        defaultIfEmpty(out));
                 }
 
                 return Observable.of(out);
-            }).
+            }),
 
             // We will continue to materialize over the whole jsonGraph message.
             // This makes sense if you think about pathValues and an API that
@@ -165,11 +168,13 @@ module.exports = function routerSet(jsonGraph) {
             // materialize for you, instead, allow the router to do that.
             map(function(jsonGraphEnvelope) {
                 return materialize(router, jsonGraph.paths, jsonGraphEnvelope);
-            });
+            })
+        );
 
-            if (router._errorHook || router._methodSummaryHook) {
-                innerSource = innerSource.
-                    do(
+        if (router._errorHook || router._methodSummaryHook) {
+            innerSource = innerSource.
+                pipe(
+                    tap(
                         function (response) {
                             if (router._methodSummaryHook) {
                                 methodSummary.results.push({
@@ -192,17 +197,19 @@ module.exports = function routerSet(jsonGraph) {
                                 router._methodSummaryHook(methodSummary);
                             }
                         }
-                    );
-            }
-            return innerSource;
+                    )
+                );
+        }
+        return innerSource;
     });
 
     if (router._errorHook) {
-        source = source.
-            do(null, function summaryHookErrorHandler(err) {
+        source = source.pipe(
+            tap(null, function summaryHookErrorHandler(err) {
                 router._errorHook(err);
             })
+        );
     }
 
-    return rxNewToRxNewAndOld(source);
+    return source;
 };

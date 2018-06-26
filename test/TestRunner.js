@@ -1,10 +1,11 @@
 var chai = require('chai');
 var expect = chai.expect;
+var tap = require('falcor-observable').tap;
 var TestRunner = {
     run: function(obs, compares) {
         var count = 0;
         return obs.
-            do(function(x) {
+            pipe(tap(function(x) {
                 // Validates against all comparables
                 compares.forEach(function(c) {
                     jsongPartialCompare(c.jsonGraph, x.jsonGraph);
@@ -12,7 +13,7 @@ var TestRunner = {
                 count++;
             }, undefined, function() {
                 expect(count, 'The observable should of onNext one time').to.equal(1);
-            });
+            }));
     },
 
     comparePath: function(expected, actual) {

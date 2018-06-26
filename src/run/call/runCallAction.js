@@ -3,7 +3,12 @@ var outputToObservable = require('./../conversion/outputToObservable');
 var noteToJsongOrPV = require('./../conversion/noteToJsongOrPV');
 var CallRequiresPathsError = require('./../../errors/CallRequiresPathsError');
 var mCGRI = require('./../mergeCacheAndGatherRefsAndInvalidations');
-var Observable = require('../../RouterRx.js').Observable;
+var Observable = require('falcor-observable').Observable;
+var filter = require('falcor-observable').filter;
+var map = require('falcor-observable').map;
+var materialize = require('falcor-observable').materialize;
+var tap = require('falcor-observable').tap;
+var toArray = require('falcor-observable').toArray;
 
 module.exports =  outerRunCallAction;
 
@@ -49,7 +54,7 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
                     };
                     methodSummary.routes.push(route);
 
-                    output = output.do(
+                    output = output.pipe(tap(
                         function (response) {
                             route.results.push({
                                 time: routerInstance._now(),
@@ -63,10 +68,10 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
                         function () {
                             route.end = routerInstance._now();
                         }
-                    )
+                    ));
                 }
-                return output.toArray();
-            }).
+                return output.pipe(toArray());
+            }).pipe(
 
             // Required to get the references from the outputting jsong
             // and pathValues.
@@ -201,14 +206,15 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
                 }
 
                 return callOutput;
-            }).
+            }),
 
             // When call has an error it needs to be propagated to the next
             // level instead of onCompleted'ing
-            do(null, function(e) {
+            tap(null, function(e) {
                 e.throwToNext = true;
                 throw e;
-            });
+            })
+        );
     } else {
         out = Observable.defer(function () {
             return outputToObservable(
@@ -225,7 +231,7 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
             };
             methodSummary.routes.push(route);
 
-            out = out.do(
+            out = out.pipe(tap(
                 function (response) {
                     route.results.push({
                         time: routerInstance._now(),
@@ -239,17 +245,18 @@ function runCallAction(matchAndPath, routerInstance, callPath, args,
                 function () {
                     route.end = routerInstance._now();
                 }
-            )
+            ));
         }
     }
 
-    return out.
-        materialize().
+    return out.pipe(
+        materialize(),
         filter(function(note) {
             return note.kind !== 'C';
-        }).
-        map(noteToJsongOrPV(matchAndPath.path, false, routerInstance)).
+        }),
+        map(noteToJsongOrPV(matchAndPath.path, false, routerInstance)),
         map(function(jsonGraphOrPV) {
             return [matchAndPath.match, jsonGraphOrPV];
-        });
+        })
+    );
 }
