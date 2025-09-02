@@ -8,7 +8,7 @@
 <a name="0.8.2"></a>
 ## 0.8.2 (2018-04-12)
 
-* fix: process hooks after createClass to allow for request specific hooks. ([f3ac9df](https://github.com/Netflix/falcor-router/commit/f3ac9df))
+* fix: process hooks after createClass to allow for request specific Hooks. ([f3ac9df](https://github.com/Netflix/falcor-router/commit/f3ac9df))
 
 
 
