@@ -28,10 +28,16 @@ module.exports = function jsongMerge(cache, jsongEnv, routerInstance) {
         },  cache, j, 0, p);
     });
 
-    return {
+    var result = {
         references: references,
         values: values
     };
+    if (Array.isArray(jsongEnv.invalidated)) {
+        result.invalidations = jsongEnv.invalidated.map(function(path) {
+            return {path: path};
+        });
+    }
+    return result;
 };
 
 function merge(config, cache, message, depth, path, fromParent, fromKey) {
