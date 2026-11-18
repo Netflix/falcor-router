@@ -309,6 +309,29 @@ describe('Call', function() {
     });
 
 
+    it('should return invalidated paths from a JSONGraph envelope.', function() {
+        var router = new R([{
+            route: 'lists.remove',
+            call: function() {
+                return {
+                    jsonGraph: {lists: {length: 2}},
+                    paths: [['lists', 'length']],
+                    invalidated: [['titles', {from: 2, to: 4}], ['lastUpdate']]
+                };
+            }
+        }]);
+
+        return new Promise(function(resolve, reject) {
+            router.call(['lists', 'remove'], []).subscribe(resolve, reject);
+        }).then(function(result) {
+            expect(result).to.deep.equals({
+                jsonGraph: {lists: {length: 2}},
+                paths: [['lists', 'length']],
+                invalidated: [['titles', {from: 2, to: 4}], ['lastUpdate']]
+            });
+        });
+    });
+
     it('should return invalidations.', function(done) {
         var router = new R([{
             route: 'genrelist[{integers:indices}].titles.remove',
